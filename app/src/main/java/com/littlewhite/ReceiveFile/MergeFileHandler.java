@@ -19,12 +19,13 @@ public class MergeFileHandler extends Handler  {//不知道需不需要新建一
     private String FileName;
     private Boolean HasFilename = false;
     private RandomAccessFile ram;
-    boolean[] check = null;
-    int length = 0;
+    private boolean[] check = null;
+   private  int length = 0;
     private File ReceiveFile;
-    long block = 0;//每个二维码容量
+    private long block = 0;//每个二维码容量
     private int  blocklengthdetect = 0;//因为大部分的qrcode长度都相同，只有最后一段长度短，只要比较任意两个qrode的长度，取最大值就行
     private int CorrectNum = 0;//已经完成拼接的数量，每完成一次就+1，直到和num的值相等
+    private TestReceive testReceive;
     public MergeFileHandler(ReceiveActivity receiveActivity,File ReceiveFile) {
         Log.i(this.getClass().toString(),"启动");
        // this.ReceiveHandler = handler;
@@ -35,6 +36,7 @@ public class MergeFileHandler extends Handler  {//不知道需不需要新建一
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+        testReceive = new TestReceive(this.ReceiveFile.getParent(),ReceiveFile.getName());
     }
     @Override
     public void handleMessage(Message message) {
@@ -67,23 +69,27 @@ public class MergeFileHandler extends Handler  {//不知道需不需要新建一
             blocklengthdetect++;
         return;
         }
-        if(result instanceof byte[]){
+        if(result instanceof byte[]){//解析的是byte数组
             if((sum==length-1) && !check[num]){//从数量上判断是否为该序列的二维码，从一定程度上提升准确性
                 check[num] = true;
                 byte[] data = (byte[])result;
                 GetFileFromQRCodes(data,this.ram,(num-1)*block);
                 CorrectNum++;
                 SendToReceiveHandler(CorrectNum,sum);
+                testReceive.writelog(num,sum);//写入日志
             }
-        }else {
+        }else {//解析的是文件名
             if((sum==length-1) && !check[0]){//从数量上判断是否为该序列的二维码，从一定程度上提升准确性
                 check[0] = true;
                 this.FileName = (String) result;
                 CorrectNum++;
                 SendToReceiveHandler(CorrectNum,sum);
+                testReceive.writelog(num,sum);//写入日志
             }
         }
+
         if(CorrectNum==length) {
+            testReceive.closewrite();
             closeMerge(this.CorrectNum,sum);
         }
     }

@@ -17,6 +17,7 @@
 package com.littlewhite.Camera;
 
 import android.content.Context;
+import android.graphics.ImageFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.Camera;
@@ -204,6 +205,17 @@ public final class CameraManager {
     }
   }
 
+  public synchronized void requestPreviewFrameWithBuffer(Handler handler, int message) {
+    OpenCamera theCamera = camera;
+    if (theCamera != null && previewing) {
+      previewCallback.setHandler(handler, message);
+      previewCallback.setResolution();
+      Point cameraResolution = configManager.getCameraResolution();
+      theCamera.getCamera().addCallbackBuffer(new byte[((cameraResolution.x * cameraResolution.y) * ImageFormat.getBitsPerPixel(ImageFormat.NV21)) / 8]);
+      theCamera.getCamera().addCallbackBuffer(new byte[((cameraResolution.x * cameraResolution.y) * ImageFormat.getBitsPerPixel(ImageFormat.NV21)) / 8]);
+      theCamera.getCamera().setPreviewCallbackWithBuffer(previewCallback);
+    }
+  }
   /**
    * Calculates the framing rect which the UI should draw to show the user where to place the
    * barcode. This target helps with alignment as well as forces the user to hold the device

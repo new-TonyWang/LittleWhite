@@ -32,9 +32,10 @@ public class ReceiveHandler extends Handler {
         Thread MultiDecoder = new Thread(this.multiDecoder);
         MergeThread.start();
         MultiDecoder.start();
-        this.cameraManager.startPreview();
         state = State.SUCCESS;
+        this.cameraManager.startPreview();
         restartPreviewAndDecode();
+
     }
     @Override
     public void handleMessage(Message message) {
@@ -57,7 +58,7 @@ public class ReceiveHandler extends Handler {
     private void restartPreviewAndDecode() {
         if (state == State.SUCCESS) {
             state = State.PREVIEW;
-            cameraManager.requestPreviewFrame(multiDecoder.getHandler(), R.id.decode);
+            cameraManager.requestPreviewFrameWithBuffer(multiDecoder.getHandler(), R.id.decode);
 
         }
     }

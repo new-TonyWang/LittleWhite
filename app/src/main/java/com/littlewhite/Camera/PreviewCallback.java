@@ -30,7 +30,8 @@ final class PreviewCallback implements Camera.PreviewCallback {
   private final CameraConfigurationManager configManager;
   private Handler previewHandler;
   private int previewMessage;
-
+  private int x ;
+  private int y;
   PreviewCallback(CameraConfigurationManager configManager) {
     this.configManager = configManager;
   }
@@ -39,22 +40,27 @@ final class PreviewCallback implements Camera.PreviewCallback {
     this.previewHandler = previewHandler;
     this.previewMessage = previewMessage;
   }
-
+  void setResolution(){
+    Point cameraResolution = configManager.getCameraResolution();
+    this.x = cameraResolution.x;
+    this.y = cameraResolution.y;
+  }
   @Override
   public void onPreviewFrame(byte[] data, Camera camera) {
-    Point cameraResolution = configManager.getCameraResolution();
-    Handler thePreviewHandler = previewHandler;
-    if (cameraResolution != null && thePreviewHandler != null) {
-     // Log.i(TAG, "预览分辨率x:"+cameraResolution.x+"预览分辨率y:"+cameraResolution.y);
+
+    //Handler thePreviewHandler = previewHandler;
+    if ( previewHandler != null) {
+     // Log.i(TAG, "预览分辨率x:"+this.x+"预览分辨率y:"+this.y);
       //分辨率是1920*1080
-      Message message = thePreviewHandler.obtainMessage(previewMessage, cameraResolution.x,
-          cameraResolution.y, data);
+      Message message = previewHandler.obtainMessage(previewMessage, this.x,
+          this.y, data);
       message.sendToTarget();
       //Log.i(TAG,"onPreviewFrame启动");
 
     } else {
-      Log.d(TAG, "Got preview callback, but no handler or resolution available");
+      Log.d(TAG, "Got preview callback, but no handler");
     }
+    camera.addCallbackBuffer(data);
+    camera.addCallbackBuffer(data);
   }
-
 }
