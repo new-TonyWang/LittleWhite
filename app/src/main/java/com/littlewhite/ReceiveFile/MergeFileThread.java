@@ -48,7 +48,7 @@ public class MergeFileThread implements Runnable {
     @Override
     public void run() {
         Looper.prepare();
-        this.handler = new MergeFileHandler(receiveActivity.getReceiveHandler(),this.outputfile);
+        this.handler = new MergeFileHandler(receiveActivity,this.outputfile);
         handlerInitLatch.countDown();
         Looper.loop();
     }

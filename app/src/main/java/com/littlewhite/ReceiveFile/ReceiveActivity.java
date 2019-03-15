@@ -20,15 +20,17 @@ import com.littlewhite.TransmissionCompleteActivity;
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 
-public class ReceiveActivity extends AppCompatActivity implements Runnable ,SurfaceHolder.Callback{
+public class ReceiveActivity extends AppCompatActivity implements SurfaceHolder.Callback{
     private ViewfinderView viewfinderView;//扫描框
         private CameraManager cameraManager;//相机管理
     private ReceiveHandler receiveHandler;//处理消息
+    private MergeFileThread mergeFile;
+    private MultiDecoder multiDecoder;
     private int TotalQRnum;
     private SurfaceView surfaceView;
     private TextView progress;
     private boolean hasSurface = false;
-    private final CountDownLatch handlerInitLatch = new CountDownLatch(1);
+    //private final CountDownLatch handlerInitLatch = new CountDownLatch(1);
    // private final CountDownLatch handlerInitLatch = new CountDownLatch(1);;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,8 +47,6 @@ public class ReceiveActivity extends AppCompatActivity implements Runnable ,Surf
     progress = findViewById(R.id.progress);
     cameraManager = new CameraManager(getApplication());//getApplication()获取Application对象实例
        // handlerInitLatch = new CountDownLatch(1);
-        Thread T = new Thread(this);
-        T.start();
         viewfinderView = findViewById(R.id.viewfinder_view);//二维码识别框
         viewfinderView.setCameraManager(cameraManager);
         SurfaceHolder surfaceHolder = surfaceView.getHolder();
@@ -80,11 +80,6 @@ public class ReceiveActivity extends AppCompatActivity implements Runnable ,Surf
     }
     public ReceiveHandler getReceiveHandler() {
 
-        try {
-            handlerInitLatch.await();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         return receiveHandler;
     }
 
@@ -106,16 +101,6 @@ public class ReceiveActivity extends AppCompatActivity implements Runnable ,Surf
         startActivity(intent);
     }
 
-    @Override
-    public void run() {
-        Looper.prepare();
-            this.receiveHandler = new ReceiveHandler(this, this.cameraManager);
-            handlerInitLatch.countDown();
-            // handlerInitLatch.countDown();
-
-       Looper.loop();
-
-    }
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
@@ -144,7 +129,9 @@ public class ReceiveActivity extends AppCompatActivity implements Runnable ,Surf
         try {
             cameraManager.openDriver(surfaceHolder);
             // Creating the handler starts the preview, which can also throw a RuntimeException.
-
+            if(receiveHandler==null) {
+                this.receiveHandler = new ReceiveHandler(this, this.cameraManager);
+            }
            // decodeOrStoreSavedBitmap(null, null);
         } catch (IOException ioe) {
           //  Log.w(TAG, ioe);

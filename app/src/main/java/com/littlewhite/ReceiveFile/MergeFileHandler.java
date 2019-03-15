@@ -13,8 +13,9 @@ import java.io.RandomAccessFile;
 import java.util.concurrent.CountDownLatch;
 
 
-public class MergeFileHandler extends Handler implements Runnable {//不知道需不需要新建一个线程去执行seek和write
-    private Handler ReceiveHandler;
+public class MergeFileHandler extends Handler  {//不知道需不需要新建一个线程去执行seek和write
+    //private Handler ReceiveHandler;
+    private ReceiveActivity receiveActivity;
     private String FileName;
     private Boolean HasFilename = false;
     private RandomAccessFile ram;
@@ -24,9 +25,10 @@ public class MergeFileHandler extends Handler implements Runnable {//不知道�
     long block = 0;//每个二维码容量
     private int  blocklengthdetect = 0;//因为大部分的qrcode长度都相同，只有最后一段长度短，只要比较任意两个qrode的长度，取最大值就行
     private int CorrectNum = 0;//已经完成拼接的数量，每完成一次就+1，直到和num的值相等
-    public MergeFileHandler(Handler handler,File ReceiveFile) {
+    public MergeFileHandler(ReceiveActivity receiveActivity,File ReceiveFile) {
         Log.i(this.getClass().toString(),"启动");
-        this.ReceiveHandler = handler;
+       // this.ReceiveHandler = handler;
+        this.receiveActivity = receiveActivity;
         this.ReceiveFile = ReceiveFile;
         try {
             this.ram = new RandomAccessFile(this.ReceiveFile,"rw");
@@ -104,7 +106,7 @@ public class MergeFileHandler extends Handler implements Runnable {//不知道�
 
     }
     private void SendToReceiveHandler(int CorrectNum,int sum){
-        Message message = Message.obtain(this.ReceiveHandler,R.id.update_progress,CorrectNum,sum);
+        Message message = Message.obtain(receiveActivity.getReceiveHandler(),R.id.update_progress,CorrectNum,sum);
         message.sendToTarget();
 
     }
@@ -114,13 +116,9 @@ public class MergeFileHandler extends Handler implements Runnable {//不知道�
         } catch (IOException e) {
             e.printStackTrace();
         }
-        ReceiveFile.renameTo(new File(ReceiveFile.getAbsolutePath()+"/"+this.FileName));
-        Message message = Message.obtain(this.ReceiveHandler,R.id.finish,CorrectNum,sum);
+        ReceiveFile.renameTo(new File(ReceiveFile.getParent()+"/"+this.FileName));
+        Message message = Message.obtain(receiveActivity.getReceiveHandler(),R.id.finish,CorrectNum,sum);
         message.sendToTarget();
     }
 
-    @Override
-    public void run() {
-
-    }
 }

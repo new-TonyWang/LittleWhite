@@ -40,13 +40,14 @@ public class ReceiveHandler extends Handler {
     public void handleMessage(Message message) {
             switch(message.what){
                 case R.id.update_progress:
+                    receiveActivity.setTotalQRnum(message.arg2+1);
                     receiveActivity.UpgradeProgress(message.arg1);
-                    receiveActivity.setTotalQRnum(message.arg2);
+
                     break;
                 case R.id.finish:
                     Message finish = obtainMessage(R.id.finish);
                     mergeFile.getHandler().sendMessageAtFrontOfQueue(finish);//发送消息到对第一个位置
-                    Looper.myLooper().quit();
+                   // Looper.myLooper().quit();
                     receiveActivity.TransmissionComplete();
                     break;
                 case R.id.stop:
