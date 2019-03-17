@@ -23,10 +23,12 @@ import java.util.List;
 import java.util.Map;
 
 public class MultiDecoderHandler extends Handler {
+    private static final String TAG = MultiDecoderHandler.class.getSimpleName();
     private HashMap<DecodeHintType,Object> hints;
     private QRCodeMultiReader reader;
     private Handler MergeFileHandler;
     private ReceiveActivity receiveActivity;
+    int i;
     public MultiDecoderHandler(HashMap<DecodeHintType,Object> hints, Handler MergeFileHandler, ReceiveActivity receiveActivity){
         Log.i(this.getClass().toString(),"启动");
         this.hints = hints;
@@ -61,7 +63,7 @@ public class MultiDecoderHandler extends Handler {
             } catch (ReaderException re) {
                 return;
             }
-            if (results.length < 2) {
+            if (results.length !=2) {
                 return;
             }
             //byte[] data0 = ((List<byte[]>)results[0].getResultMetadata().get(ResultMetadataType.BYTE_SEGMENTS)).get(0);//一般情况为数据
@@ -94,7 +96,7 @@ public class MultiDecoderHandler extends Handler {
             // int[] index = { ,)};
             try {
                 sendToMerge(data, Integer.parseInt(indexs.substring(0, indexof)), Integer.parseInt(indexs.substring(indexof + 1)));
-                Log.i(this.getClass().toString(),"num:"+Integer.parseInt(indexs.substring(0, indexof))+"sum"+Integer.parseInt(indexs.substring(indexof + 1)));
+                //Log.i(this.getClass().toString(),"num:"+Integer.parseInt(indexs.substring(0, indexof))+"sum"+Integer.parseInt(indexs.substring(indexof + 1)));
             }catch (Exception e){
 
             }
@@ -102,6 +104,7 @@ public class MultiDecoderHandler extends Handler {
 
     }
     private void sendToMerge(Object result,int num,int sum){
+        Log.i(TAG,"解析成功"+(++i)+"个");
             Message message = Message.obtain(this.MergeFileHandler,R.id.Merge,num,sum,result);
             message.sendToTarget();
     }

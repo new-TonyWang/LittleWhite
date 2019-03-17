@@ -32,6 +32,7 @@ final class PreviewCallback implements Camera.PreviewCallback {
   private int previewMessage;
   private int x ;
   private int y;
+  int i = 0;
   PreviewCallback(CameraConfigurationManager configManager) {
     this.configManager = configManager;
   }
@@ -47,7 +48,7 @@ final class PreviewCallback implements Camera.PreviewCallback {
   }
   @Override
   public void onPreviewFrame(byte[] data, Camera camera) {
-
+   // Log.i(TAG,"第"+i+++"个");
     //Handler thePreviewHandler = previewHandler;
     if ( previewHandler != null) {
      // Log.i(TAG, "预览分辨率x:"+this.x+"预览分辨率y:"+this.y);

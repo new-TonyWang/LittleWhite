@@ -32,7 +32,7 @@ public class TestReceive {
         long currenttime = System.currentTimeMillis();
         try {
             randomAccessFile.seek(randomAccessFile.length());
-            randomAccessFile.writeUTF(num+" "+(currenttime-starttime)+"\r\n");
+            randomAccessFile.writeUTF(num+" "+(currenttime-starttime)+"\n");
         } catch (IOException e) {
             e.printStackTrace();
         }
