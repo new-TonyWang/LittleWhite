@@ -62,7 +62,7 @@ public final class Decoder {
     return decode(BitMatrix.parse(image), hints);
   }
 
-  public DecoderResult decode(BitMatrix bits) throws ChecksumException, FormatException, NotDataException {
+  public DecoderResult decode(BitMatrix bits) throws ChecksumException, FormatException {
     return decode(bits, null);
   }
 

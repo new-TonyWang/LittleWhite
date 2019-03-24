@@ -1,15 +1,12 @@
 package com.littlewhite.ReceiveFile;
 
-import android.nfc.Tag;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 
 import com.littlewhite.Camera.CameraManager;
 import com.littlewhite.R;
-
-import java.io.IOException;
+import com.littlewhite.ReceiveFile.QRcodeDecoder.MultiDecoder;
 
 public class ReceiveHandler extends Handler {
     private ReceiveActivity receiveActivity;
@@ -41,13 +38,13 @@ public class ReceiveHandler extends Handler {
     public void handleMessage(Message message) {
             switch(message.what){
                 case R.id.update_progress:
-                    receiveActivity.setTotalQRnum(message.arg2+1);
+                    receiveActivity.setTotalQRnum(message.arg2);
                     receiveActivity.UpgradeProgress(message.arg1);
 
                     break;
                 case R.id.finish:
                     Message finish = obtainMessage(R.id.finish);
-                    mergeFile.getHandler().sendMessageAtFrontOfQueue(finish);//发送消息到对第一个位置
+                    multiDecoder.getHandler().sendMessageAtFrontOfQueue(finish);//发送消息到对第一个位置
                    // Looper.myLooper().quit();
                     receiveActivity.TransmissionComplete();
                     break;

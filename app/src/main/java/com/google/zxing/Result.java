@@ -64,7 +64,7 @@ public final class Result {
 	}
 	/**
 	 * 解析成byte数组
-	 * @param text
+	 * @param
 	 * @param rawBytes
 	 * @param resultPoints
 	 * @param format

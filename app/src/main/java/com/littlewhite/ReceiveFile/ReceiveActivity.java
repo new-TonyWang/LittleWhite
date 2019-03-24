@@ -2,10 +2,8 @@ package com.littlewhite.ReceiveFile;
 
 import android.app.AlertDialog;
 import android.content.Intent;
-import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.Window;
@@ -15,10 +13,10 @@ import android.widget.TextView;
 import com.littlewhite.Camera.CameraManager;
 import com.littlewhite.Camera.ViewfinderView;
 import com.littlewhite.R;
+import com.littlewhite.ReceiveFile.QRcodeDecoder.MultiDecoder;
 import com.littlewhite.TransmissionCompleteActivity;
 
 import java.io.IOException;
-import java.util.concurrent.CountDownLatch;
 
 public class ReceiveActivity extends AppCompatActivity implements SurfaceHolder.Callback{
     private ViewfinderView viewfinderView;//扫描框

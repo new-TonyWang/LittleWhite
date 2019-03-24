@@ -106,7 +106,7 @@ public class QRCodeReader implements Reader {
     ResultPoint[] points;
     if (hints != null && hints.containsKey(DecodeHintType.PURE_BARCODE)) {
       BitMatrix bits = extractPureBits(image.getBlackMatrix());
-      decoderResult = decoder.decode(bits, hints);
+      decoderResult = decoder.decode(bits);
       points = NO_POINTS;
     } else {
       DetectorResult detectorResult = new Detector(image.getBlackMatrix()).detect(hints);//寻找二维码定位码，透视变换，将二维码点阵化
@@ -147,7 +147,7 @@ public class QRCodeReader implements Reader {
  * @throws NotDataException 
    */
   public final Result decodetobytearry(BinaryBitmap image, Map<DecodeHintType,?> hints)
-	      throws NotFoundException, ChecksumException, FormatException, NotDataException {
+	      throws NotFoundException, ChecksumException, FormatException {
 	    DecoderResult decoderResult;
 	    ResultPoint[] points;
 	      DetectorResult detectorResult = new Detector(image.getBlackMatrix()).detect(hints);//寻找二维码定位码，透视变换，将二维码点阵化
@@ -164,8 +164,8 @@ public class QRCodeReader implements Reader {
 	    if (byteSegments != null) {
 	      result.putMetadata(ResultMetadataType.BYTE_SEGMENTS, byteSegments);
 	    }
-	    String ecLevel = decoderResult.getECLevel();
-	      result.putMetadata(ResultMetadataType.ERROR_CORRECTION_LEVEL, ecLevel);
+	   // String ecLevel = decoderResult.getECLevel();
+	     // result.putMetadata(ResultMetadataType.ERROR_CORRECTION_LEVEL, ecLevel);
 	    
 	    /*
 	    if (decoderResult.hasStructuredAppend()) {
@@ -182,14 +182,16 @@ public class QRCodeReader implements Reader {
   public void reset() {
     // do nothing
   }
-
+    
+    
+    
   /**
    * This method detects a code in a "pure" image -- that is, pure monochrome image
    * which contains only an unrotated, unskewed, image of a code, with some white border
    * around it. This is a specialized method that works exceptionally fast in this special
    * case.
    *
-   * @see com.google.zxing.datamatrix.DataMatrixReader#extractPureBits(BitMatrix)
+   * @
    */
   private static BitMatrix extractPureBits(BitMatrix image) throws NotFoundException {
 

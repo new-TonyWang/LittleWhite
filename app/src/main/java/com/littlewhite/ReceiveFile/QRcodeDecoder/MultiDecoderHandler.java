@@ -1,7 +1,6 @@
-package com.littlewhite.ReceiveFile;
+package com.littlewhite.ReceiveFile.QRcodeDecoder;
 
 
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -17,10 +16,10 @@ import com.google.zxing.ResultMetadataType;
 import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.multi.qrcode.QRCodeMultiReader;
 import com.littlewhite.R;
+import com.littlewhite.ReceiveFile.ReceiveActivity;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class MultiDecoderHandler extends Handler {
     private static final String TAG = MultiDecoderHandler.class.getSimpleName();
@@ -48,6 +47,8 @@ public class MultiDecoderHandler extends Handler {
             break;
         case R.id.finish:
             Looper.myLooper().quit();
+            reader.reset();
+            System.gc();
             break;
         case R.id.stop:
             //保存信息

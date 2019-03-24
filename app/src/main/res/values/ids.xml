@@ -20,6 +20,8 @@
   <item type="id" name="decode_succeeded"/>
   <item type="id" name="Merge"/>
   <item type="id" name="stop"/>
+  <item type="id" name="sourceBlock"/>
+  <item type="id" name="FECParameters"/>
   <item type="id" name="update_progress"/>
   <item type="id" name="finish"/>
   <item type="id" name="quit"/>
