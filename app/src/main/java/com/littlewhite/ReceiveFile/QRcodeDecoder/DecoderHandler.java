@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public class DecoderHandler extends Handler {
-    private static final String TAG = DecoderHandler.class.getSimpleName();
+    private static final String TAG = MultiDecoderHandler.class.getSimpleName();
     private HashMap<DecodeHintType,Object> hints;
     private QRCodeReader reader;
     private Handler RaptorQDecodeHandler;
@@ -44,15 +44,12 @@ public class DecoderHandler extends Handler {
             case R.id.decode:
                     decode((byte[])message.obj,message.arg1,message.arg2);
                 break;
-            case R.id.restart_decode:
-                break;
             case R.id.finish:
                 Looper.myLooper().quit();
                 reader.reset();
                 break;
             case R.id.stop:
                 //保存信息
-                Looper.myLooper().quit();
         }
     }
     private void decode(byte[] YUV,int width,int height)  {
@@ -63,9 +60,7 @@ public class DecoderHandler extends Handler {
             try {
                 result = reader.decodetobytearry(bitmap, this.hints);
             } catch (ReaderException e) {
-                Log.i(TAG,"解析失败");
                 return;//解析不到的时候跳出该方法
-
             }
             sendToRaptorDecoder(((List<byte[]>) result.getResultMetadata().get(ResultMetadataType.BYTE_SEGMENTS)).get(0));
 

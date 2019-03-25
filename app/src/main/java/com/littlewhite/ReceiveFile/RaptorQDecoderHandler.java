@@ -1,6 +1,5 @@
 package com.littlewhite.ReceiveFile;
 
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -21,20 +20,18 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 
 
 public class RaptorQDecoderHandler extends Handler {
     private ReceiveActivity receiveActivity;
-    private int num = 0;//解析了几个
+    private int num;//解析了几个
     private int sum;//一共几个
-    private double total;//生成check数组的时候使用
     private FECParameters fecParameters;
     private ArrayDataDecoder arrayDataDecoder;
-    //private byte[] source;
+    private byte[] source;
     private FileOutputStream fos;
-     private boolean[] check;//保存已经被检测过的数据包
+    // private boolean[] check;//保存已经被检测过的数据包
     private boolean hasinit = false;//表示是否接收到了参数，可以真正开始解码
    // private LinkedBlockingQueue<byte[]> queue;//存放未解码的byte数组
     private File receiveFile;
@@ -61,24 +58,14 @@ public class RaptorQDecoderHandler extends Handler {
                     //byte[] Parameters = message.obj
                     this.fecParameters = FECParameters.ExtractFECParameters((byte[]) message.obj).value();//耗时操作，应该再做一点别的东西
                     this.arrayDataDecoder = OpenRQ.newDecoderWithTwoOverhead(this.fecParameters);
-                    this.sum = this.fecParameters.totalSymbols();
-                    this.total = this.sum;
-                    this.sum+=2;
-                    check = new boolean[(int)Math.ceil(this.total*9/5)];
-
-                    //check = new boolean[this.sum];
+                    this.sum = this.fecParameters.totalSymbols() + 2;
                     //this.check = new boolean[];
                     //new Thread(this).start();
                 }
                 decodeRaptor((byte[]) message.obj);
                 break;
-            case R.id.restart_decode:
-
-                break;
             case R.id.finish:
                 Looper.myLooper().quit();
-                break;
-            case R.id.stop:
                 break;
         }
     }
@@ -92,11 +79,7 @@ public class RaptorQDecoderHandler extends Handler {
         //SourceBlockDecoder sourceBlock = arrayDataDecoder.sourceBlock(encodingPacket.sourceBlockNumber());
         switch(sourceBlockState){
            case INCOMPLETE:
-               if(!check[encodingPacket.fecPayloadID()]) {
-                   check[encodingPacket.fecPayloadID()] = true;
-                   this.num++;
-                   SendToReceiveHandler(R.id.finish,this.num, this.sum);
-               }
+               SendToReceiveHandler(encodingPacket.encodingSymbolID(),this.sum,R.id.update_progress);
                break;
            case DECODED:
                byte[] CompleteData = arrayDataDecoder.dataArray();
@@ -106,7 +89,7 @@ public class RaptorQDecoderHandler extends Handler {
                } catch (IOException e) {
                    e.printStackTrace();
                }
-               SendToUnzip( R.id.finish,++this.num,this.sum);
+               SendToReceiveHandler(encodingPacket.encodingSymbolID(),this.sum,R.id.finish);
                Looper.myLooper().quit();
                break;
            case DECODING_FAILURE://解析失败，生成端有误
@@ -116,16 +99,7 @@ public class RaptorQDecoderHandler extends Handler {
 
        }
     }
-    private void SendToReceiveHandler(int what,int CorrectNum,int sum){
-        Message message = Message.obtain(receiveActivity.getReceiveHandler(),what,CorrectNum,sum);
-       // message.setData(bundle);
-        message.sendToTarget();
-    }
-    private void SendToUnzip(int what,int CorrectNum,int sum){//解压文件
-        Bundle bundle = new Bundle();
-        ArrayList<String> stringArrayList= new ArrayList<>();
-        stringArrayList.add(receiveFile.getAbsolutePath());
-        bundle.putStringArrayList("FilePath",stringArrayList);
+    private void SendToReceiveHandler(int CorrectNum,int sum,int what){
         Message message = Message.obtain(receiveActivity.getReceiveHandler(),what,CorrectNum,sum);
         message.sendToTarget();
 

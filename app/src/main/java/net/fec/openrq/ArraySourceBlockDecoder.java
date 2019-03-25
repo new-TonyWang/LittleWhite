@@ -467,9 +467,9 @@ final class ArraySourceBlockDecoder implements SourceBlockDecoder {
     // requires valid ESI
     private boolean putSourceData(int esi, ByteBuffer symbolData, SourceSymbolDataType dataType) {
 
-        if (symbolsState.containsSourceSymbol(esi)&&esi!=fecParameters().totalSymbols()-1) { // if already received, just advance the buffer position
+        if (symbolsState.containsSourceSymbol(esi)) { // if already received, just advance the buffer position
             final int T = fecParameters().symbolSize();
-            symbolData.position(symbolData.position() + T);//最后一个数据码进行第二次传输的时候会报错，在if语句加上了判断
+            symbolData.position(symbolData.position() + T);
             return false;
         }
         else {

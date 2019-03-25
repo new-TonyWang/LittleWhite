@@ -49,7 +49,6 @@ public class ReceiveActivity extends AppCompatActivity implements SurfaceHolder.
         viewfinderView.setCameraManager(cameraManager);
         SurfaceHolder surfaceHolder = surfaceView.getHolder();
         surfaceHolder.addCallback(this);
-
         if (hasSurface) {
             // The activity was paused but not stopped, so the surface still exists. Therefore
             // surfaceCreated() won't be called, so init the camera here.
@@ -93,23 +92,17 @@ public class ReceiveActivity extends AppCompatActivity implements SurfaceHolder.
         this.cameraManager = cameraManager;
     }
     public void TransmissionComplete(){
-      //  receiveHandler.quitSynchronously();
-        receiveHandler = null;
         Intent intent = new Intent(this, TransmissionCompleteActivity.class);
         Bundle bundle = new Bundle();
         bundle.putInt("sum",this.TotalQRnum);
         intent.putExtras(bundle);
         startActivity(intent);
-
     }
 
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        if (!hasSurface) {//首次初始化相机
-            hasSurface = true;
-            initCamera(holder);
-        }
+        initCamera(holder);
 
     }
 
@@ -135,7 +128,6 @@ public class ReceiveActivity extends AppCompatActivity implements SurfaceHolder.
             cameraManager.openDriver(surfaceHolder);
             // Creating the handler starts the preview, which can also throw a RuntimeException.
             if(receiveHandler==null) {
-
                 this.receiveHandler = new ReceiveHandler(this, this.cameraManager);
             }
            // decodeOrStoreSavedBitmap(null, null);
@@ -156,21 +148,5 @@ public class ReceiveActivity extends AppCompatActivity implements SurfaceHolder.
        // builder.setPositiveButton(R.string.button_ok, new FinishListener(this));
        // builder.setOnCancelListener(new FinishListener(this));
         builder.show();
-    }
-    @Override
-    protected void onPause() {
-        if (receiveHandler != null) {
-            receiveHandler.quitSynchronously();
-            //receiveHandler = null;//程序未退出的时候就不删除handler
-        }
-
-        cameraManager.closeDriver();
-        //historyManager = null; // Keep for onActivityResult
-        if (!hasSurface) {
-           // SurfaceView surfaceView = (SurfaceView) findViewById(R.id.surfaceView);
-            SurfaceHolder surfaceHolder = surfaceView.getHolder();
-            surfaceHolder.removeCallback(this);
-        }
-        super.onPause();
     }
 }
