@@ -6,10 +6,14 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
+import com.littlewhite.ReceiveFile.SqllitUtil.SqllitData;
+
 public class MainActivity extends ActivityOnlistener {
     private Button mBaction,mBhistory,mBsetting;
+    private SqllitData sqllitData;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        this.sqllitData = new SqllitData(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mBaction = findViewById(R.id.action);

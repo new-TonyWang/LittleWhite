@@ -1,23 +1,26 @@
 package com.littlewhite;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
 import com.littlewhite.ReceiveFile.ReceiveActivity;
+import com.littlewhite.ReceiveFile.SqllitUtil.SqllitData;
 
 public class ActivityOnlistener extends AppCompatActivity implements View.OnClickListener {
-
+    //private SqllitData sqllitData = new SqllitData(this);
     @Override
     public void onClick(View v) {
         v.setEnabled(false);
         switch(v.getId()){
             case R.id.settings:
                 Intent settings = new Intent(this,SettingsActivity.class);//跳转到设置界面
-                startActivityForResult(settings,1);
+                startActivity(settings);
                 break;
             case R.id.action:
                 Intent action = new Intent(this,ActionActivity.class);
+                //action.putExtras();
                 startActivity(action);
                 break;
             case R.id.history:

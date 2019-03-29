@@ -33,6 +33,7 @@ public class RaptorQDecoderHandler extends Handler {
     private FECParameters fecParameters;
     private ArrayDataDecoder arrayDataDecoder;
     //private byte[] source;
+    private StringBuilder stringBuilder;
     private FileOutputStream fos;
      private boolean[] check;//保存已经被检测过的数据包
     private boolean hasinit = false;//表示是否接收到了参数，可以真正开始解码
@@ -65,7 +66,7 @@ public class RaptorQDecoderHandler extends Handler {
                     this.total = this.sum;
                     this.sum+=2;
                     check = new boolean[(int)Math.ceil(this.total*9/5)];
-
+                    stringBuilder = new StringBuilder();
                     //check = new boolean[this.sum];
                     //this.check = new boolean[];
                     //new Thread(this).start();
@@ -95,7 +96,10 @@ public class RaptorQDecoderHandler extends Handler {
                if(!check[encodingPacket.fecPayloadID()]) {
                    check[encodingPacket.fecPayloadID()] = true;
                    this.num++;
+                   stringBuilder.append(encodingPacket.fecPayloadID());
+                   stringBuilder.append(",");
                    SendToReceiveHandler(R.id.finish,this.num, this.sum);
+
                }
                break;
            case DECODED:
