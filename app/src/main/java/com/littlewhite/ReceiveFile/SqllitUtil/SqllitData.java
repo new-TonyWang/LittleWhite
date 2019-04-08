@@ -4,24 +4,33 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteStatement;
+import android.os.Environment;
 
-import java.sql.Statement;
+import java.io.File;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Queue;
 
 public class SqllitData {
     private SqllitHelper helper;
     private String FileID;
     private SQLiteDatabase sqLiteDatabase;
-    private final String sql = "UPDATE File_log SET ReceivedSymbolNum=? WHERE ID=?";
+    //private final String sql = "UPDATE File_Logs SET ReceivedSymbolNum=? ,ReceivedNum=? WHERE ID=?";
+    private File DownLoadPath = initReceivePath();
     public SqllitData(Context context){
-        String dbname = "LittleWhite.db";
+        File path = initReceivePath();
+        String dbname = path.getAbsolutePath()+"/LittleWhite.db";
         helper = new SqllitHelper(context,dbname,null,1);
+    }
+    private File initReceivePath() {
+        File DOWNLOADSDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);//外存DownLoad目录
+        if (!DOWNLOADSDir.exists()) {
+            DOWNLOADSDir.mkdir();
+        }
+        File DownloadFileDir = new File(DOWNLOADSDir.getAbsolutePath() + "/QRCodes");
+        if (!DownloadFileDir.exists()) {
+            DownloadFileDir.mkdir();
+        }
+        return DownloadFileDir;
     }
 
     /**
@@ -40,42 +49,61 @@ public class SqllitData {
                     cursor.getInt(0),
                     cursor.getString(1),
                     cursor.getInt(2),
-                    cursor.getString(3),
-                    cursor.getLong(4),
-                    cursor.getInt(5),
-                    cursor.getInt(6)
+                    cursor.getInt(3),
+                    cursor.getBlob(4),
+                    cursor.getInt(5)
             );
             fileInfos.add(fileInfo);
         }
+        cursor.close();
         db.close();
         return fileInfos;
     }
-    public void InsertNewFile(FileInfo fileInfo){
+    public List<FileInfo> SearchUnComplete(){
+        SQLiteDatabase db = this.helper.getWritableDatabase();
+        ArrayList<FileInfo> fileInfos = new ArrayList<>();
+        //Cursor cursor = db.query("File_Logs",new String[]{"ID","filename","TotalSymbolNum","ReceivedSymbolNum"},,new String[]{"1"},null,null,null);
+        Cursor cursor = db.rawQuery("select * from File_Logs where HasComplete= 0",null);
+        while (cursor.moveToNext()){
+            //int ID = cursor.getInt(0);
+            FileInfo fileInfo = new FileInfo(
+                    cursor.getInt(0),
+                    cursor.getString(1),
+                    cursor.getInt(2),
+                    cursor.getInt(3),
+                    cursor.getBlob(4),
+                    0
+            );
+            fileInfos.add(fileInfo);
+        }
+        cursor.close();
+        db.close();
+        return fileInfos;
+    }
+    public void InsertNewFile(String fileInfo){
         SQLiteDatabase db = this.helper.getWritableDatabase();
         ContentValues cv = new ContentValues();
-        cv.put("FileName",fileInfo.getFileName());
+        cv.put("FileName",fileInfo);
         cv.put("HasComplete",false);
         //cv.put("TotalSymbolNum",fileInfo.getTotalSymbolNum());
         //cv.put("ReceivedSymbolNum",null);
         this.FileID = String.valueOf(db.insert("File_Logs",null,cv));
-
         db.close();
     }
 
     /**
      * 接收新文件的时候更新FECParameters
-     * @param commonFecOTI
-     * @param schemeSpecFecOTI
+     *
+     *
      */
-    public void UpdateFECParameters(Long commonFecOTI,int schemeSpecFecOTI,int TotalSymbolNum){
-        SQLiteDatabase db = this.helper.getWritableDatabase();
+    public void UpdateFECParameters(byte[] FECParameters,int TotalSymbolNum){
+        this.sqLiteDatabase = this.helper.getWritableDatabase();
         ContentValues cv = new ContentValues();
+        cv.put("FECParameters",FECParameters);
         cv.put("TotalSymbolNum",TotalSymbolNum);
-        cv.put("commonFecOTI",commonFecOTI);
-        cv.put("schemeSpecFecOTI",schemeSpecFecOTI);
         //String ID = String.valueOf(this.FileID);
-        db.update("File_Logs",cv,"ID=?",new String[]{this.FileID});
-        db.close();
+        this.sqLiteDatabase.update("File_Logs",cv,"ID=?",new String[]{this.FileID});
+        //db.close();
     }
     /*public void Update(Long commonFecOTI,int schemeSpecFecOTI){
         SQLiteDatabase db = this.helper.getWritableDatabase();
@@ -90,14 +118,15 @@ public class SqllitData {
     /**
      * 更新接收到的数据包。
      * 这里已经开始进行文件接收，理论上sqLiteDatabase不会再改变，
-     * @param builder
-     */
-    public void UpdateReceivedSymbolNum(StringBuilder builder){
+     *
+     *//*
+    public void UpdateReceivedSymbolNum(StringBuilder builder,int ReceivedNum){
     //String ReceivedSymbolNum = builder.toString();
-    Object[] bindArray = new Object[]{builder.toString(),this.FileID};
+    Object[] bindArray = new Object[]{builder.toString(),ReceivedNum,this.FileID};
     this.sqLiteDatabase.execSQL(sql,bindArray);
         //SQLiteStatement statement = new SQLiteStatement(this.sqLiteDatabase,sql,bindArray);
     }
+    */
     public void SetDataBase(){
         this.sqLiteDatabase = this.helper.getWritableDatabase();
     }
@@ -111,9 +140,57 @@ public class SqllitData {
     /**
      * 文件未完成传输，但是本地文件已经被删除,或者手动删除历史纪录
      */
-    public void DeleteFileLog(int ID){
+    public void DeleteFileLog(StringBuilder IDS ){
         SQLiteDatabase db = this.helper.getWritableDatabase();
-        db.delete("File_Log","ID=?",new String[] {String.valueOf(ID)});
+        StringBuilder deletesql = new StringBuilder();
+        deletesql.append("delete from File_Logs where ID IN(");
+        deletesql.append(IDS);
+        deletesql.append(")");
+        db.rawQuery(deletesql.toString(),null);
+        db.close();
+    }
+    public void DeleteEmptyFile(){//删除了数据库和本地文件的空文件，也删除了不在本地储存的数据库数据
+        ArrayList<String> filenames = new ArrayList<String>();
+        SQLiteDatabase db = this.helper.getWritableDatabase();
+        Cursor cursor = db.rawQuery("select FileName from File_Logs where FECParameters is null",null);
+        while (cursor.moveToNext()){
+            filenames.add(cursor.getString(0));
+        }
+        File[] files = this.DownLoadPath.listFiles();
+       // LinkedList<String> Deletefile = new LinkedList<>();
+        StringBuilder Deletefile = new StringBuilder();
+        for (int i = 0;i<files.length-1;i++) {
+            String Filename =files[i].getName();
+            //Filename=
+            Deletefile.append("'");
+            Deletefile.append(Filename);
+            for(String name:filenames) {
+
+                if(name.equals(Filename)){
+                    files[i].delete();
+                    break;
+                }
+            }
+            Deletefile.append("'");
+            Deletefile.append(",");
+        }
+        Deletefile.append("'");
+        Deletefile.append(files[files.length-1].getName());
+        Deletefile.append("'");
+        StringBuilder deletesql = new StringBuilder();
+        deletesql.append("delete from File_Logs where FECParameters is null or FileName NOT IN(");
+        deletesql.append(Deletefile.toString());
+        deletesql.append(")");
+        db.rawQuery(deletesql.toString(),null);
+        cursor.close();
+        db.close();
+    }
+    public void PickFile(int ID){
+        this.sqLiteDatabase = helper.getWritableDatabase();
+        this.FileID = String.valueOf(ID);
+    }
+    public void Complete(){
+        this.sqLiteDatabase.rawQuery("UPDATE File_Logs SET HasComplete= 1 WHERE ID=?",new String[]{this.FileID});
     }
         /*
     public void InsertNewFile(FileInfo fileInfo){

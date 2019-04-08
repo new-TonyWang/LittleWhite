@@ -526,8 +526,8 @@ public abstract class EncodingPacket {
 
         @Override
         public ByteBuffer symbols() {
-
-            return symbols.asReadOnlyBuffer();
+                return symbols;
+           // return symbols.asReadOnlyBuffer();
         }
 
         @Override
@@ -541,6 +541,8 @@ public abstract class EncodingPacket {
 
             // cannot use the field directly because the position of the buffer will be changed
             final ByteBuffer symbolsBuf = symbols();
+
+            //symbolsBuf.position(0);
             final byte[] symbolsArr = new byte[symbolsLength()];
             symbolsBuf.get(symbolsArr);
 

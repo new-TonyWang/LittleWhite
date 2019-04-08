@@ -10,4 +10,10 @@ public class TransmissionCompleteActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_transmition_complete);
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+    }
 }

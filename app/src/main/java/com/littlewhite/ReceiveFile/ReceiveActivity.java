@@ -14,6 +14,8 @@ import com.littlewhite.Camera.CameraManager;
 import com.littlewhite.Camera.ViewfinderView;
 import com.littlewhite.R;
 import com.littlewhite.ReceiveFile.QRcodeDecoder.MultiDecoder;
+import com.littlewhite.ReceiveFile.SqllitUtil.FileInfo;
+import com.littlewhite.ReceiveFile.SqllitUtil.SqllitData;
 import com.littlewhite.TransmissionCompleteActivity;
 
 import java.io.IOException;
@@ -22,12 +24,13 @@ public class ReceiveActivity extends AppCompatActivity implements SurfaceHolder.
     private ViewfinderView viewfinderView;//扫描框
         private CameraManager cameraManager;//相机管理
     private ReceiveHandler receiveHandler;//处理消息
-    private MergeFileThread mergeFile;
-    private MultiDecoder multiDecoder;
+   // private MergeFileThread mergeFile;
+   // private MultiDecoder multiDecoder;
     private int TotalQRnum;
     private SurfaceView surfaceView;
     private TextView progress;
     private boolean hasSurface = false;
+    //private FileInfo fileHistory;
     //private final CountDownLatch handlerInitLatch = new CountDownLatch(1);
    // private final CountDownLatch handlerInitLatch = new CountDownLatch(1);;
     @Override
@@ -43,17 +46,18 @@ public class ReceiveActivity extends AppCompatActivity implements SurfaceHolder.
         super.onResume();
     surfaceView = findViewById(R.id.surfaceView);
     progress = findViewById(R.id.progress);
+    //Intent intent = getIntent();
     cameraManager = new CameraManager(getApplication());//getApplication()获取Application对象实例
        // handlerInitLatch = new CountDownLatch(1);
         viewfinderView = findViewById(R.id.viewfinder_view);//二维码识别框
         viewfinderView.setCameraManager(cameraManager);
         SurfaceHolder surfaceHolder = surfaceView.getHolder();
-        surfaceHolder.addCallback(this);
+        //surfaceHolder.addCallback(this);
 
         if (hasSurface) {
             // The activity was paused but not stopped, so the surface still exists. Therefore
             // surfaceCreated() won't be called, so init the camera here.
-            initCamera(surfaceHolder);
+            initCamera(surfaceHolder);//重新打开app的时候用
         } else {
             // Install the callback and wait for surfaceCreated() to init the camera.
             surfaceHolder.addCallback(this);
@@ -92,15 +96,15 @@ public class ReceiveActivity extends AppCompatActivity implements SurfaceHolder.
     public void setCameraManager(CameraManager cameraManager) {
         this.cameraManager = cameraManager;
     }
-    public void TransmissionComplete(){
+    public void TransmissionComplete(Bundle fileBundle){
       //  receiveHandler.quitSynchronously();
         receiveHandler = null;
         Intent intent = new Intent(this, TransmissionCompleteActivity.class);
         Bundle bundle = new Bundle();
         bundle.putInt("sum",this.TotalQRnum);
+        bundle.putAll(fileBundle);
         intent.putExtras(bundle);
         startActivity(intent);
-
     }
 
 
@@ -123,6 +127,7 @@ public class ReceiveActivity extends AppCompatActivity implements SurfaceHolder.
     public void surfaceDestroyed(SurfaceHolder holder) {
 
     }
+
     private void initCamera(SurfaceHolder surfaceHolder) {
         if (surfaceHolder == null) {
             throw new IllegalStateException("No SurfaceHolder provided");
@@ -135,8 +140,7 @@ public class ReceiveActivity extends AppCompatActivity implements SurfaceHolder.
             cameraManager.openDriver(surfaceHolder);
             // Creating the handler starts the preview, which can also throw a RuntimeException.
             if(receiveHandler==null) {
-
-                this.receiveHandler = new ReceiveHandler(this, this.cameraManager);
+                this.receiveHandler = new ReceiveHandler(this, this.cameraManager);//期望它只执行一次
             }
            // decodeOrStoreSavedBitmap(null, null);
         } catch (IOException ioe) {

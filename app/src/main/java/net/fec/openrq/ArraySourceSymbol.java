@@ -16,8 +16,11 @@
 package net.fec.openrq;
 
 
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.Objects;
 
 import net.fec.openrq.util.io.BufferOperation;
@@ -32,9 +35,9 @@ final class ArraySourceSymbol implements SourceSymbol {
     /*
      * Requires valid parameters.
      */
-    static ArraySourceSymbol newSymbol(byte[] srcDataArray, int symbolOff, int symbolSize) {//濮濄倗琚稉绡抦mutableList娑擃厾娈戦弫鐗堝祦閿涳拷
+    static ArraySourceSymbol newSymbol(byte[] srcDataArray, int symbolOff, int symbolSize) {//濮濄倗抦mutableList娑擃厾娈戦弫鐗堝祦閿涳拷
 
-        final int transportSize = Math.min(symbolSize, srcDataArray.length - symbolOff);
+        final int transportSize = Math.min(symbolSize, srcDataArray.length - symbolOff);//最后一个容量小
         return new ArraySourceSymbol(srcDataArray, symbolOff, symbolSize, transportSize);
     }
 
@@ -43,7 +46,7 @@ final class ArraySourceSymbol implements SourceSymbol {
     private final int symbolOff;//濮ｅ繋绔撮崸妤冩畱閸嬪繒些
 
     private final int codeSize;//閸ф娈戠�瑰綊鍣�
-
+   // private FileChannel fileChannel;
     private final ByteBuffer transportBuf;//鐎涙ɑ婀侀弫鐗堝祦濠ф劕鎷皁ffset閻ㄥ垺uffer
 
 
@@ -51,11 +54,12 @@ final class ArraySourceSymbol implements SourceSymbol {
 
         this.srcDataArray = Objects.requireNonNull(srcDataArray);
         this.symbolOff = symbolOff;
-
+       // this.fileChannel = fileChannel;
         this.codeSize = codeSize;
 
-        this.transportBuf = prepareTransportBuffer(srcDataArray, symbolOff, transportSize);
+        this.transportBuf = prepareTransportBuffer(srcDataArray, symbolOff, transportSize);//文件数据，offset，传输大小
     }
+
 
     private static ByteBuffer prepareTransportBuffer(byte[] array, int off, int len) {
 
@@ -99,10 +103,30 @@ final class ArraySourceSymbol implements SourceSymbol {
     @Override
     public void putCodeData(ByteBuffer src, BufferOperation op) {
 
+        //final int pos = src.position();
+       // System.out.println("前"+src.position());
+       // src.get(srcDataArray, symbolOff, transportSize());
+       // System.out.println("后"+src.position());
+        //System.out.println("codeSize"+codeSize);
+       // src.limit(transportSize());
+       /* try {
+            //src.flip();
+            src.position(0);
+            //fileChannel.position(symbolOff);
+            //fileChannel.write(src);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }*/
         final int pos = src.position();
+
         src.get(srcDataArray, symbolOff, transportSize());
+
         src.position(pos + codeSize()); // always advance by codeSize() bytes
+
         op.apply(src, pos, src.position());
+        //src.position(pos + codeSize()); // always advance by codeSize() bytes
+        src.position(0);
+        //op.apply(src, pos, src.position());
     }
 
     @Override
@@ -127,7 +151,24 @@ final class ArraySourceSymbol implements SourceSymbol {
     public void putTransportData(ByteBuffer src, BufferOperation op) {
 
         final int pos = src.position();
+        //System.out.println(transportSize());
+
         src.get(srcDataArray, symbolOff, transportSize());
+       //src.flip();
+
+        /*try {
+            //src.limit(transportSize());
+            src.position(0);
+            //this.transportBuf.;
+            //this.transportBuf.position(0);
+
+           // fileChannel.
+           // fileChannel.write(src);
+            //src.array();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }*/
         op.apply(src, pos, src.position());
+        src.position(0);
     }
 }

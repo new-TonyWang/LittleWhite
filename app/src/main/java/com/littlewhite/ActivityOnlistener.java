@@ -4,15 +4,19 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.Button;
 
 import com.littlewhite.ReceiveFile.ReceiveActivity;
 import com.littlewhite.ReceiveFile.SqllitUtil.SqllitData;
 
+import java.util.ArrayList;
+
 public class ActivityOnlistener extends AppCompatActivity implements View.OnClickListener {
     //private SqllitData sqllitData = new SqllitData(this);
+    protected  ArrayList<Button> list = new ArrayList<>();
     @Override
     public void onClick(View v) {
-        v.setEnabled(false);
+        setButtonsNotEnable();
         switch(v.getId()){
             case R.id.settings:
                 Intent settings = new Intent(this,SettingsActivity.class);//跳转到设置界面
@@ -34,7 +38,7 @@ public class ActivityOnlistener extends AppCompatActivity implements View.OnClic
                 startActivity(receive);
                 break;
         }
-        v.setEnabled(true);
+        setButtonsEnable();
     }
 
     /**
@@ -44,5 +48,15 @@ public class ActivityOnlistener extends AppCompatActivity implements View.OnClic
      */
     protected void setOnclickListener(View v,View.OnClickListener listener){
         v.setOnClickListener(listener);
+    }
+    protected void setButtonsNotEnable(){
+        for(int i = 0;i<this.list.size();i++){
+            list.get(i).setEnabled(false);
+        }
+    }
+    protected void setButtonsEnable(){
+        for(int i = 0;i<this.list.size();i++){
+            list.get(i).setEnabled(true);
+        }
     }
 }

@@ -100,7 +100,7 @@ interface SourceSymbol {
      *                {@link Buffer#remaining() available}
      */
     void putCodeData(ByteBuffer src, BufferOperation op);
-
+    //void putCodeDataWithChannel(ByteBuffer src);
     /**
      * Returns the size in bytes of this source symbol for transport purposes.
      * 
@@ -143,4 +143,5 @@ interface SourceSymbol {
      *                {@link Buffer#remaining() available}
      */
     void putTransportData(ByteBuffer src, BufferOperation op);
+    //void putTransportDataWithChannel(ByteBuffer src);
 }

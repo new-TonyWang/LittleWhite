@@ -16,9 +16,9 @@
 package net.fec.openrq;
 
 
-import java.io.DataInput;
-import java.io.IOException;
+import java.io.*;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 
 import net.fec.openrq.DataUtils.SourceBlockSupplier;
@@ -55,7 +55,28 @@ public final class ArrayDataDecoder implements DataDecoder {
         }
 
         final byte[] dataArray = new byte[fecParams.dataLengthAsInt()];
-        return new ArrayDataDecoder(dataArray, fecParams, symbOver);
+        try {
+            return new ArrayDataDecoder(dataArray, fecParams, symbOver);
+        } catch (FileNotFoundException e) {
+            return null;
+        }
+    }
+    static ArrayDataDecoder RestartDecoder(FECParameters fecParams, int symbOver,File receivefile,byte[] data) {
+
+        // throws NullPointerException if null fecParams
+        if (fecParams.dataLength() > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("data length must be at most 2^^31 - 1");
+        }
+        if (symbOver < 0) {
+            throw new IllegalArgumentException("negative symbol overhead");
+        }
+
+        final byte[] dataArray = new byte[fecParams.dataLengthAsInt()];
+        try {
+            return new ArrayDataDecoder(dataArray, fecParams, symbOver);
+        } catch (FileNotFoundException e) {
+            return null;
+        }
     }
 
 
@@ -64,9 +85,13 @@ public final class ArrayDataDecoder implements DataDecoder {
     private final ImmutableList<SourceBlockDecoder> srcBlockDecoders;
 
 
-    private ArrayDataDecoder(byte[] dataArray, FECParameters fecParams, final int symbOver) {
+    private ArrayDataDecoder(byte[] dataArray, FECParameters fecParams, final int symbOver) throws FileNotFoundException {
+       // this.receivefile = new File("D:\\workspace\\idea\\OpenRQ\\src\\imageout.png");
 
+       //FileOutputStream fileOutputStream = new FileOutputStream(this.receivefile);
+         //this.fileChannel = fileOutputStream.getChannel();
         this.dataArray = dataArray;
+        //this.dataArray = null;
         this.fecParams = fecParams;
         this.srcBlockDecoders = DataUtils.partitionSourceData(
             fecParams,
@@ -81,8 +106,29 @@ public final class ArrayDataDecoder implements DataDecoder {
                         sbn, symbOver);
                 }
             });
-    }
+    }/*
+    private ArrayDataDecoder(byte[] dataArray, FECParameters fecParams, final int symbOver,File receivefile) throws FileNotFoundException {
+        //this.receivefile = new File("D:\\workspace\\idea\\OpenRQ\\src\\imageout.png");
+        FileOutputStream fileOutputStream = new FileOutputStream(receivefile);
+        this.fileChannel = fileOutputStream.getChannel();
+        this.dataArray = dataArray;
+        //this.dataArray = null;
+        this.fecParams = fecParams;
+        this.srcBlockDecoders = DataUtils.partitionSourceData(
+                fecParams,
+                SourceBlockDecoder.class, new SourceBlockSupplier<SourceBlockDecoder>() {
 
+                    @Override
+                    public SourceBlockDecoder get(int off, int sbn) {
+
+                        return ArraySourceBlockDecoder.newDecoder(
+                                ArrayDataDecoder.this, ArrayDataDecoder.this.dataArray, off,
+                                ArrayDataDecoder.this.fecParams,
+                                sbn, symbOver,ArrayDataDecoder.this.fileChannel);
+                    }
+                });
+    }
+    */
     @Override
     public FECParameters fecParameters() {
 

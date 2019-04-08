@@ -16,7 +16,7 @@
  -->
 <resources>
   <item type="id" name="decode"/>
-  <item type="id" name="decode_failed"/>
+  <item type="id" name="failed"/>
   <item type="id" name="decode_succeeded"/>
   <item type="id" name="Merge"/>
   <item type="id" name="stop"/>
@@ -28,4 +28,8 @@
   <item type="id" name="quit"/>
   <item type="id" name="restart_preview"/>
   <item type="id" name="return_scan_result"/>
+  <item type="id" name="ZipFile"/>
+  <item type="id" name="UnZipFile"/>
+  <item type="id" name="Encode"/>
+
 </resources>

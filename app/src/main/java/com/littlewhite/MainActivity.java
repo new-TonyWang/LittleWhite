@@ -14,6 +14,7 @@ public class MainActivity extends ActivityOnlistener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         this.sqllitData = new SqllitData(this);
+        this.sqllitData.DeleteEmptyFile();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mBaction = findViewById(R.id.action);

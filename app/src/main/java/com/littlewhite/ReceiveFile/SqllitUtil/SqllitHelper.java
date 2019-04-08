@@ -17,7 +17,7 @@ public class SqllitHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String sql = "create table File_Logs(ID int primary key AUTOINCREMENT,FileName varchar(30) NOT NULL,TotalSymbolNum int,ReceivedSymbolNum varchar(4000),commonFecOTI Long,schemeSpecFecOTI int,HasComplete boolean)";
+        String sql = "create table File_Logs(ID INTEGER primary key AUTOINCREMENT,FileName varchar(30) NOT NULL,TotalSymbolNum Integer,ReceivedNum Integer,FECParameters blob,HasComplete boolean)";
 //输出创建数据库的日志信息
         Log.i(TAG, "create Database------------->");
 //execSQL函数用于执行SQL语句

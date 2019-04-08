@@ -295,7 +295,6 @@ public final class FECParameters {
         if (offset < 0 || offset >= array.length) throw new IndexOutOfBoundsException();
         return parse(ByteBuffer.wrap(array, offset, array.length - offset));
     }
-
     /**
      * 从byte数组中提取前12位作为参数
      * @param array

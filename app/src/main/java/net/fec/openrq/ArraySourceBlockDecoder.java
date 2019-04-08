@@ -16,7 +16,9 @@
 package net.fec.openrq;
 
 
+import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.BitSet;
 import java.util.Collections;
 import java.util.Iterator;
@@ -42,19 +44,20 @@ import net.fec.openrq.util.rq.SystematicIndices;
 
 /**
  */
-final class ArraySourceBlockDecoder implements SourceBlockDecoder {
+ class ArraySourceBlockDecoder implements SourceBlockDecoder {
 
     // requires valid arguments
     static ArraySourceBlockDecoder newDecoder(
-        ArrayDataDecoder dataDecoder,
-        final byte[] array,
-        int arrayOff,
-        FECParameters fecParams,
-        int sbn,
-        int symbOver)
+            ArrayDataDecoder dataDecoder,
+            final byte[] array,
+            int arrayOff,//每个块的offset
+            FECParameters fecParams,
+            int sbn,
+            int symbOver
+            )
     {
 
-        ImmutableList<SourceSymbol> sourceSymbols = DataUtils.partitionSourceBlock(
+        ImmutableList<SourceSymbol> sourceSymbols = DataUtils.partitionSourceBlock(//生成了源symbol
             sbn,
             fecParams,
             arrayOff,
@@ -63,33 +66,56 @@ final class ArraySourceBlockDecoder implements SourceBlockDecoder {
                 @Override
                 public SourceSymbol get(int off, @SuppressWarnings("unused") int esi, int T) {
 
-                    return ArraySourceSymbol.newSymbol(array, off, T);//閸樼喐鏆熺紒锟�,閸嬪繒些閿涳拷
+                    return ArraySourceSymbol.newSymbol(array, off, T);//生成一个新节点
                 }
             });
 
-        return new ArraySourceBlockDecoder(dataDecoder, sbn, sourceSymbols, symbOver);
+        return new ArraySourceBlockDecoder(dataDecoder, sbn, sourceSymbols, symbOver);//
     }
+    static ArraySourceBlockDecoder RestartDecoder(
+            ArrayDataDecoder dataDecoder,
+            final byte[] array,
+            int arrayOff,//每个块的offset
+            FECParameters fecParams,
+            int sbn,
+            int symbOver)
+    {
 
+        ImmutableList<SourceSymbol> sourceSymbols = DataUtils.partitionSourceBlock(
+                sbn,
+                fecParams,
+                arrayOff,
+                SourceSymbol.class, new DataUtils.SourceSymbolSupplier<SourceSymbol>() {
+
+                    @Override
+                    public SourceSymbol get(int off, @SuppressWarnings("unused") int esi, int T) {
+
+                        return ArraySourceSymbol.newSymbol(array, off, T);//生成一个新节点
+                    }
+                });
+
+        return new ArraySourceBlockDecoder(dataDecoder, sbn, sourceSymbols, symbOver);//
+    }
 
     private final ArrayDataDecoder dataDecoder;
 
     private final int sbn;
 
     private final SymbolsState symbolsState;
-
-
+   // private FileChannel fileChannel;
+    private final int LastSymbol;
     private ArraySourceBlockDecoder(
         ArrayDataDecoder dataDecoder,
         int sbn,
         ImmutableList<SourceSymbol> sourceSymbols,
-        int symbOver)
+        int symbOver
+    )
     {
 
         this.dataDecoder = Objects.requireNonNull(dataDecoder);
-
         this.sbn = sbn;
-
-        this.symbolsState = new SymbolsState(sourceSymbols, symbOver);
+        this.symbolsState = new SymbolsState(sourceSymbols, symbOver);//
+        this.LastSymbol = fecParameters().totalSymbols()-1;
     }
 
     private FECParameters fecParameters() {
@@ -229,7 +255,7 @@ final class ArraySourceBlockDecoder implements SourceBlockDecoder {
                 switch (packet.symbolType()) {
                     case SOURCE:
                         for (int i = 0; i < packet.numberOfSymbols(); i++) {
-                            putNewSymbol |= putSourceData(esi + i, symbols, SourceSymbolDataType.TRANSPORT);
+                            putNewSymbol |= putSourceData(esi + i, symbols, SourceSymbolDataType.TRANSPORT);//放入了数据包
                         }
                     break;
 
@@ -393,7 +419,7 @@ final class ArraySourceBlockDecoder implements SourceBlockDecoder {
 
         // populate D with the received source symbols
         for (int esi : symbolsState.receivedSourceSymbols()) {
-            symbolsState.getSourceSymbol(esi).getCodeData(ByteBuffer.wrap(D[S + H + esi]));
+            symbolsState.getSourceSymbol(esi).getCodeData(ByteBuffer.wrap(D[S + H + esi]));//获取已经解码的包信息
         }
 
         /*
@@ -467,9 +493,9 @@ final class ArraySourceBlockDecoder implements SourceBlockDecoder {
     // requires valid ESI
     private boolean putSourceData(int esi, ByteBuffer symbolData, SourceSymbolDataType dataType) {
 
-        if (symbolsState.containsSourceSymbol(esi)&&esi!=fecParameters().totalSymbols()-1) { // if already received, just advance the buffer position
-            final int T = fecParameters().symbolSize();
-            symbolData.position(symbolData.position() + T);//最后一个数据码进行第二次传输的时候会报错，在if语句加上了判断
+        if (symbolsState.containsSourceSymbol(esi)) {
+            //final int T = fecParameters().symbolSize();
+            //symbolData.position(symbolData.position() + T);
             return false;
         }
         else {
@@ -478,6 +504,7 @@ final class ArraySourceBlockDecoder implements SourceBlockDecoder {
         }
     }
 
+
     /*
      * ===== Requires locked symbolsState! =====
      */
@@ -485,8 +512,8 @@ final class ArraySourceBlockDecoder implements SourceBlockDecoder {
     private boolean putRepairData(int esi, ByteBuffer symbolData) {
 
         if (symbolsState.containsRepairSymbol(esi)) { // if already received, just advance the buffer position
-            final int T = fecParameters().symbolSize();
-            symbolData.position(symbolData.position() + T);
+           // final int T = fecParameters().symbolSize();
+            //symbolData.position(symbolData.position() + T);
             return false;
         }
         else {
@@ -515,14 +542,14 @@ final class ArraySourceBlockDecoder implements SourceBlockDecoder {
         private final Iterable<Integer> receivedSourceSymbols;
 
         private int symbolOverhead;
-
+       // private FileChannel fileChannel;
         private final Lock symbolsStateLock;
 
 
         SymbolsState(ImmutableList<SourceSymbol> sourceSymbols, int symbOver) {
 
             this.sbState = SourceBlockState.INCOMPLETE;
-
+           // this.fileChannel = fileChannel;
             this.sourceSymbols = Objects.requireNonNull(sourceSymbols);
             this.repairSymbols = new LinkedHashMap<>(); // preserved receiving ordering
 
@@ -539,7 +566,7 @@ final class ArraySourceBlockDecoder implements SourceBlockDecoder {
 
         int K() {
 
-            return sourceSymbols.size();
+            return sourceSymbols.size();//定值
         }
 
         // Always call this method before accessing the symbols state!
@@ -593,21 +620,25 @@ final class ArraySourceBlockDecoder implements SourceBlockDecoder {
             }
         }
 
+
         private void putSourceSymbolData(int esi, ByteBuffer symbolData, SourceSymbolDataType dataType) {
 
             switch (dataType) {
                 case CODE:
-                    sourceSymbols.get(esi).putCodeData(symbolData);
+                    sourceSymbols.get(esi).putCodeData(symbolData);//经过纠正的码
                 break;
 
                 case TRANSPORT:
-                    sourceSymbols.get(esi).putTransportData(symbolData);//sybolData閸栧懎鎯堟禍鍡曠炊鏉堟挾娈戦弬鍥︽閸愬懎顔�
+                    sourceSymbols.get(esi).putTransportData(symbolData);//sybolData从这里更新了this.data
+                    //this.fileChannel.write();
                 break;
 
                 default:
                     throw new AssertionError("unknown enum type");
             }
         }
+
+
 
         // requires valid parameter
         SourceSymbol getSourceSymbol(int esi) {
@@ -658,7 +689,7 @@ final class ArraySourceBlockDecoder implements SourceBlockDecoder {
 
         boolean haveEnoughSymbolsToDecode() {
 
-            return (sourceSymbolsBitSet.cardinality() + repairSymbols.size()) >= (K() + symbolOverhead);
+            return (sourceSymbolsBitSet.cardinality() + repairSymbols.size()) >= (K() + symbolOverhead);//k()是symbolsize
         }
 
         int symbolOverhead() {

@@ -63,7 +63,7 @@ public class DecoderHandler extends Handler {
             try {
                 result = reader.decodetobytearry(bitmap, this.hints);
             } catch (ReaderException e) {
-                Log.i(TAG,"解析失败");
+               // Log.i(TAG,"解析失败");
                 return;//解析不到的时候跳出该方法
 
             }
@@ -73,7 +73,7 @@ public class DecoderHandler extends Handler {
 
     }
     private void sendToRaptorDecoder(byte[] result){
-        Log.i(TAG,"解析成功"+(++i)+"个");
+        //Log.i(TAG,"解析成功"+(++i)+"个");
         Message message = Message.obtain(this.RaptorQDecodeHandler,R.id.decode,result);
         message.sendToTarget();
     }

@@ -78,8 +78,8 @@ final class RepairSymbol {
      * @return a new read-only buffer containing the data from this symbol
      */
     ByteBuffer readOnlyData() {
-
-        return dataBuf.asReadOnlyBuffer();
+            return dataBuf;
+        //return dataBuf.asReadOnlyBuffer();
     }
 
     /**

@@ -2,11 +2,17 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.littlewhite">
+
     <uses-permission android:name="android.permission.CAMERA" />
+
     <uses-feature android:name="android.hardware.camera.autofocus" />
-    <uses-feature android:name="android.hardware.camera" android:required="true" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="true" />
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -14,13 +20,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".TransmissionCompleteActivity"/>
-        <activity android:name=".ReceiveFile.ReceiveActivity"
-            android:screenOrientation="sensorLandscape"
-            android:windowSoftInputMode="stateAlwaysHidden"
+        <activity android:name=".History.HistoryActivity"></activity>
+        <activity android:name=".TransmissionCompleteActivity" />
+        <activity
+            android:name=".ReceiveFile.ReceiveActivity"
             android:clearTaskOnLaunch="true"
+            android:screenOrientation="sensorLandscape"
+            android:stateNotNeeded="true"
             android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"
-            android:stateNotNeeded="true"/>
+            android:windowSoftInputMode="stateAlwaysHidden" />
         <activity android:name=".SendFileActivity" />
         <activity android:name=".ActionActivity" />
         <activity
@@ -34,7 +42,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
     </application>
 
 </manifest>

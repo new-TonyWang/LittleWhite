@@ -23,6 +23,8 @@ import net.fec.openrq.encoder.DataEncoder;
 import net.fec.openrq.parameters.FECParameters;
 import net.fec.openrq.parameters.ParameterChecker;
 
+import java.io.File;
+
 
 /**
  * The entry point for the OpenRQ API.

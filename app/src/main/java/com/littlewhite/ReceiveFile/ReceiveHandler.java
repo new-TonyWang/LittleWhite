@@ -1,6 +1,7 @@
 package com.littlewhite.ReceiveFile;
 
 import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -9,6 +10,7 @@ import com.littlewhite.Camera.CameraManager;
 import com.littlewhite.R;
 import com.littlewhite.ReceiveFile.QRcodeDecoder.DecoderThread;
 import com.littlewhite.ReceiveFile.QRcodeDecoder.MultiDecoder;
+import com.littlewhite.ReceiveFile.SqllitUtil.FileInfo;
 
 public class ReceiveHandler extends Handler {
     private ReceiveActivity receiveActivity;
@@ -24,7 +26,7 @@ public class ReceiveHandler extends Handler {
         SUCCESS,
         DONE
     }
-    public ReceiveHandler(ReceiveActivity receiveActivity,CameraManager cameraManager)  {
+    public ReceiveHandler(ReceiveActivity receiveActivity, CameraManager cameraManager)  {
         Log.i(this.getClass().toString(),"启动");
         this.receiveActivity = receiveActivity;
         this.cameraManager = cameraManager;
@@ -58,8 +60,11 @@ public class ReceiveHandler extends Handler {
                     Message finish = obtainMessage(R.id.finish);
                     decoderThread.getHandler().sendMessageAtFrontOfQueue(finish);//发送消息到对第一个位置
                    // Looper.myLooper().quit();
-                    receiveActivity.TransmissionComplete();
+                    Bundle bundle = message.getData();
+
+                    receiveActivity.TransmissionComplete(bundle);
                     break;
+                 //case R.id.
                 case R.id.stop:
                     break;
             }
