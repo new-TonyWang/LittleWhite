@@ -34,7 +34,7 @@ import com.google.zxing.NotFoundException;
 public abstract class GridSampler {
 
   private static GridSampler gridSampler = new DefaultGridSampler();
-
+  private static ColorGridSampler ColorgridSampler = new ColorGridSampler();
   /**
    * Sets the implementation of GridSampler used by the library. One global
    * instance is stored, which may sound problematic. But, the implementation provided
@@ -53,6 +53,9 @@ public abstract class GridSampler {
    */
   public static GridSampler getInstance() {
     return gridSampler;
+  }
+  public static ColorGridSampler getColorInstance() {
+    return ColorgridSampler;
   }
 
   /**
@@ -100,7 +103,10 @@ public abstract class GridSampler {
                                        int dimensionX,
                                        int dimensionY,
                                        PerspectiveTransform transform) throws NotFoundException;
-
+  public abstract BitMatrix[] ColorGrid(HsvData image,
+                                       int dimensionX,
+                                       int dimensionY,
+                                       PerspectiveTransform transform) throws NotFoundException;
   /**
    * <p>Checks a set of points that have been transformed to sample points on an image against
    * the image's dimensions to see if the point are even within the image.</p>

@@ -7,6 +7,7 @@ import android.os.Message;
 import android.util.Log;
 
 import com.littlewhite.Camera.CameraManager;
+import com.littlewhite.Camera.newCameraManager;
 import com.littlewhite.R;
 import com.littlewhite.ReceiveFile.QRcodeDecoder.DecoderThread;
 import com.littlewhite.ReceiveFile.QRcodeDecoder.MultiDecoder;
@@ -16,7 +17,7 @@ public class ReceiveHandler extends Handler {
     private ReceiveActivity receiveActivity;
    // private MergeFileThread mergeFile;
     //private MultiDecoder multiDecoder;
-    private CameraManager cameraManager;
+    private newCameraManager cameraManager;
     private DecoderThread decoderThread;
     private RaptorQDecoder raptorQDecoder;
     private SharedPreferences sharedPreferences;
@@ -26,7 +27,7 @@ public class ReceiveHandler extends Handler {
         SUCCESS,
         DONE
     }
-    public ReceiveHandler(ReceiveActivity receiveActivity, CameraManager cameraManager)  {
+    public ReceiveHandler(ReceiveActivity receiveActivity, newCameraManager cameraManager)  {
         Log.i(this.getClass().toString(),"启动");
         this.receiveActivity = receiveActivity;
         this.cameraManager = cameraManager;

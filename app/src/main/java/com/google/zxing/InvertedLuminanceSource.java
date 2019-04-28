@@ -53,6 +53,11 @@ public final class InvertedLuminanceSource extends LuminanceSource {
   }
 
   @Override
+  public byte[] getUVMatrix() {
+    return new byte[0];
+  }
+
+  @Override
   public boolean isCropSupported() {
     return delegate.isCropSupported();
   }

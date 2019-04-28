@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.ChecksumException;
+import com.google.zxing.ColorYUV;
 import com.google.zxing.DecodeHintType;
 import com.google.zxing.FormatException;
 import com.google.zxing.NotFoundException;
@@ -15,6 +16,7 @@ import com.google.zxing.Reader;
 import com.google.zxing.ReaderException;
 import com.google.zxing.Result;
 import com.google.zxing.ResultMetadataType;
+import com.google.zxing.common.CBinarizer;
 import com.google.zxing.common.HybridBinarizer;
 
 import com.google.zxing.qrcode.QRCodeReader;
@@ -57,7 +59,7 @@ public class DecoderHandler extends Handler {
     }
     private void decode(byte[] YUV,int width,int height)  {
         Result result = null;
-        PlanarYUVLuminanceSource source = receiveActivity.getCameraManager().buildLuminanceSource(YUV, width, height);
+        PlanarYUVLuminanceSource source = receiveActivity.getCameraManager().buildPlanarYUVSource(YUV, width, height);
         if (source != null) {
             BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
             try {

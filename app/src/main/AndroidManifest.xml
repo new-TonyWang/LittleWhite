@@ -24,8 +24,8 @@
         <activity android:name=".TransmissionCompleteActivity" />
         <activity
             android:name=".ReceiveFile.ReceiveActivity"
-            android:clearTaskOnLaunch="true"
             android:screenOrientation="sensorLandscape"
+            android:clearTaskOnLaunch="true"
             android:stateNotNeeded="true"
             android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"
             android:windowSoftInputMode="stateAlwaysHidden" />

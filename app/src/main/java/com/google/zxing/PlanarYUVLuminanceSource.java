@@ -106,6 +106,11 @@ public final class PlanarYUVLuminanceSource extends LuminanceSource {
   }
 
   @Override
+  public byte[] getUVMatrix() {
+    return new byte[0];
+  }
+
+  @Override
   public boolean isCropSupported() {
     return true;
   }

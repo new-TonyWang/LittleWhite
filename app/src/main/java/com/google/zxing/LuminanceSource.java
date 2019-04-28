@@ -60,7 +60,7 @@ public abstract class LuminanceSource {
    *         of the result.
    */
   public abstract byte[] getMatrix();
-
+  public abstract byte[] getUVMatrix();
   /**
    * @return The width of the bitmap.
    */

@@ -48,7 +48,7 @@ public final class ViewfinderView extends View {
   private static final int MAX_RESULT_POINTS = 20;
   private static final int POINT_SIZE = 6;
 
-  private CameraManager cameraManager;
+  private newCameraManager cameraManager;
   private final Paint paint;
   private Bitmap resultBitmap;
   private final int maskColor;
@@ -75,7 +75,7 @@ public final class ViewfinderView extends View {
     //lastPossibleResultPoints = null;
   }
 
-  public void setCameraManager(CameraManager cameraManager) {
+  public void setCameraManager(newCameraManager cameraManager) {
     this.cameraManager = cameraManager;
   }
 
