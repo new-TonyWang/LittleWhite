@@ -30,8 +30,13 @@ public class DecoderThread implements Runnable {
         this.handlerInitLatch = new CountDownLatch(1);
     }
     private void setHints(){
+<<<<<<< HEAD
        decodeHints.put(DecodeHintType.CHARACTER_SET, "UTF-8");
         //decodeHints.put(DecodeHintType.FILEDATA,Boolean.TRUE);
+=======
+       //decodeHints.put(DecodeHintType.CHARACTER_SET, "UTF-8");
+        decodeHints.put(DecodeHintType.FILEDATA,Boolean.TRUE);
+>>>>>>> 03b1350728049c5018ac862b6001afb0b15c7134
     }
     public Handler getHandler(){
         try {

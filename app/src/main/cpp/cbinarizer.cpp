@@ -163,14 +163,24 @@ Java_com_google_zxing_common_CBinarizer_convertToHSV(JNIEnv *env, jobject instan
     //V = channels[2].data;
     jsize cwidth = (jsize)channels[0].cols;
     jsize cheght = (jsize)channels[0].rows;
+<<<<<<< HEAD
     jsize length = cwidth*cheght;
+=======
+    //jsize length = cwidth*cheght;
+>>>>>>> 03b1350728049c5018ac862b6001afb0b15c7134
     //cv::imwrite("sdcard/test.jpg",hsv);
     free(ARGB);
     env->ReleaseByteArrayElements(luminances_, (jbyte *)luminances, 0);
     env->ReleaseByteArrayElements(uv_,(jbyte *) uv, 0);
+<<<<<<< HEAD
     env->SetByteArrayRegion(H_, 0, length, (jbyte *)channels[0].data);
     env->SetByteArrayRegion(S_,0, length,(jbyte *)channels[1].data);
     env->SetByteArrayRegion(V_,0, length,(jbyte *)channels[2].data);
+=======
+    env->SetByteArrayRegion(H_, 0, cwidth, (jbyte *)channels[0].data);
+    env->SetByteArrayRegion(S_,0, cwidth,(jbyte *)channels[1].data);
+    env->SetByteArrayRegion(V_,0, cwidth,(jbyte *)channels[2].data);
+>>>>>>> 03b1350728049c5018ac862b6001afb0b15c7134
    // cv::imwrite("sdcard/test.jpg",img);
     //env->ReleaseByteArrayElements(H_,(jbyte *) H, 0);
    // env->ReleaseByteArrayElements(S_,(jbyte *) S, 0);

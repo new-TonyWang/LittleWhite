@@ -264,10 +264,17 @@ public class newCameraManager {
           // Called early, before init even finished
           return null;
         }
+<<<<<<< HEAD
         //rect.left = rect.left * cameraResolution.x / screenResolution.x;
         //rect.right = rect.right * cameraResolution.x / screenResolution.x;
         //rect.top = rect.top * cameraResolution.y / screenResolution.y;
       //  rect.bottom = rect.bottom * cameraResolution.y / screenResolution.y;
+=======
+        rect.left = rect.left * cameraResolution.x / screenResolution.x;
+        rect.right = rect.right * cameraResolution.x / screenResolution.x;
+        rect.top = rect.top * cameraResolution.y / screenResolution.y;
+        rect.bottom = rect.bottom * cameraResolution.y / screenResolution.y;
+>>>>>>> 03b1350728049c5018ac862b6001afb0b15c7134
         framingRectInPreview = rect;
       }
       return framingRectInPreview;

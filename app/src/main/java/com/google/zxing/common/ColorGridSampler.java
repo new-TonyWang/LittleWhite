@@ -85,12 +85,15 @@ public class ColorGridSampler extends GridSampler {
                         // 品红
                         bits.set(x / 2, y);
                     }
+<<<<<<< HEAD
                      else if (((image.getH(xx,yy))>=0&&(image.getH(xx,yy))<=180)
                              &&(image.getS(xx,yy)>=0&&image.getS(xx,yy)<=255)
                              &&(image.getV(xx,yy)>=0&&image.getV(xx,yy)<=149)) {
                          // 黑
                          bits.set(x / 2, y);
                      }
+=======
+>>>>>>> 03b1350728049c5018ac862b6001afb0b15c7134
                     else{
 
                      }
@@ -109,7 +112,11 @@ public class ColorGridSampler extends GridSampler {
 
        // return bits;
         BitMatrix[] Bits = {bits,bits,bits};
+<<<<<<< HEAD
        // outputimage(bits);
+=======
+        outputimage(bits);
+>>>>>>> 03b1350728049c5018ac862b6001afb0b15c7134
         return Bits;
     }
 
