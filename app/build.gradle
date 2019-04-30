@@ -4,11 +4,24 @@ android {
     compileSdkVersion 28
     defaultConfig {
         applicationId "com.example.littlewhite"
-        minSdkVersion 24
+        minSdkVersion 22
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        externalNativeBuild {
+            cmake {
+                cppFlags ""
+            }
+            ndk{
+                abiFilters "arm64-v8a" , "armeabi-v7a"
+            }
+            sourceSets{
+                main{
+                    jniLibs.srcDirs = ['src/main/jniLibs']
+                }
+            }
+        }
     }
     buildTypes {
         release {
@@ -16,6 +29,12 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    externalNativeBuild {
+        cmake {
+            path "src/main/cpp/CMakeLists.txt"
+        }
+    }
+
 }
 
 dependencies {

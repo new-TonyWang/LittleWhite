@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.ChecksumException;
+import com.google.zxing.ColorYUV;
 import com.google.zxing.DecodeHintType;
 import com.google.zxing.FormatException;
 import com.google.zxing.NotFoundException;
@@ -15,6 +16,7 @@ import com.google.zxing.Reader;
 import com.google.zxing.ReaderException;
 import com.google.zxing.Result;
 import com.google.zxing.ResultMetadataType;
+import com.google.zxing.common.CBinarizer;
 import com.google.zxing.common.HybridBinarizer;
 
 import com.google.zxing.qrcode.QRCodeReader;
@@ -42,7 +44,11 @@ public class DecoderHandler extends Handler {
     public void handleMessage(Message message) {
         switch (message.what){
             case R.id.decode:
+                long start = System.currentTimeMillis();
                     decode((byte[])message.obj,message.arg1,message.arg2);
+                long end = System.currentTimeMillis();
+
+                System.out.println("时长" + (end - start) + "ms");
                 break;
             case R.id.restart_decode:
                 break;
@@ -57,11 +63,11 @@ public class DecoderHandler extends Handler {
     }
     private void decode(byte[] YUV,int width,int height)  {
         Result result = null;
-        PlanarYUVLuminanceSource source = receiveActivity.getCameraManager().buildLuminanceSource(YUV, width, height);
+        ColorYUV source = receiveActivity.getCameraManager().buildColorYUVSource(YUV, width, height);
         if (source != null) {
-            BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
+            BinaryBitmap bitmap = new BinaryBitmap(new CBinarizer(source));
             try {
-                result = reader.decodetobytearry(bitmap, this.hints);
+                result = reader.decodecolorCode(bitmap, this.hints);
             } catch (ReaderException e) {
                // Log.i(TAG,"解析失败");
                 return;//解析不到的时候跳出该方法

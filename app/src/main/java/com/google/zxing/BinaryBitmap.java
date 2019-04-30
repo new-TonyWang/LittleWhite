@@ -18,6 +18,7 @@ package com.google.zxing;
 
 import com.google.zxing.common.BitArray;
 import com.google.zxing.common.BitMatrix;
+import com.google.zxing.common.HsvData;
 
 /**
  * This class is the core bitmap class used by ZXing to represent 1 bit data. Reader objects
@@ -25,9 +26,10 @@ import com.google.zxing.common.BitMatrix;
  *
  * @author dswitkin@google.com (Daniel Switkin)
  */
-public final class BinaryBitmap {
+public  class BinaryBitmap {
 
   private final Binarizer binarizer;
+  private  HsvData hsvData;
   private BitMatrix matrix;
 
   public BinaryBitmap(Binarizer binarizer) {
@@ -90,6 +92,19 @@ public final class BinaryBitmap {
       //System.out.println("matrix的高:"+matrix.getHeight()+"matrix的宽:"+matrix.getWidth());
     }
     return matrix;//从二值化得来的图像
+  }
+  public HsvData gethsvData() throws NotFoundException {
+    // The matrix is created on demand the first time it is requested, then cached. There are two
+    // reasons for this:
+    // 1. This work will never be done if the caller only installs 1D Reader objects, or if a
+    //    1D Reader finds a barcode before the 2D Readers run.
+    // 2. This work will only be done once even if the caller installs multiple 2D Readers.
+    if (hsvData == null) {
+
+      hsvData = binarizer.getHsvData();
+      //System.out.println("matrix的高:"+matrix.getHeight()+"matrix的宽:"+matrix.getWidth());
+    }
+    return hsvData;//从二值化得来的图像
   }
 
   /**

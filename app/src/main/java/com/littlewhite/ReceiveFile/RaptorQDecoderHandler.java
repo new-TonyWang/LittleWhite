@@ -199,7 +199,7 @@ public class RaptorQDecoderHandler extends Handler {
         //String[] ReceivedSymbolString = ReceivedSymbol.split(",",ReceivedSymbol.length()-1);
         //int length = ReceivedSymbolString.length;
         //int[] ReceivedSymbolint = new int[length];
-        check = new boolean[(int) Math.ceil(this.total * 2)];
+        check = new boolean[(int) Math.ceil(this.total * 2)+1];
         /*for (String aReceivedSymbolString : ReceivedSymbolString) {
             if(!aReceivedSymbolString.equals("")){check[Integer.valueOf(aReceivedSymbolString)] = true;}
         }*/
@@ -227,9 +227,9 @@ public class RaptorQDecoderHandler extends Handler {
         this.sum = this.fecParameters.totalSymbols();
         this.total = this.sum;
         this.sum += 2;
-        check = new boolean[(int) Math.ceil(this.total * 2)];
+        check = new boolean[(int) Math.ceil(this.total * 2)+1];
        // stringBuilder = new StringBuilder();
-        this.sqllitData.UpdateFECParameters(this.fecParameters.asArray(), this.total * 2);
+        this.sqllitData.UpdateFECParameters(this.fecParameters.asArray(), (this.total * 2)+1);
         objectOutputStream = requireNonNull(MyObjectStream.newInstance(this.receiveFile));
         decodeFirst(fecParameters);
     }

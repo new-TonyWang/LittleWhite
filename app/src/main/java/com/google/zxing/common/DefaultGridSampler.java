@@ -85,4 +85,9 @@ public final class DefaultGridSampler extends GridSampler {
     return bits;
   }
 
+  @Override
+  public BitMatrix[] ColorGrid(HsvData image, int dimensionX, int dimensionY, PerspectiveTransform transform) throws NotFoundException {
+    return new BitMatrix[0];
+  }
+
 }

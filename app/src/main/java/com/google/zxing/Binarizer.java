@@ -18,6 +18,7 @@ package com.google.zxing;
 
 import com.google.zxing.common.BitArray;
 import com.google.zxing.common.BitMatrix;
+import com.google.zxing.common.HsvData;
 
 /**
  * This class hierarchy provides a set of methods to convert luminance data to 1 bit data.
@@ -71,7 +72,7 @@ public abstract class Binarizer {
    * @throws NotFoundException if image can't be binarized to make a matrix
    */
   public abstract BitMatrix getBlackMatrix() throws NotFoundException;
-
+  public abstract HsvData getHsvData() throws NotFoundException;
   /**
    * Creates a new object with the same type as this Binarizer implementation, but with pristine
    * state. This is needed because Binarizer implementations may be stateful, e.g. keeping a cache

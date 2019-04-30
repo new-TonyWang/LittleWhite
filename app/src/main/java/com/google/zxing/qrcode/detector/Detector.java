@@ -24,6 +24,7 @@ import com.google.zxing.ResultPointCallback;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.common.DetectorResult;
 import com.google.zxing.common.GridSampler;
+import com.google.zxing.common.HsvData;
 import com.google.zxing.common.PerspectiveTransform;
 import com.google.zxing.common.detector.MathUtils;
 import com.google.zxing.qrcode.decoder.Version;
@@ -44,7 +45,6 @@ public class Detector {
   public Detector(BitMatrix image) {
     this.image = image;
   }
-
   protected final BitMatrix getImage() {
     return image;
   }

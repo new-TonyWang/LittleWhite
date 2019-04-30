@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import com.littlewhite.Camera.CameraManager;
 import com.littlewhite.Camera.ViewfinderView;
+import com.littlewhite.Camera.newCameraManager;
 import com.littlewhite.R;
 import com.littlewhite.ReceiveFile.QRcodeDecoder.MultiDecoder;
 import com.littlewhite.ReceiveFile.SqllitUtil.FileInfo;
@@ -22,7 +23,7 @@ import java.io.IOException;
 
 public class ReceiveActivity extends AppCompatActivity implements SurfaceHolder.Callback{
     private ViewfinderView viewfinderView;//扫描框
-        private CameraManager cameraManager;//相机管理
+        private newCameraManager cameraManager;//相机管理
     private ReceiveHandler receiveHandler;//处理消息
    // private MergeFileThread mergeFile;
    // private MultiDecoder multiDecoder;
@@ -38,6 +39,7 @@ public class ReceiveActivity extends AppCompatActivity implements SurfaceHolder.
         super.onCreate(savedInstanceState);
         Window window = getWindow();
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_receive);
 
     }
@@ -47,7 +49,7 @@ public class ReceiveActivity extends AppCompatActivity implements SurfaceHolder.
     surfaceView = findViewById(R.id.surfaceView);
     progress = findViewById(R.id.progress);
     //Intent intent = getIntent();
-    cameraManager = new CameraManager(getApplication());//getApplication()获取Application对象实例
+    cameraManager = new newCameraManager(getApplication());//getApplication()获取Application对象实例
        // handlerInitLatch = new CountDownLatch(1);
         viewfinderView = findViewById(R.id.viewfinder_view);//二维码识别框
         viewfinderView.setCameraManager(cameraManager);
@@ -89,11 +91,11 @@ public class ReceiveActivity extends AppCompatActivity implements SurfaceHolder.
     public void setReceiveHandler(ReceiveHandler receiveHandler) {
         this.receiveHandler = receiveHandler;
     }
-    public CameraManager getCameraManager() {
+    public newCameraManager getCameraManager() {
         return cameraManager;
     }
 
-    public void setCameraManager(CameraManager cameraManager) {
+    public void setCameraManager(newCameraManager cameraManager) {
         this.cameraManager = cameraManager;
     }
     public void TransmissionComplete(Bundle fileBundle){
