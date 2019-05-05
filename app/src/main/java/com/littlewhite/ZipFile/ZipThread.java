@@ -1,26 +1,23 @@
 package com.littlewhite.ZipFile;
 
-import android.content.Context;
+
 import android.os.Handler;
 import android.os.Looper;
-
-import com.littlewhite.ReceiveFile.ReceiveActivity;
-
-import java.io.File;
+import com.littlewhite.SendReceive;
 import java.util.concurrent.CountDownLatch;
 
 
 public class ZipThread implements Runnable{
 
-    private Context context;
+    private SendReceive SendReceive;
     private Handler ZipHandler;
-    private Handler NextStepHandler;
+   // private Handler NextStepHandler;
     private final CountDownLatch handlerInitLatch;
     //private File zipfile;
-    public ZipThread(Context context,Handler NextStepHandler){
-        this.context = context;
+    public ZipThread(SendReceive SendReceive){
+        this.SendReceive  = SendReceive;
         this.handlerInitLatch = new CountDownLatch(1);
-        this.NextStepHandler = NextStepHandler;
+      //  this.NextStepHandler = NextStepHandler;
         //this.zipfile = new File(file);
     }
 
@@ -36,7 +33,7 @@ public class ZipThread implements Runnable{
     @Override
     public void run() {
         Looper.prepare();
-        this.ZipHandler = new ZipHandler(context,this.NextStepHandler);
+        this.ZipHandler = new ZipHandler(SendReceive);
         handlerInitLatch.countDown();
         Looper.loop();
     }

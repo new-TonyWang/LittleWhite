@@ -347,7 +347,7 @@ endif (${ANDROID_ABI} STREQUAL "arm64-v8a")
 
 include_directories(
 
-        D:/workspace/Android_Studio_workespace/LittleWhite/ffmpeg-3.2.5
+        G:/workspace/AndroidStudioProjects/LittleWhite/ffmpeg-3.2.5
 )
 
 # Searches for a specified prebuilt library and stores the path as a

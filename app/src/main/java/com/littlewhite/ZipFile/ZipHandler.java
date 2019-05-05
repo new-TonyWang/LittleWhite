@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.os.Message;
 
 import com.littlewhite.R;
+import com.littlewhite.SendReceive;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -18,13 +19,13 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 public class ZipHandler extends Handler {
-    private Context context;
+    private SendReceive sendReceive;
     private File Zipfile;
     private ZipUtil zipUtil= new ZipUtil();
-    private Handler handler;
-    public ZipHandler(Context context,Handler handler){
-        this.context =context;
-        this.handler = handler;
+   // private Handler handler;
+    public ZipHandler(SendReceive sendReceive){
+        this.sendReceive =sendReceive;
+       // this.handler = handler;
     }
     @Override
     public void handleMessage(Message message) {
@@ -33,12 +34,13 @@ public class ZipHandler extends Handler {
             case R.id.ZipFile:
                 String zipfile = bundle.getString("FilePath");
                 ZipFile(zipfile);
-                File de
                 break;
             case R.id.UnZipFile:
                // Bundle bundle= message.getData();
                 String unzipfile = bundle.getString("FilePath");
                 UnZipFile(unzipfile);
+                File deleteFile = new File(unzipfile);
+                deleteFile.delete();
                 break;
             default:
 
@@ -52,11 +54,11 @@ public class ZipHandler extends Handler {
     private  void UnZipFile(String FilePath){
            boolean Correct =  unzip(FilePath);
            if(Correct){
-               Message message= Message.obtain(this.handler);
+               Message message= Message.obtain((Handler) sendReceive.getHandler());
                message.what = R.id.finish;
                message.sendToTarget();
            }else{
-            Message.obtain(this.handler,R.id.failed);
+            Message.obtain((Handler) sendReceive.getHandler(),R.id.failed);
            }
         }
 
@@ -67,12 +69,12 @@ public class ZipHandler extends Handler {
     private  void ZipFile(String FilePath){
         File zipDirectoryFile =  zipDirectory(FilePath);
         if(!Objects.equals(zipDirectoryFile, null)){
-            Message message = Message.obtain(this.handler);
+            Message message = Message.obtain((Handler) sendReceive.getHandler());
             message.obj = zipDirectoryFile;
             message.what = R.id.Encode;
             message.sendToTarget();
         }else{
-            Message message = Message.obtain(this.handler);
+            Message message = Message.obtain((Handler) sendReceive.getHandler());
            // message.obj = zipDirectoryFile;
             message.what = R.id.failed;
             message.sendToTarget();

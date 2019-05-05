@@ -8,6 +8,7 @@ import android.widget.Button;
 
 import com.littlewhite.ReceiveFile.ReceiveActivity;
 import com.littlewhite.ReceiveFile.SqllitUtil.SqllitData;
+import com.littlewhite.SendFile.SendFileActivity;
 
 import java.util.ArrayList;
 
@@ -30,7 +31,7 @@ public class ActivityOnlistener extends AppCompatActivity implements View.OnClic
             case R.id.history:
                 break;
             case R.id.send:
-                Intent send = new Intent(this,SendFileActivity.class);
+                Intent send = new Intent(this, SendFileActivity.class);
                 startActivity(send);
                 break;
             case R.id.receive:

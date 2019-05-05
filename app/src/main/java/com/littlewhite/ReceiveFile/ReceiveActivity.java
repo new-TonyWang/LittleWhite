@@ -17,14 +17,15 @@ import com.littlewhite.R;
 import com.littlewhite.ReceiveFile.QRcodeDecoder.MultiDecoder;
 import com.littlewhite.ReceiveFile.SqllitUtil.FileInfo;
 import com.littlewhite.ReceiveFile.SqllitUtil.SqllitData;
+import com.littlewhite.SendReceive;
 import com.littlewhite.TransmissionCompleteActivity;
 
 import java.io.IOException;
 
-public class ReceiveActivity extends AppCompatActivity implements SurfaceHolder.Callback{
+public class ReceiveActivity extends SendReceive<ReceiveHandler> implements SurfaceHolder.Callback{
     private ViewfinderView viewfinderView;//扫描框
         private newCameraManager cameraManager;//相机管理
-    private ReceiveHandler receiveHandler;//处理消息
+   // private ReceiveHandler receiveHandler;//处理消息
    // private MergeFileThread mergeFile;
    // private MultiDecoder multiDecoder;
     private int TotalQRnum;
@@ -83,13 +84,14 @@ public class ReceiveActivity extends AppCompatActivity implements SurfaceHolder.
     public void setTotalQRnum(int totalQRnum) {
         TotalQRnum = totalQRnum;
     }
-    public ReceiveHandler getReceiveHandler() {
+    @Override
+   public ReceiveHandler getHandler(){
 
-        return receiveHandler;
+        return handler;
     }
 
     public void setReceiveHandler(ReceiveHandler receiveHandler) {
-        this.receiveHandler = receiveHandler;
+        this.handler = receiveHandler;
     }
     public newCameraManager getCameraManager() {
         return cameraManager;
@@ -100,7 +102,7 @@ public class ReceiveActivity extends AppCompatActivity implements SurfaceHolder.
     }
     public void TransmissionComplete(Bundle fileBundle){
       //  receiveHandler.quitSynchronously();
-        receiveHandler = null;
+        handler = null;
         Intent intent = new Intent(this, TransmissionCompleteActivity.class);
         Bundle bundle = new Bundle();
         bundle.putInt("sum",this.TotalQRnum);
@@ -141,8 +143,8 @@ public class ReceiveActivity extends AppCompatActivity implements SurfaceHolder.
         try {
             cameraManager.openDriver(surfaceHolder);
             // Creating the handler starts the preview, which can also throw a RuntimeException.
-            if(receiveHandler==null) {
-                this.receiveHandler = new ReceiveHandler(this, this.cameraManager);//期望它只执行一次
+            if(handler==null) {
+                this.handler = new ReceiveHandler(this, this.cameraManager);//期望它只执行一次
             }
            // decodeOrStoreSavedBitmap(null, null);
         } catch (IOException ioe) {
@@ -165,8 +167,8 @@ public class ReceiveActivity extends AppCompatActivity implements SurfaceHolder.
     }
     @Override
     protected void onPause() {
-        if (receiveHandler != null) {
-            receiveHandler.quitSynchronously();
+        if (handler != null) {
+            handler.quitSynchronously();
             //receiveHandler = null;//程序未退出的时候就不删除handler
         }
 

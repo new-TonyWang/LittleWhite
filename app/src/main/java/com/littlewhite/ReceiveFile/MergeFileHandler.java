@@ -112,7 +112,7 @@ public class MergeFileHandler extends Handler  {//不知道需不需要新建一
 
     }
     private void SendToReceiveHandler(int CorrectNum,int sum){
-        Message message = Message.obtain(receiveActivity.getReceiveHandler(),R.id.update_progress,CorrectNum,sum);
+        Message message = Message.obtain(receiveActivity.getHandler(),R.id.update_progress,CorrectNum,sum);
         message.sendToTarget();
 
     }
@@ -123,7 +123,7 @@ public class MergeFileHandler extends Handler  {//不知道需不需要新建一
             e.printStackTrace();
         }
         ReceiveFile.renameTo(new File(ReceiveFile.getParent()+"/"+this.FileName));
-        Message message = Message.obtain(receiveActivity.getReceiveHandler(),R.id.finish,CorrectNum,sum);
+        Message message = Message.obtain(receiveActivity.getHandler(),R.id.finish,CorrectNum,sum);
         message.sendToTarget();
     }
 

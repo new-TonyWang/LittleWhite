@@ -53,13 +53,14 @@ public class RaptorQDecoderHandler extends Handler {
     private ObjectOutputStream objectOutputStream;
     private List<FileInfo> List;
     private ZipThread zipThread;
-    public RaptorQDecoderHandler(ReceiveActivity receiveActivity,File receivePath,SqllitData sqllitData,List<FileInfo> List) {
+    public RaptorQDecoderHandler(ReceiveActivity receiveActivity,File receivePath,SqllitData sqllitData,List<FileInfo> List,ZipThread zipThread) {
         this.receiveActivity = receiveActivity;
        // this.fecParameters = fecParameters;
        // this.arrayDataDecoder = arrayDataDecoder;
         this.receivePath = receivePath;
         this.sqllitData = sqllitData;
         this.List = List;
+        this.zipThread = zipThread;
         //this.receiveFileInfo = new FileInfo(this.receiveFile.getName());
        /* try {
             this.fos = new FileOutputStream(this.receiveFile);
@@ -132,7 +133,7 @@ public class RaptorQDecoderHandler extends Handler {
                }
                 sqllitData.Complete();
                this.sqllitData.CloseSqLiteDatabase();
-               SendToUnzip(++this.num,this.sum);
+               SendToUnzip();
 
                requireNonNull(Looper.myLooper()).quit();
                break;
@@ -239,7 +240,7 @@ public class RaptorQDecoderHandler extends Handler {
     }
     private File initReceiveFile(File ReceivePath){
         // Log.i(this.getClass().toString(),"启动");
-        File receiveFile = new File(ReceivePath.getAbsolutePath()+"/tmp"+System.currentTimeMillis()+".tmp");//后续利用数据库加上端点续传
+        File receiveFile = new File(ReceivePath.getAbsolutePath()+"/tmp"+System.currentTimeMillis()+".tmp");
         if(!ReceivePath.exists()){
             try {
                 ReceivePath.createNewFile();
@@ -250,17 +251,18 @@ public class RaptorQDecoderHandler extends Handler {
         return receiveFile;
     }
     private void SendToReceiveHandler(int CorrectNum, int sum){
-        Message message = Message.obtain(receiveActivity.getReceiveHandler(), R.id.update_progress,CorrectNum,sum);
+        Message message = Message.obtain(receiveActivity.getHandler(), R.id.update_progress,CorrectNum,sum);
        // message.setData(bundle);
         message.sendToTarget();
     }
-    private void SendToUnzip(int CorrectNum, int sum){//解压文件
+    private void SendToUnzip(){//解压文件
         Bundle bundle = new Bundle();
         //ArrayList<String> stringArrayList= new ArrayList<>();
        // stringArrayList.add();
         //bundle.putStringArrayList(,stringArrayList);
         bundle.putString("FilePath",receiveFile.getAbsolutePath());
-        Message message = Message.obtain(zipThread.getZipHandler(), R.id.ZipFile,CorrectNum,sum);
+        Message message = Message.obtain(zipThread.getZipHandler(), R.id.UnZipFile);
+        message.setData(bundle);
         message.sendToTarget();
 
     }

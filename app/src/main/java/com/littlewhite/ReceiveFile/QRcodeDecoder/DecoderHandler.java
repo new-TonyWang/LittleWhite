@@ -64,14 +64,14 @@ public class DecoderHandler extends Handler {
     private void decode(byte[] YUV,int width,int height)  {
         Result result = null;
 
-        ColorYUV source = receiveActivity.getCameraManager().buildColorYUVSource(YUV, width, height);
+        PlanarYUVLuminanceSource source = receiveActivity.getCameraManager().buildPlanarYUVSource(YUV, width, height);
 
        // PlanarYUVLuminanceSource source = receiveActivity.getCameraManager().buildPlanarYUVSource(YUV, width, height);
 
         if (source != null) {
-            BinaryBitmap bitmap = new BinaryBitmap(new CBinarizer(source));
+            BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
             try {
-                result = reader.decodecolorCode(bitmap, this.hints);
+                result = reader.decodetobytearry(bitmap, this.hints);
             } catch (ReaderException e) {
                // Log.i(TAG,"解析失败");
                 return;//解析不到的时候跳出该方法

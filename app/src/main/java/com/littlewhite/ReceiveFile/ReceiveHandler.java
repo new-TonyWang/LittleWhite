@@ -12,6 +12,7 @@ import com.littlewhite.R;
 import com.littlewhite.ReceiveFile.QRcodeDecoder.DecoderThread;
 import com.littlewhite.ReceiveFile.QRcodeDecoder.MultiDecoder;
 import com.littlewhite.ReceiveFile.SqllitUtil.FileInfo;
+import com.littlewhite.ZipFile.ZipThread;
 
 public class ReceiveHandler extends Handler {
     private ReceiveActivity receiveActivity;
@@ -20,6 +21,7 @@ public class ReceiveHandler extends Handler {
     private newCameraManager cameraManager;
     private DecoderThread decoderThread;
     private RaptorQDecoder raptorQDecoder;
+    private ZipThread zipThread;
     private SharedPreferences sharedPreferences;
     private State state;
     private enum State {
@@ -31,6 +33,7 @@ public class ReceiveHandler extends Handler {
         Log.i(this.getClass().toString(),"启动");
         this.receiveActivity = receiveActivity;
         this.cameraManager = cameraManager;
+        this.zipThread = new ZipThread(this.receiveActivity);
         /*
         this.mergeFile =  new MergeFileThread(this.receiveActivity);
         this.multiDecoder = new MultiDecoder(this.receiveActivity,this.mergeFile);
@@ -39,10 +42,12 @@ public class ReceiveHandler extends Handler {
        // MergeThread.start();
         //MultiDecoder.start();
         */
-        this.raptorQDecoder = new RaptorQDecoder(this.receiveActivity);
+        this.raptorQDecoder = new RaptorQDecoder(this.receiveActivity,this.zipThread);
         this.decoderThread = new DecoderThread(this.receiveActivity,this.raptorQDecoder);
         Thread raptorQDecoderThread = new Thread(this.raptorQDecoder);
         Thread DecoderThread = new Thread(this.decoderThread);
+        Thread ZipThread = new Thread(this.zipThread);
+        ZipThread.start();
         raptorQDecoderThread.start();
         DecoderThread.start();
         state = State.SUCCESS;

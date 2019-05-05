@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.littlewhite.ReceiveFile.SqllitUtil.FileInfo;
 import com.littlewhite.ReceiveFile.SqllitUtil.SqllitData;
+import com.littlewhite.ZipFile.ZipThread;
 
 import net.fec.openrq.ArrayDataDecoder;
 import net.fec.openrq.parameters.FECParameters;
@@ -25,10 +26,12 @@ public class RaptorQDecoder implements Runnable {
     private Handler RaptorDecoderHandler;
     private final CountDownLatch handlerInitLatch;
     private SqllitData sqllitData;
-    public RaptorQDecoder(ReceiveActivity receiveActivity){
+    private ZipThread zipThread;
+    public RaptorQDecoder(ReceiveActivity receiveActivity,ZipThread zipThread){
         this.receiveActivity = receiveActivity;
         this.receivePath = initReceivePath();
         this.sqllitData = new SqllitData(this.receiveActivity);
+        this.zipThread = zipThread;
        /* if(fileInfo == null){//接收新文件
        // this.receiveFile = initReceiveFile(ReceivePath);
         //FileInfo NewFile = new FileInfo(receiveFile.getName());
@@ -95,7 +98,7 @@ public class RaptorQDecoder implements Runnable {
     public void run() {
         Looper.prepare();
         List list = getList();
-        this.RaptorDecoderHandler = new RaptorQDecoderHandler(receiveActivity,this.receivePath,this.sqllitData,list);
+        this.RaptorDecoderHandler = new RaptorQDecoderHandler(receiveActivity,this.receivePath,this.sqllitData,list,zipThread);
         this.handlerInitLatch.countDown();
         Looper.loop();
 
