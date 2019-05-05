@@ -33,6 +33,7 @@ public class ZipHandler extends Handler {
             case R.id.ZipFile:
                 String zipfile = bundle.getString("FilePath");
                 ZipFile(zipfile);
+                File de
                 break;
             case R.id.UnZipFile:
                // Bundle bundle= message.getData();

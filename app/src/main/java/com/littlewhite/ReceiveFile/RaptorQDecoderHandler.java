@@ -260,7 +260,7 @@ public class RaptorQDecoderHandler extends Handler {
        // stringArrayList.add();
         //bundle.putStringArrayList(,stringArrayList);
         bundle.putString("FilePath",receiveFile.getAbsolutePath());
-        Message message = Message.obtain(zipThread.getZipHandler(), R.id.finish,CorrectNum,sum);
+        Message message = Message.obtain(zipThread.getZipHandler(), R.id.ZipFile,CorrectNum,sum);
         message.sendToTarget();
 
     }
