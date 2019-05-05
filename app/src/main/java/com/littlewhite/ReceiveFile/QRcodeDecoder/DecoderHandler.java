@@ -63,11 +63,11 @@ public class DecoderHandler extends Handler {
     }
     private void decode(byte[] YUV,int width,int height)  {
         Result result = null;
-<<<<<<< HEAD
+
         ColorYUV source = receiveActivity.getCameraManager().buildColorYUVSource(YUV, width, height);
-=======
-        PlanarYUVLuminanceSource source = receiveActivity.getCameraManager().buildPlanarYUVSource(YUV, width, height);
->>>>>>> 03b1350728049c5018ac862b6001afb0b15c7134
+
+       // PlanarYUVLuminanceSource source = receiveActivity.getCameraManager().buildPlanarYUVSource(YUV, width, height);
+
         if (source != null) {
             BinaryBitmap bitmap = new BinaryBitmap(new CBinarizer(source));
             try {

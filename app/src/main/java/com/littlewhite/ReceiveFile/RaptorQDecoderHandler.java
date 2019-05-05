@@ -8,6 +8,8 @@ import android.os.Message;
 import com.littlewhite.R;
 import com.littlewhite.ReceiveFile.SqllitUtil.FileInfo;
 import com.littlewhite.ReceiveFile.SqllitUtil.SqllitData;
+import com.littlewhite.ZipFile.ZipHandler;
+import com.littlewhite.ZipFile.ZipThread;
 
 
 import net.fec.openrq.ArrayDataDecoder;
@@ -50,6 +52,7 @@ public class RaptorQDecoderHandler extends Handler {
     private File receiveFile;//表示的是object流的文件
     private ObjectOutputStream objectOutputStream;
     private List<FileInfo> List;
+    private ZipThread zipThread;
     public RaptorQDecoderHandler(ReceiveActivity receiveActivity,File receivePath,SqllitData sqllitData,List<FileInfo> List) {
         this.receiveActivity = receiveActivity;
        // this.fecParameters = fecParameters;
@@ -130,6 +133,7 @@ public class RaptorQDecoderHandler extends Handler {
                 sqllitData.Complete();
                this.sqllitData.CloseSqLiteDatabase();
                SendToUnzip(++this.num,this.sum);
+
                requireNonNull(Looper.myLooper()).quit();
                break;
            case DECODING_FAILURE://解析失败，生成端有误
@@ -256,7 +260,7 @@ public class RaptorQDecoderHandler extends Handler {
        // stringArrayList.add();
         //bundle.putStringArrayList(,stringArrayList);
         bundle.putString("FilePath",receiveFile.getAbsolutePath());
-        Message message = Message.obtain(receiveActivity.getReceiveHandler(), R.id.finish,CorrectNum,sum);
+        Message message = Message.obtain(zipThread.getZipHandler(), R.id.finish,CorrectNum,sum);
         message.sendToTarget();
 
     }

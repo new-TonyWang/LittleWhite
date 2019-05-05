@@ -5,7 +5,6 @@ public class ColorYUV extends LuminanceSource {
 
   private final byte[] yuvData;
   private final int dataWidth;
-<<<<<<< HEAD
 
   public int getDataWidth() {
     return dataWidth;
@@ -15,8 +14,7 @@ public class ColorYUV extends LuminanceSource {
     return dataHeight;
   }
 
-=======
->>>>>>> 03b1350728049c5018ac862b6001afb0b15c7134
+
   private final int dataHeight;
   private final int left;
   private final int top;
@@ -111,8 +109,5 @@ public class ColorYUV extends LuminanceSource {
       }
     }
   }
-<<<<<<< HEAD
 
-=======
->>>>>>> 03b1350728049c5018ac862b6001afb0b15c7134
 }

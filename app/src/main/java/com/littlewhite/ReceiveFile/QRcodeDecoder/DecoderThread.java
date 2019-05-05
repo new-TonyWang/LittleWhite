@@ -25,18 +25,13 @@ public class DecoderThread implements Runnable {
     public DecoderThread (ReceiveActivity ReceiveActivity,RaptorQDecoder raptorQDecoder){
         this.raptorQDecoder = raptorQDecoder;
         this.ReceiveActivity = ReceiveActivity;
-        this.sharedPreferences = this.ReceiveActivity.getSharedPreferences("data", Context.MODE_PRIVATE);//获取context的存储对象，用于读取设置
+       // this.sharedPreferences = this.ReceiveActivity.getSharedPreferences("data", Context.MODE_PRIVATE);//获取context的存储对象，用于读取设置
         setHints();//读取用户设置的功能还未完成
         this.handlerInitLatch = new CountDownLatch(1);
     }
     private void setHints(){
-<<<<<<< HEAD
-       decodeHints.put(DecodeHintType.CHARACTER_SET, "UTF-8");
-        //decodeHints.put(DecodeHintType.FILEDATA,Boolean.TRUE);
-=======
        //decodeHints.put(DecodeHintType.CHARACTER_SET, "UTF-8");
         decodeHints.put(DecodeHintType.FILEDATA,Boolean.TRUE);
->>>>>>> 03b1350728049c5018ac862b6001afb0b15c7134
     }
     public Handler getHandler(){
         try {

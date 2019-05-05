@@ -1,0 +1,105 @@
+libSYS/src/cmdl_parser.lo: libSYS/src/cmdl_parser.cpp \
+ D:/Android/sdk/ndk-bundle/toolchains/x86_64-4.9/prebuilt/windows-x86_64/lib/gcc/x86_64-linux-android/4.9.x/include/stdarg.h \
+ D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/stdio.h \
+ D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/sys/cdefs.h \
+ D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/sys/cdefs_elf.h \
+ D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/android/api-level.h \
+ D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/sys/types.h \
+ D:/Android/sdk/ndk-bundle/toolchains/x86_64-4.9/prebuilt/windows-x86_64/lib/gcc/x86_64-linux-android/4.9.x/include/stddef.h \
+ D:/Android/sdk/ndk-bundle/toolchains/x86_64-4.9/prebuilt/windows-x86_64/lib/gcc/x86_64-linux-android/4.9.x/include/stdint.h \
+ D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/stdint.h \
+ D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/machine/wchar_limits.h \
+ D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/linux/types.h \
+ D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/asm/types.h \
+ D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/asm-generic/types.h \
+ D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/asm-generic/int-ll64.h \
+ D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/asm/bitsperlong.h \
+ D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/asm-generic/bitsperlong.h \
+ D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/linux/posix_types.h \
+ D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/linux/stddef.h \
+ D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/linux/compiler.h \
+ D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/asm/posix_types.h \
+ D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/asm/posix_types_64.h \
+ D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/asm-generic/posix_types.h \
+ D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/sys/sysmacros.h \
+ D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/string.h \
+ D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/malloc.h \
+ D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/xlocale.h \
+ D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/stdlib.h \
+ D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/alloca.h \
+ D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/strings.h \
+ D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/memory.h \
+ D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/ctype.h \
+ libSYS/include/cmdl_parser.h libSYS/include/machine_type.h \
+ D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/assert.h \
+ libSYS/include/genericStds.h
+
+D:/Android/sdk/ndk-bundle/toolchains/x86_64-4.9/prebuilt/windows-x86_64/lib/gcc/x86_64-linux-android/4.9.x/include/stdarg.h:
+
+D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/stdio.h:
+
+D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/sys/cdefs.h:
+
+D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/sys/cdefs_elf.h:
+
+D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/android/api-level.h:
+
+D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/sys/types.h:
+
+D:/Android/sdk/ndk-bundle/toolchains/x86_64-4.9/prebuilt/windows-x86_64/lib/gcc/x86_64-linux-android/4.9.x/include/stddef.h:
+
+D:/Android/sdk/ndk-bundle/toolchains/x86_64-4.9/prebuilt/windows-x86_64/lib/gcc/x86_64-linux-android/4.9.x/include/stdint.h:
+
+D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/stdint.h:
+
+D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/machine/wchar_limits.h:
+
+D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/linux/types.h:
+
+D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/asm/types.h:
+
+D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/asm-generic/types.h:
+
+D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/asm-generic/int-ll64.h:
+
+D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/asm/bitsperlong.h:
+
+D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/asm-generic/bitsperlong.h:
+
+D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/linux/posix_types.h:
+
+D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/linux/stddef.h:
+
+D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/linux/compiler.h:
+
+D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/asm/posix_types.h:
+
+D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/asm/posix_types_64.h:
+
+D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/asm-generic/posix_types.h:
+
+D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/sys/sysmacros.h:
+
+D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/string.h:
+
+D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/malloc.h:
+
+D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/xlocale.h:
+
+D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/stdlib.h:
+
+D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/alloca.h:
+
+D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/strings.h:
+
+D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/memory.h:
+
+D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/ctype.h:
+
+libSYS/include/cmdl_parser.h:
+
+libSYS/include/machine_type.h:
+
+D:/Android/sdk/ndk-bundle/platforms/android-21/arch-x86_64/usr/include/assert.h:
+
+libSYS/include/genericStds.h:

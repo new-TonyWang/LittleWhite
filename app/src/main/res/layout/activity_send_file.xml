@@ -7,7 +7,7 @@
     android:paddingLeft="8dp"
     android:paddingRight="8dp"
     android:paddingBottom="8dp"
-    tools:context=".SendFileActivity">
+    tools:context="SendFile.SendFileActivity">
 
     <LinearLayout
         android:layout_width="0dp"
@@ -107,7 +107,7 @@
                     android:gravity="center"
                     android:inputType="number"
                     android:ems="10"
-                    android:text="900" />
+                    android:text="600" />
             </LinearLayout>
 
             <LinearLayout

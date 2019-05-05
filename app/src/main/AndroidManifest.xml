@@ -29,8 +29,8 @@
             android:stateNotNeeded="true"
             android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"
             android:windowSoftInputMode="stateAlwaysHidden" />
-        <activity android:name=".SendFileActivity" />
         <activity android:name=".ActionActivity" />
+        <activity android:name=".SendFile.SendFileActivity" />
         <activity
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings"

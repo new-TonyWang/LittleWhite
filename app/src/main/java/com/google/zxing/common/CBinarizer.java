@@ -8,10 +8,9 @@ import android.graphics.YuvImage;
 import android.os.Environment;
 
 import com.google.zxing.Binarizer;
-<<<<<<< HEAD
+
 import com.google.zxing.ColorYUV;
-=======
->>>>>>> 03b1350728049c5018ac862b6001afb0b15c7134
+
 import com.google.zxing.LuminanceSource;
 import com.google.zxing.NotFoundException;
 
@@ -34,20 +33,18 @@ public class CBinarizer extends GlobalHistogramBinarizer {
 
     private HsvData hsvData;
 
-<<<<<<< HEAD
-    public CBinarizer(ColorYUV source) {
-=======
+
+
+
     public CBinarizer(LuminanceSource source) {
->>>>>>> 03b1350728049c5018ac862b6001afb0b15c7134
+
         super(source);
     }
 
     public HsvData getHsvData() throws NotFoundException {
-<<<<<<< HEAD
 
-=======
         long start = System.currentTimeMillis();
->>>>>>> 03b1350728049c5018ac862b6001afb0b15c7134
+
         if (hsvData != null) {
             return hsvData;
         }
@@ -78,12 +75,10 @@ public class CBinarizer extends GlobalHistogramBinarizer {
         //outputmatrix(luminances,uv,width,height,true,Math.random());
         //outputRGB(RGB,width,height,"rgb");
         int[][] blackPoints = calculateBlackPoints(luminances, subWidth, subHeight, width, height);
-<<<<<<< HEAD
 
-=======
         long end = System.currentTimeMillis();
         System.out.println("时长" + (end - start) + "ms");
->>>>>>> 03b1350728049c5018ac862b6001afb0b15c7134
+
         BitMatrix newMatrix = new BitMatrix(width, height);
         calculateThresholdForBlock(luminances, subWidth, subHeight, width, height, blackPoints, newMatrix);
         hsvData = new HsvData(H, S, V, newMatrix);
@@ -101,8 +96,7 @@ public class CBinarizer extends GlobalHistogramBinarizer {
 	}
 	*/
 
-
-    private void outputmatrix(byte[] y, byte[] uv, int width, int height, boolean israw, double dou) {
+    private void outputmatrix(byte[] y,byte[] uv, int width, int height, boolean israw, double dou) {
         byte[] data = new byte[y.length + uv.length];
         System.arraycopy(y, 0, data, 0, y.length);
         //for(int i = y.length;i<uv.length;i++){
