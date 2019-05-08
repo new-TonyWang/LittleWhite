@@ -187,4 +187,43 @@ public BitMatrix encode(byte[] contents, BarcodeFormat format, int width, int he
 	
 }
 
+	@Override
+	public BitMatrix[] encode(byte[] contents1, byte[] contents2, byte[] contents3, BarcodeFormat format, int width, int height, Map<EncodeHintType, ?> hints) throws WriterException {
+		if (contents1==null) {
+			throw new IllegalArgumentException("输入1未找到");
+		}
+		if (contents2==null) {
+			throw new IllegalArgumentException("输入2未找到");
+		}
+		if (contents3==null) {
+			throw new IllegalArgumentException("输入3未找到");
+		}
+
+		if (format != BarcodeFormat.QR_CODE) {
+			throw new IllegalArgumentException("Can only encode QR_CODE, but got " + format);
+		}
+
+		if (width < 0 || height < 0) {
+			throw new IllegalArgumentException("Requested dimensions are too small: " + width + 'x' +
+					height);
+		}
+
+		ErrorCorrectionLevel errorCorrectionLevel = ErrorCorrectionLevel.L;
+		int quietZone = QUIET_ZONE_SIZE;
+		if (hints != null) {
+			if (hints.containsKey(EncodeHintType.ERROR_CORRECTION)) {
+				errorCorrectionLevel = ErrorCorrectionLevel.valueOf(hints.get(EncodeHintType.ERROR_CORRECTION).toString());
+			}
+			if (hints.containsKey(EncodeHintType.MARGIN)) {
+				quietZone = Integer.parseInt(hints.get(EncodeHintType.MARGIN).toString());
+			}
+		}
+
+		QRCode[] code = Encoder.encode(contents1,contents2,contents3, errorCorrectionLevel, hints);
+		BitMatrix[] renderResults = {renderResult(code[0], width, height, quietZone),
+				renderResult(code[1], width, height, quietZone),
+				renderResult(code[2], width, height, quietZone)};
+		return renderResults;
+	}
+
 }

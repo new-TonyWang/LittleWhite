@@ -384,6 +384,92 @@ public final class Encoder {
 		QRCode qrcode[] = { qrcode1, qrcode2, qrcode3 };
 		return qrcode;
 	}
+	public static QRCode[] encode(byte[] content1, byte[] content2, byte[] content3, ErrorCorrectionLevel ecLevel,
+								  Map<EncodeHintType, ?> hints) throws WriterException {
+
+		// Determine what character encoding has been specified by the caller, if any
+		String encoding = DEFAULT_BYTE_MODE_ENCODING;
+		boolean hasEncodingHint = hints != null && hints.containsKey(EncodeHintType.CHARACTER_SET);
+		if (hasEncodingHint) {
+			encoding = hints.get(EncodeHintType.CHARACTER_SET).toString();
+		}
+
+		// Pick an encoding mode appropriate for the content. Note that this will not
+		// attempt to use
+		// multiple modes / segments even if that were more efficient. Twould be nice.
+		Mode mode1 = Mode.DATA;
+		Mode mode2 = Mode.DATA;
+		Mode mode3 = Mode.DATA;
+		// This will store the header information, like mode and
+		// length, as well as "header" segments like an ECI segment.
+		BitArray headerBits = new BitArray();
+
+		// Append ECI segment if applicable
+
+		// Append the FNC1 mode header for GS1 formatted data if applicable
+		boolean hasGS1FormatHint = hints != null && hints.containsKey(EncodeHintType.GS1_FORMAT);
+		if (hasGS1FormatHint && Boolean.valueOf(hints.get(EncodeHintType.GS1_FORMAT).toString())) {
+			// GS1 formatted codes are prefixed with a FNC1 in first position mode header
+			appendModeInfo(Mode.FNC1_FIRST_POSITION, headerBits);
+		}
+
+		// (With ECI in place,) Write the mode marker
+		appendModeInfo(mode1, headerBits);//此处省事了，意味着只能解析相同编码模式的二维码
+		//appendModeInfo(mode2, headerBits);
+		//appendModeInfo(mode3, headerBits);
+		// Collect data within the main segment, separately, to count its size if
+		// needed. Don't add it to
+		// main payload yet.
+		BitArray dataBits1 = new BitArray();
+		append8BitBytespure(content1, dataBits1);
+		BitArray dataBits2 = new BitArray();
+		append8BitBytespure(content2, dataBits2);
+		BitArray dataBits3 = new BitArray();
+		append8BitBytespure(content3,dataBits3);
+		Version version1;
+		Version version2;
+		Version version3;
+		if (hints != null && hints.containsKey(EncodeHintType.QR_VERSION)) {
+			int versionNumber = Integer.parseInt(hints.get(EncodeHintType.QR_VERSION).toString());
+			version1 = Version.getVersionForNumber(versionNumber);
+			version2 = Version.getVersionForNumber(versionNumber);
+			version3 = Version.getVersionForNumber(versionNumber);
+			int bitsNeeded1 = calculateBitsNeeded(mode1, headerBits, dataBits1, version1);
+			int bitsNeeded2 = calculateBitsNeeded(mode2, headerBits, dataBits2, version2);
+			int bitsNeeded3 = calculateBitsNeeded(mode3, headerBits, dataBits3, version3);
+			if (!willFit(bitsNeeded1, version1, ecLevel)||!willFit(bitsNeeded2, version2, ecLevel)||!willFit(bitsNeeded3, version3, ecLevel)) {
+				throw new WriterException("Data too big for requested version");
+			}
+		} else {
+			version1 = recommendVersion(ecLevel, mode1, headerBits, dataBits1);// 第一个二维码(红色的)包含FEC，肯定是最长的。
+			version2 = version1;
+			version3 = version1;
+			System.out.println("1版本:" + version1.getVersionNumber() + " 2版本" + version2.getVersionNumber() + " 3版本"
+					+ version3.getVersionNumber());
+
+		}/*
+		 * if (hints != null && hints.containsKey(EncodeHintType.QR_VERSION)) { int
+		 * versionNumber1 =
+		 * Integer.parseInt(hints.get(EncodeHintType.QR_VERSION).toString()); int
+		 * versionNumber2 =
+		 * Integer.parseInt(hints.get(EncodeHintType.QR_VERSION).toString()); int
+		 * versionNumber3 =
+		 * Integer.parseInt(hints.get(EncodeHintType.QR_VERSION).toString());
+		 *
+		 * version1 = Version.getVersionForNumber(versionNumber1); version2=
+		 * Version.getVersionForNumber(versionNumber2); version3 =
+		 * Version.getVersionForNumber(versionNumber3); int bitsNeeded =
+		 * calculateBitsNeeded(mode1, headerBits, dataBits1, version1); if
+		 * (!willFit(bitsNeeded, version1, ecLevel)) { throw new
+		 * WriterException("Data too big for requested version"); } } else { version1 =
+		 * recommendVersion(ecLevel, mode1, headerBits, dataBits1);//
+		 * dataBits可以用来判断是否处于相同级别 }
+		*/
+		QRCode qrcode1 = setqrcode(headerBits, Mode.DATA, dataBits1, version1, ecLevel);
+		QRCode qrcode2 = setqrcode(headerBits, Mode.DATA, dataBits2, version2, ecLevel);
+		QRCode qrcode3 = setqrcode(headerBits,  Mode.DATA, dataBits3, version3, ecLevel);
+		return new QRCode[]{ qrcode1, qrcode2, qrcode3 };
+	}
 
 	public static QRCode setqrcode(BitArray headerBits, Mode mode, BitArray dataBits, String content, Version version,
 			ErrorCorrectionLevel ecLevel) throws WriterException {
@@ -392,6 +478,45 @@ public final class Encoder {
 		// Find "length" of main segment and write it
 		int numLetters = mode == Mode.BYTE ? dataBits.getSizeInBytes() : content.length();
 		appendLengthInfo(numLetters, version, mode, headerAndDataBits);
+		// Put data together into the overall payload
+		headerAndDataBits.appendBitArray(dataBits);
+
+		Version.ECBlocks ecBlocks = version.getECBlocksForLevel(ecLevel);
+		int numDataBytes = version.getTotalCodewords() - ecBlocks.getTotalECCodewords();
+
+		// Terminate the bits properly.
+		terminateBits(numDataBytes, headerAndDataBits);
+
+		// Interleave data bits with error correction code.
+		BitArray finalBits = interleaveWithECBytes(headerAndDataBits, version.getTotalCodewords(), numDataBytes,
+				ecBlocks.getNumBlocks());
+
+		QRCode qrCode = new QRCode();
+
+		qrCode.setECLevel(ecLevel);
+		qrCode.setMode(mode);
+		qrCode.setVersion(version);
+
+		// Choose the mask pattern and set to "qrCode".
+		int dimension = version.getDimensionForVersion();
+		ByteMatrix matrix = new ByteMatrix(dimension, dimension);
+		int maskPattern = chooseMaskPattern(finalBits, ecLevel, version, matrix);
+		qrCode.setMaskPattern(maskPattern);
+
+		// Build the matrix and set it to "qrCode".
+		MatrixUtil.buildMatrix(finalBits, ecLevel, version, maskPattern, matrix);
+		qrCode.setMatrix(matrix);
+
+		return qrCode;
+
+	}
+	public static QRCode setqrcode(BitArray headerBits, Mode mode, BitArray dataBits, Version version,
+								   ErrorCorrectionLevel ecLevel) throws WriterException {
+		BitArray headerAndDataBits = new BitArray();
+		headerAndDataBits.appendBitArray(headerBits);
+		// Find "length" of main segment and write it
+		//int numLetters = mode == Mode.BYTE ? dataBits.getSizeInBytes() : content.length;
+		appendLengthInfo(dataBits.getSizeInBytes(), version, mode, headerAndDataBits);
 		// Put data together into the overall payload
 		headerAndDataBits.appendBitArray(dataBits);
 
@@ -834,7 +959,7 @@ public final class Encoder {
 	 * 文件传输的时候需要，
 	 * @param content
 	 * @param bits
-	 * @param encoding
+	 *
 	 * @throws WriterException
 	 */
 	static void append8BitBytespure(byte[] content, BitArray bits) {

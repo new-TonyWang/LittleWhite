@@ -63,7 +63,7 @@ public interface Writer {
  * @throws WriterException
  */
 	BitMatrix[] encode(String contents1, String contents2, String contents3, BarcodeFormat format, int width, int height,
-			Map<EncodeHintType, ?> hints) throws WriterException;
+                       Map<EncodeHintType, ?> hints) throws WriterException;
 	/**
 	 * 加密byte数组
 	 * @param contents
@@ -77,4 +77,6 @@ public interface Writer {
 	BitMatrix encode(byte[] contents, BarcodeFormat format, int width, int height, Map<EncodeHintType, ?> hints)
 			throws WriterException;
 
+	BitMatrix[] encode(byte[] contents1, byte[] contents2, byte[] contents3, BarcodeFormat format, int width, int height, Map<EncodeHintType, ?> hints)
+	throws WriterException;
 }

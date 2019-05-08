@@ -52,7 +52,7 @@ public class SendFileActivity extends ActivityOnlistener {
     private ProgressBar pb;
     private Button bt;
     private Context context;
-    private String path;//mnt/sdcard/Android/data/< package name >/files/
+    private String path = null;//mnt/sdcard/Android/data/< package name >/files/
     private Button mBFileSelection;
     private TextView FilePathTV;
     private int width;
@@ -61,13 +61,15 @@ public class SendFileActivity extends ActivityOnlistener {
     private EditText widthEdit;
     private EditText heightEdit;
     private EditText FPSEdit;
+    private EditText QRCodeCapacityEdit;
     private SendFileHandler sendFileHandler;
     private int QRCodeType;
     private int QRCodeCapacity;
-    private EditText QRCodeCapacityEdit;
+
     private String ErrorCorrectionLevel;
     private Button VideoGeneration;
     private ArrayAdapter<CharSequence> adapter;
+    private boolean haschange = false;
     // private List<CharSequence> List = new ArrayList<CharSequence>();
 
     //  private spin
@@ -78,9 +80,9 @@ public class SendFileActivity extends ActivityOnlistener {
         //pb = (ProgressBar) findViewById(R.id.pb);
         //bt = findViewById(R.id.bt);
 
-        this.sendFileHandler = new SendFileHandler();
-        String apppath = this.getExternalFilesDir(null).getPath();
-        path = apppath;
+        this.sendFileHandler = new SendFileHandler(this);
+        // String apppath = this.getExternalFilesDir(null).getPath();
+        // path = apppath;
         // String dirpath = makedir(path);//获取文件夹路径
         //通过zxing生成无数张二维码图片并存放在dirpath并且返回生成文件的数量
         // int number = zxingcreation(dirpath);
@@ -141,6 +143,10 @@ public class SendFileActivity extends ActivityOnlistener {
         initSpanner(ErrorCorrectionLevelSelection);
         initSpanner(QRCodeTypeSelection);
         setOnclickListener(mBFileSelection, this);
+        setEditTextListener(widthEdit);
+        setEditTextListener(heightEdit);
+        setEditTextListener(FPSEdit);
+        setEditTextListener(QRCodeCapacityEdit);
     }
 
     private void initSpanner(final Spinner spinner) {//设置监听
@@ -149,7 +155,7 @@ public class SendFileActivity extends ActivityOnlistener {
             @Override
             //当AdapterView中的item被选中的时候执行的方法。
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {//id返回的是所选的位置
-                switch (view.getId()) {
+                switch (parent.getId()) {
                     case R.id.ErrorCorrectionLevelSelection:
                         ErrorCorrectionLevel = (String) adapter.getItem(position);
                         break;
@@ -172,7 +178,7 @@ public class SendFileActivity extends ActivityOnlistener {
 
     }
 
-    private void setEditTextListener(EditText editText) {
+    private void setEditTextListener(final EditText editText) {
         editText.addTextChangedListener(new TextWatcher() {
             @Override
             public void onTextChanged(CharSequence text, int start, int before, int count) {
@@ -195,13 +201,63 @@ public class SendFileActivity extends ActivityOnlistener {
             @Override
             public void afterTextChanged(Editable edit) {
                 //edit  输入结束呈现在输入框中的信息
+                editText.removeTextChangedListener(this);
                 checkConfig();
-
+                editText.addTextChangedListener(this);
 
             }
         });
     }
 
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.FileSelection:
+                super.onClick(v);
+                break;
+            case R.id.VideoGeneration:
+                this.FPS = Integer.valueOf(FPSEdit.getText().toString());
+                this.width = Integer.valueOf(widthEdit.getText().toString());
+                this.height = Integer.valueOf(heightEdit.getText().toString());
+                this.QRCodeCapacity = Integer.valueOf(QRCodeCapacityEdit.getText().toString());
+                SendConfigs Configs = new SendConfigs(path,FPS,width,height,QRCodeType,ErrorCorrectionLevel,QRCodeCapacity);
+
+        }
+    }
+
+    private void OnFocusChangeListener(final EditText editText) {
+        editText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean focus) {
+                //Watcher watcher = new Watcher();
+                if (focus) {
+                    //editText.addTextChangedListener(watcher);
+                } else {
+                    //editText.removeTextChangedListener(watcher);
+                }
+            }
+
+        });
+    }
+
+    /*
+    private class Watcher implements TextWatcher{
+
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            checkConfig();
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+
+        }
+    }*/
     private void getFilePath(int requestCode) {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("*/*");
@@ -388,111 +444,132 @@ public class SendFileActivity extends ActivityOnlistener {
     }
 
     private boolean checkConfig() {
-        if (this.FPS >= 25 || this.FPS == 0) {
-            this.VideoGeneration.setClickable(false);
-            this.FPSEdit.setText(R.string.FPS_Default);
-            Toast.makeText(this, "视频帧率必须在0-25之间", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-        if (width < 100
-                || height < 100) {
-            this.VideoGeneration.setClickable(false);
-            widthEdit.setText(R.string.height_width_default);
-            heightEdit.setText(R.string.height_width_default);
-            Toast.makeText(this, "视频分辨率必须大于100", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-        switch (this.QRCodeType) {
+        if (this.path != null) {
+            this.FPS = Integer.valueOf(FPSEdit.getText().toString().equals("") ? "0" : FPSEdit.getText().toString());
+            this.width = Integer.valueOf(widthEdit.getText().toString().equals("") ? "0" : widthEdit.getText().toString());
+            this.height = Integer.valueOf(heightEdit.getText().toString().equals("") ? "0" : heightEdit.getText().toString());
+            this.QRCodeCapacity = Integer.valueOf(QRCodeCapacityEdit.getText().toString().equals("") ? "0" : QRCodeCapacityEdit.getText().toString());
+            if (this.FPS > 25 || this.FPS == 0) {
+                this.VideoGeneration.setClickable(false);
+                //this.FPSEdit.setText(R.string.FPS_Default);
+                Toast.makeText(this, "视频帧率必须在1-25之间", Toast.LENGTH_SHORT).show();
+                return false;
+            }
+            if (this.width < 100
+                    || this.height < 100) {
+                this.VideoGeneration.setClickable(false);
+                //widthEdit.setText(R.string.height_width_default);
+                //heightEdit.setText(R.string.height_width_default);
+                Toast.makeText(this, "视频分辨率必须大于100", Toast.LENGTH_SHORT).show();
+                return false;
+            }
+            switch (this.QRCodeType) {
 
-            case 0://黑白
-                switch (ErrorCorrectionLevel) {
-                    case "L":
-                        if (this.QRCodeCapacity > 1935
-                                || this.QRCodeCapacity < 21) {
+                case 0://黑白
+                    switch (ErrorCorrectionLevel) {
+                        case "L":
+                            if (this.QRCodeCapacity > 1935
+                                    || this.QRCodeCapacity < 21) {
 
-                            this.VideoGeneration.setClickable(false);
-                            QRCodeCapacityEdit.setText(R.string.black_white_QRCode_capacity_default);
-                            Toast.makeText(this, "L级别纠错的时候黑白二维码容量必须在21-1935之间", Toast.LENGTH_SHORT).show();
-                            return false;
-                        }
-                    case "M":
-                        if (this.QRCodeCapacity > 1705
-                                || this.QRCodeCapacity < 21) {
+                                this.VideoGeneration.setClickable(false);
+                                //  QRCodeCapacityEdit.setText(R.string.black_white_QRCode_capacity_default);
+                                Toast.makeText(this, "L级别纠错的时候黑白二维码容量必须在21-1935之间", Toast.LENGTH_SHORT).show();
+                                return false;
+                            }
+                            break;
+                        case "M":
+                            if (this.QRCodeCapacity > 1705
+                                    || this.QRCodeCapacity < 21) {
 
-                            this.VideoGeneration.setClickable(false);
-                            QRCodeCapacityEdit.setText(Integer.toString(1750));
-                            Toast.makeText(this, "M级别纠错的时候黑白二维码容量必须在21-1705之间", Toast.LENGTH_SHORT).show();
-                            return false;
-                        }
-                    case "Q":
-                        if (this.QRCodeCapacity > 1211
-                                || this.QRCodeCapacity < 21) {
+                                this.VideoGeneration.setClickable(false);
+                                // QRCodeCapacityEdit.setText(Integer.toString(1750));
+                                Toast.makeText(this, "M级别纠错的时候黑白二维码容量必须在21-1705之间", Toast.LENGTH_SHORT).show();
+                                return false;
+                            }
+                            break;
+                        case "Q":
+                            if (this.QRCodeCapacity > 1211
+                                    || this.QRCodeCapacity < 21) {
 
-                            this.VideoGeneration.setClickable(false);
-                            QRCodeCapacityEdit.setText(Integer.toString(1211));
-                            Toast.makeText(this, "Q级别纠错的时候黑白二维码容量必须在21-1211之间", Toast.LENGTH_SHORT).show();
-                            return false;
-                        }
-                    case "H":
-                        if (this.QRCodeCapacity > 941
-                                || this.QRCodeCapacity < 21) {
+                                this.VideoGeneration.setClickable(false);
+                                // QRCodeCapacityEdit.setText(Integer.toString(1211));
+                                Toast.makeText(this, "Q级别纠错的时候黑白二维码容量必须在21-1211之间", Toast.LENGTH_SHORT).show();
+                                return false;
+                            }
+                            break;
+                        case "H":
+                            if (this.QRCodeCapacity > 941
+                                    || this.QRCodeCapacity < 21) {
 
-                            this.VideoGeneration.setClickable(false);
-                            QRCodeCapacityEdit.setText(Integer.toString(941));
-                            Toast.makeText(this, "H级别纠错的时候黑白二维码容量必须在21-941之间", Toast.LENGTH_SHORT).show();
-                            return false;
-                        }
-                }
+                                this.VideoGeneration.setClickable(false);
+                                //QRCodeCapacityEdit.setText(Integer.toString(941));
+                                Toast.makeText(this, "H级别纠错的时候黑白二维码容量必须在21-941之间", Toast.LENGTH_SHORT).show();
+                                return false;
+                            }
+                            break;
+                    }
+                    break;
                 //this.VideoGeneration.setClickable(true);
                 //return  true;
 
-            case 1://彩色
-                switch (ErrorCorrectionLevel) {
-                    case "L":
-                        if (this.QRCodeCapacity > 1747
-                                || this.QRCodeCapacity < 21) {
+                case 1://彩色
+                    switch (ErrorCorrectionLevel) {
+                        case "L":
+                            if (this.QRCodeCapacity > 1747
+                                    || this.QRCodeCapacity < 21) {
 
-                            this.VideoGeneration.setClickable(false);
-                            QRCodeCapacityEdit.setText(R.string.ColorCode_capacity_default);
-                            Toast.makeText(this, "L级别纠错的时候彩色二维码容量必须在21-1747之间", Toast.LENGTH_SHORT).show();
-                            return false;
-                        }
-                    case "M":
-                        if (this.QRCodeCapacity > 1339
-                                || this.QRCodeCapacity < 21) {
+                                this.VideoGeneration.setClickable(false);
+                                // QRCodeCapacityEdit.setText(R.string.ColorCode_capacity_default);
+                                Toast.makeText(this, "L级别纠错的时候彩色二维码容量必须在21-1747之间", Toast.LENGTH_SHORT).show();
+                                return false;
+                            }
+                            break;
+                        case "M":
+                            if (this.QRCodeCapacity > 1339
+                                    || this.QRCodeCapacity < 21) {
 
-                            this.VideoGeneration.setClickable(false);
-                            QRCodeCapacityEdit.setText(Integer.toString(1339));
-                            Toast.makeText(this, "M级别纠错的时候彩色二维码容量必须在21-1339之间", Toast.LENGTH_SHORT).show();
-                            return false;
-                        }
-                    case "Q":
-                        if (this.QRCodeCapacity > 955
-                                || this.QRCodeCapacity < 21) {
+                                this.VideoGeneration.setClickable(false);
+                                // QRCodeCapacityEdit.setText(Integer.toString(1339));
+                                Toast.makeText(this, "M级别纠错的时候彩色二维码容量必须在21-1339之间", Toast.LENGTH_SHORT).show();
+                                return false;
+                            }
 
-                            this.VideoGeneration.setClickable(false);
-                            QRCodeCapacityEdit.setText(Integer.toString(955));
-                            Toast.makeText(this, "Q级别纠错的时候彩色二维码容量必须在21-955之间", Toast.LENGTH_SHORT).show();
-                            return false;
-                        }
-                    case "H":
-                        if (this.QRCodeCapacity > 739
-                                || this.QRCodeCapacity < 21) {
+                            break;
+                        case "Q":
+                            if (this.QRCodeCapacity > 955
+                                    || this.QRCodeCapacity < 21) {
 
-                            this.VideoGeneration.setClickable(false);
-                            QRCodeCapacityEdit.setText(Integer.toString(739));
-                            Toast.makeText(this, "H级别纠错的时候彩色二维码容量必须在21-739之间", Toast.LENGTH_SHORT).show();
-                            return false;
-                        }
-                }
+                                this.VideoGeneration.setClickable(false);
+                                // QRCodeCapacityEdit.setText(Integer.toString(955));
+                                Toast.makeText(this, "Q级别纠错的时候彩色二维码容量必须在21-955之间", Toast.LENGTH_SHORT).show();
+                                return false;
+                            }
+                            break;
+                        case "H":
+                            if (this.QRCodeCapacity > 739
+                                    || this.QRCodeCapacity < 21) {
 
-                break;
+                                this.VideoGeneration.setClickable(false);
+                                //QRCodeCapacityEdit.setText(Integer.toString(739));
+                                Toast.makeText(this, "H级别纠错的时候彩色二维码容量必须在21-739之间", Toast.LENGTH_SHORT).show();
+                                return false;
+                            }
+                            break;
+                    }
+                    break;
+
+            }
+
+
+            this.VideoGeneration.setClickable(true);
+            return true;
 
         }
-
-        this.VideoGeneration.setClickable(true);
-        return true;
+        this.VideoGeneration.setClickable(false);
+        return false;
     }
+
+
 }
 
 

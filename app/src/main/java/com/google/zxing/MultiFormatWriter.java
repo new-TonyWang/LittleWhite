@@ -70,6 +70,12 @@ public final class MultiFormatWriter implements Writer {
 		return writer.encode(contents1, contents2, contents3, format, width, height, hints);
 	}
 
+	public BitMatrix[] encode(byte[] contents1, byte[] contents2, byte[] contents3, BarcodeFormat format, int width, int height, Map<EncodeHintType, ?> hints)
+			throws WriterException {
+
+		Writer writer =  new QRCodeWriter();;
+		return writer.encode(contents1,contents2,contents3, format, width, height, hints);
+	}
 	
 
 }
