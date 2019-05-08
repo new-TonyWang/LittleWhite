@@ -1,5 +1,6 @@
 package com.littlewhite;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -15,6 +16,8 @@ import java.util.ArrayList;
 public class ActivityOnlistener extends AppCompatActivity implements View.OnClickListener {
     //private SqllitData sqllitData = new SqllitData(this);
     protected  ArrayList<Button> list = new ArrayList<>();
+    protected static final int REQUEST_CODE_GET_FILE_PATH = 1;
+    protected static final int FILE_SELECT_CODE = 0;
     @Override
     public void onClick(View v) {
         setButtonsNotEnable();
@@ -38,12 +41,21 @@ public class ActivityOnlistener extends AppCompatActivity implements View.OnClic
                 Intent receive = new Intent(this, ReceiveActivity.class);
                 startActivity(receive);
                 break;
+            case R.id.FileSelection:
+                getFilePath(REQUEST_CODE_GET_FILE_PATH);
+               // Intent receive = new Intent(this, ReceiveActivity.class);
+                //startActivity(receive);
+                break;
+            case R.id.VideoGeneration:
+                //Intent receive = new Intent(this, ReceiveActivity.class);
+                //startActivity(receive);
+                break;
         }
         setButtonsEnable();
     }
 
     /**
-     * 设置监听器(传说中的代码复用??)
+     * 设置监听器()
      * @param v
      * @param listener
      */
@@ -58,6 +70,19 @@ public class ActivityOnlistener extends AppCompatActivity implements View.OnClic
     protected void setButtonsEnable(){
         for(int i = 0;i<this.list.size();i++){
             list.get(i).setEnabled(true);
+        }
+    }
+    private void getFilePath(int requestCode) {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("*/*");
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(Intent.createChooser(intent, "Select a File"), requestCode);
+        } else {
+            new AlertDialog.Builder(this).setTitle("未找到文件管理器")
+                    .setMessage("请安装文件管理器以选择文件")
+                    .setPositiveButton("确定", null)
+                    .show();
         }
     }
 }

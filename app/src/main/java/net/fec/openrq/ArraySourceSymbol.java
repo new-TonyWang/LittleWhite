@@ -126,6 +126,7 @@ final class ArraySourceSymbol implements SourceSymbol {
         op.apply(src, pos, src.position());
         //src.position(pos + codeSize()); // always advance by codeSize() bytes
         src.position(0);
+        src.limit(transportSize());
         //op.apply(src, pos, src.position());
     }
 

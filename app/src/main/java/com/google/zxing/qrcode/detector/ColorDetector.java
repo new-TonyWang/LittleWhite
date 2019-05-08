@@ -14,6 +14,7 @@ import com.google.zxing.common.HsvData;
 import com.google.zxing.common.PerspectiveTransform;
 import com.google.zxing.common.detector.MathUtils;
 import com.google.zxing.qrcode.decoder.Version;
+import com.littlewhite.ColorCode.HSVColorTable;
 
 
 import java.util.Map;
@@ -40,7 +41,7 @@ public class ColorDetector  {
      * @throws NotFoundException if QR Code cannot be found
      * @throws FormatException if a QR Code cannot be decoded
      */
-    public final DetectorResult[] detect(Map<DecodeHintType,?> hints) throws NotFoundException, FormatException {
+    public final DetectorResult[] detect(Map<DecodeHintType,?> hints, HSVColorTable hsvColorTable) throws NotFoundException, FormatException {
 
         resultPointCallback = hints == null ? null :
                 (ResultPointCallback) hints.get(DecodeHintType.NEED_RESULT_POINT_CALLBACK);
@@ -53,10 +54,10 @@ public class ColorDetector  {
     System.out.println("左上"+info.getTopLeft().toString());
     System.out.println("右上"+info.getTopRight().toString());
 	*/
-        return processFinderPatternInfo(info);
+        return processFinderPatternInfo(info,hsvColorTable);
     }
 
-    protected final DetectorResult[] processFinderPatternInfo(FinderPatternInfo info)
+    protected final DetectorResult[] processFinderPatternInfo(FinderPatternInfo info, HSVColorTable hsvColorTable)
             throws NotFoundException, FormatException {
 
         FinderPattern topLeft = info.getTopLeft();
@@ -105,7 +106,7 @@ public class ColorDetector  {
         PerspectiveTransform transform =//透视变换
                 createTransform(topLeft, topRight, bottomLeft, alignmentPattern, dimension);
 
-        BitMatrix[] bits = ColorGrid(image, transform, dimension);//点阵化像素点
+        BitMatrix[] bits = ColorGrid(image, transform, dimension,hsvColorTable);//点阵化像素点
 
         ResultPoint[] points;
         if (alignmentPattern == null) {
@@ -162,10 +163,10 @@ public class ColorDetector  {
 
     private static BitMatrix[] ColorGrid(HsvData image,
                                         PerspectiveTransform transform,
-                                        int dimension) throws NotFoundException {
+                                        int dimension,HSVColorTable hsvColorTable) throws NotFoundException {
 
         GridSampler sampler = ColorGridSampler.getColorInstance();
-        return sampler.ColorGrid(image, dimension, dimension, transform);
+        return sampler.ColorGrid(image, dimension, dimension, transform,hsvColorTable);
     }
 
     /**

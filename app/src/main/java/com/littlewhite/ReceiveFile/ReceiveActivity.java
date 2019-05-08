@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.littlewhite.Camera.CameraManager;
 import com.littlewhite.Camera.ViewfinderView;
 import com.littlewhite.Camera.newCameraManager;
+import com.littlewhite.History.HistoryActivity;
 import com.littlewhite.R;
 import com.littlewhite.ReceiveFile.QRcodeDecoder.MultiDecoder;
 import com.littlewhite.ReceiveFile.SqllitUtil.FileInfo;
@@ -103,7 +104,7 @@ public class ReceiveActivity extends SendReceive<ReceiveHandler> implements Surf
     public void TransmissionComplete(Bundle fileBundle){
       //  receiveHandler.quitSynchronously();
         handler = null;
-        Intent intent = new Intent(this, TransmissionCompleteActivity.class);
+        Intent intent = new Intent(this, HistoryActivity.class);
         Bundle bundle = new Bundle();
         bundle.putInt("sum",this.TotalQRnum);
         bundle.putAll(fileBundle);

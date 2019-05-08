@@ -12,6 +12,7 @@ import com.littlewhite.R;
 import com.littlewhite.ReceiveFile.QRcodeDecoder.DecoderThread;
 import com.littlewhite.ReceiveFile.QRcodeDecoder.MultiDecoder;
 import com.littlewhite.ReceiveFile.SqllitUtil.FileInfo;
+import com.littlewhite.ReceiveFile.SqllitUtil.SqllitData;
 import com.littlewhite.ZipFile.ZipThread;
 
 public class ReceiveHandler extends Handler {
@@ -22,6 +23,7 @@ public class ReceiveHandler extends Handler {
     private DecoderThread decoderThread;
     private RaptorQDecoder raptorQDecoder;
     private ZipThread zipThread;
+    private SqllitData sqllitData;
     private SharedPreferences sharedPreferences;
     private State state;
     private enum State {
@@ -33,7 +35,8 @@ public class ReceiveHandler extends Handler {
         Log.i(this.getClass().toString(),"启动");
         this.receiveActivity = receiveActivity;
         this.cameraManager = cameraManager;
-        this.zipThread = new ZipThread(this.receiveActivity);
+        this.sqllitData = new SqllitData(this.receiveActivity);
+        this.zipThread = new ZipThread(this.receiveActivity,sqllitData);
         /*
         this.mergeFile =  new MergeFileThread(this.receiveActivity);
         this.multiDecoder = new MultiDecoder(this.receiveActivity,this.mergeFile);
@@ -42,7 +45,7 @@ public class ReceiveHandler extends Handler {
        // MergeThread.start();
         //MultiDecoder.start();
         */
-        this.raptorQDecoder = new RaptorQDecoder(this.receiveActivity,this.zipThread);
+        this.raptorQDecoder = new RaptorQDecoder(this.receiveActivity,this.zipThread,sqllitData);
         this.decoderThread = new DecoderThread(this.receiveActivity,this.raptorQDecoder);
         Thread raptorQDecoderThread = new Thread(this.raptorQDecoder);
         Thread DecoderThread = new Thread(this.decoderThread);
@@ -52,7 +55,8 @@ public class ReceiveHandler extends Handler {
         DecoderThread.start();
         state = State.SUCCESS;
         this.cameraManager.startPreview();
-        restartPreviewAndDecode();
+        //restartPreviewAndDecode();
+        restartPreviewAndDecodeColorcode();
     }
     @Override
     public void handleMessage(Message message) {
@@ -67,7 +71,6 @@ public class ReceiveHandler extends Handler {
                     decoderThread.getHandler().sendMessageAtFrontOfQueue(finish);//发送消息到对第一个位置
                    // Looper.myLooper().quit();
                     Bundle bundle = message.getData();
-
                     receiveActivity.TransmissionComplete(bundle);
                     break;
                  //case R.id.
@@ -80,6 +83,13 @@ public class ReceiveHandler extends Handler {
             state = State.PREVIEW;
             //cameraManager.requestPreviewFrameWithBuffer(multiDecoder.getHandler(), R.id.decode);
             cameraManager.requestPreviewFrameWithBuffer(decoderThread.getHandler(), R.id.decode);
+        }
+    }
+    private void restartPreviewAndDecodeColorcode() {
+        if (state == State.SUCCESS) {
+            state = State.PREVIEW;
+            //cameraManager.requestPreviewFrameWithBuffer(multiDecoder.getHandler(), R.id.decode);
+            cameraManager.requestPreviewFrameWithBuffer(decoderThread.getHandler(), R.id.decodeColor);
         }
     }
     public void quitSynchronously() {

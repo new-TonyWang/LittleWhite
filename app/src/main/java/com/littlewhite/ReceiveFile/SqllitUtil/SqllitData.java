@@ -63,7 +63,8 @@ public class SqllitData {
         SQLiteDatabase db = this.helper.getWritableDatabase();
         ArrayList<FileInfo> fileInfos = new ArrayList<>();
         //Cursor cursor = db.query("File_Logs",new String[]{"ID","filename","TotalSymbolNum","ReceivedSymbolNum"},,new String[]{"1"},null,null,null);
-        Cursor cursor = db.rawQuery("select * from File_Logs where HasComplete= 0",null);
+        Cursor cursor = db.rawQuery("select * from File_Logs where HasComplete= "+String.valueOf(0),null);
+       // db.
         while (cursor.moveToNext()){
             //int ID = cursor.getInt(0);
             FileInfo fileInfo = new FileInfo(
@@ -84,7 +85,7 @@ public class SqllitData {
         SQLiteDatabase db = this.helper.getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put("FileName",fileInfo);
-        cv.put("HasComplete",false);
+        cv.put("HasComplete",0);
         //cv.put("TotalSymbolNum",fileInfo.getTotalSymbolNum());
         //cv.put("ReceivedSymbolNum",null);
         this.FileID = String.valueOf(db.insert("File_Logs",null,cv));
@@ -190,7 +191,20 @@ public class SqllitData {
         this.FileID = String.valueOf(ID);
     }
     public void Complete(){
-        this.sqLiteDatabase.rawQuery("UPDATE File_Logs SET HasComplete= 1 WHERE ID=?",new String[]{this.FileID});
+       // this.sqLiteDatabase.rawQuery("UPDATE File_Logs SET HasComplete= '1' WHERE ID=?",new String[]{this.FileID});
+        ContentValues cv = new ContentValues();
+       // cv.put("FECParameters",FECParameters);
+        cv.put("HasComplete","1");
+        this.sqLiteDatabase.update("File_Logs",cv,"ID=?",new String[]{this.FileID});
+    }
+
+    /**
+     * 解压文件之后对数据库中的数据进行重命名
+     */
+    public void Changename(String name){
+        ContentValues cv = new ContentValues();
+        cv.put("FileName",name);
+        this.sqLiteDatabase.update("File_Logs",cv,"ID=?",new String[]{this.FileID});
     }
         /*
     public void InsertNewFile(FileInfo fileInfo){

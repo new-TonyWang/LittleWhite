@@ -27,10 +27,11 @@ public class RaptorQDecoder implements Runnable {
     private final CountDownLatch handlerInitLatch;
     private SqllitData sqllitData;
     private ZipThread zipThread;
-    public RaptorQDecoder(ReceiveActivity receiveActivity,ZipThread zipThread){
+    public RaptorQDecoder(ReceiveActivity receiveActivity,ZipThread zipThread,SqllitData sqllitData){
         this.receiveActivity = receiveActivity;
         this.receivePath = initReceivePath();
-        this.sqllitData = new SqllitData(this.receiveActivity);
+        this.sqllitData = sqllitData;
+       // this.sqllitData = new SqllitData(this.receiveActivity);
         this.zipThread = zipThread;
        /* if(fileInfo == null){//接收新文件
        // this.receiveFile = initReceiveFile(ReceivePath);

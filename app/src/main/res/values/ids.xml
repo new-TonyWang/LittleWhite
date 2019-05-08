@@ -16,6 +16,7 @@
  -->
 <resources>
   <item type="id" name="decode"/>
+  <item type="id" name="decodeColor"/>
   <item type="id" name="failed"/>
   <item type="id" name="decode_succeeded"/>
   <item type="id" name="Merge"/>

@@ -3,9 +3,11 @@ package com.littlewhite.ZipFile;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 
 import com.littlewhite.R;
+import com.littlewhite.ReceiveFile.SqllitUtil.SqllitData;
 import com.littlewhite.SendReceive;
 
 import java.io.File;
@@ -20,11 +22,13 @@ import java.util.zip.ZipOutputStream;
 
 public class ZipHandler extends Handler {
     private SendReceive sendReceive;
-    private File Zipfile;
-    private ZipUtil zipUtil= new ZipUtil();
+    private SqllitData sqllitData;
+   // private File Zipfile;
+    //private ZipUtil zipUtil= new ZipUtil();
    // private Handler handler;
-    public ZipHandler(SendReceive sendReceive){
+    public ZipHandler(SendReceive sendReceive,SqllitData sqllitData){
         this.sendReceive =sendReceive;
+        this.sqllitData = sqllitData;
        // this.handler = handler;
     }
     @Override
@@ -39,9 +43,11 @@ public class ZipHandler extends Handler {
                // Bundle bundle= message.getData();
                 String unzipfile = bundle.getString("FilePath");
                 UnZipFile(unzipfile);
-                File deleteFile = new File(unzipfile);
-                deleteFile.delete();
+                //File deleteFile = new File(unzipfile);
+                //deleteFile.delete();
                 break;
+            case R.id.finish:
+                Looper.myLooper().quit();
             default:
 
         }
@@ -52,10 +58,13 @@ public class ZipHandler extends Handler {
       * @param FilePath
      */
     private  void UnZipFile(String FilePath){
-           boolean Correct =  unzip(FilePath);
-           if(Correct){
+           String Correct =  unzip(FilePath);
+           if(Correct != null){
+               sqllitData.Changename(Correct);
+               sqllitData.CloseSqLiteDatabase();
                Message message= Message.obtain((Handler) sendReceive.getHandler());
                message.what = R.id.finish;
+               message.obj = Correct;
                message.sendToTarget();
            }else{
             Message.obtain((Handler) sendReceive.getHandler(),R.id.failed);
@@ -153,30 +162,35 @@ public class ZipHandler extends Handler {
      * @param unzip
      * @throws IOException
      */
-    private boolean unzip(String unzip){
+    private String unzip(String unzip){
         File file = new File(unzip);
         String  basePath = file.getParent();
         FileInputStream fis = null;
+        String unZipName = null;
         try {
             fis = new FileInputStream(file);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-            return false;
+            return null;
         }
         ZipInputStream zis = new ZipInputStream(fis);
         try {
-            unzip(zis,basePath);
+            unZipName =  unzip(zis,basePath);
         } catch (IOException e) {
             e.printStackTrace();
-            return false;
+            return null;
         }
-        return true;
+        return unZipName;
     }
 
-    private void unzip(ZipInputStream zis,String basepath) throws IOException {
+    private String  unzip(ZipInputStream zis,String basepath) throws IOException {
         ZipEntry entry = zis.getNextEntry();
+        File file = null;
+        String unZipName = null;
         if (entry != null) {
-            File file = new File(basepath + File.separator + entry.getName());
+            unZipName = entry.getName();
+            file = new File(basepath + File.separator + unZipName);
+
             if (file.isDirectory()) {
                 // 可能存在空文件夹
                 if (!file.exists())
@@ -198,6 +212,7 @@ public class ZipHandler extends Handler {
                 unzip(zis,basepath);
             }
         }
+        return unZipName;
     }
 
 

@@ -17,6 +17,7 @@
 package com.google.zxing.common;
 
 import com.google.zxing.NotFoundException;
+import com.littlewhite.ColorCode.HSVColorTable;
 
 /**
  * Implementations of this class can, given locations of finder patterns for a QR code in an
@@ -106,7 +107,8 @@ public abstract class GridSampler {
   public abstract BitMatrix[] ColorGrid(HsvData image,
                                        int dimensionX,
                                        int dimensionY,
-                                       PerspectiveTransform transform) throws NotFoundException;
+                                       PerspectiveTransform transform,
+                                        HSVColorTable hsvColorTable) throws NotFoundException;
   /**
    * <p>Checks a set of points that have been transformed to sample points on an image against
    * the image's dimensions to see if the point are even within the image.</p>

@@ -6,6 +6,7 @@ import android.graphics.ImageFormat;
 import android.os.Environment;
 
 import com.google.zxing.NotFoundException;
+import com.littlewhite.ColorCode.HSVColorTable;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -13,7 +14,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-public class ColorGridSampler extends GridSampler {
+public  class ColorGridSampler extends GridSampler {
     @Override
     public BitMatrix sampleGrid(BitMatrix image,
                                 int dimensionX,
@@ -40,11 +41,13 @@ public class ColorGridSampler extends GridSampler {
     }
 
     @Override
-    public BitMatrix[] ColorGrid(HsvData image, int dimensionX, int dimensionY, PerspectiveTransform transform) throws NotFoundException {
+    public BitMatrix[] ColorGrid(HsvData image, int dimensionX, int dimensionY, PerspectiveTransform transform, HSVColorTable hsvColorTable) throws NotFoundException {
         if (dimensionX <= 0 || dimensionY <= 0) {
             throw NotFoundException.getNotFoundInstance();
         }
-        BitMatrix bits = new BitMatrix(dimensionX, dimensionY);
+        BitMatrix bitsR = new BitMatrix(dimensionX, dimensionY);
+        BitMatrix bitsG = new BitMatrix(dimensionX, dimensionY);
+        BitMatrix bitsB = new BitMatrix(dimensionX, dimensionY);
         float[] points = new float[2 * dimensionX];
         for (int y = 0; y < dimensionY; y++) {
             int max = points.length;
@@ -59,43 +62,41 @@ public class ColorGridSampler extends GridSampler {
             checkAndNudgePoints(image.getBitMatrix(), points);
             try {
                 for (int x = 0; x < max; x += 2) {
-                    int xx = (int) points[x];
-                    int yy = (int)points[x+1];
+                    int xx = Math.round(points[x]);
+                    int yy = Math.round(points[x+1]);
+                   // int color = hsvColorTable.getColor(calculateAvgH(image,xx,yy),calculateAvgS(image,xx,yy),calculateAvgV(image,xx,yy));
+                    int color = hsvColorTable.getColor(image.getH(xx,yy),image.getS(xx,yy),image.getV(xx,yy));
+                    switch (color) {
+                        case 1://红
+                            bitsR.set(x / 2, y);
+                            break;
+                        case 2://黄
+                            bitsR.set(x / 2, y);
+                            bitsG.set(x / 2, y);
+                            break;
+                        case 3://绿
+                            bitsG.set(x / 2, y);
+                            break;
+                        case 4://青
+                            bitsG.set(x / 2, y);
+                            bitsB.set(x / 2, y);
+                            break;
+                        case 5://蓝
+                            bitsB.set(x / 2, y);
+                            break;
+                        case 6://品红
+                            bitsR.set(x / 2, y);
+                            bitsB.set(x / 2, y);
+                            break;
+                        case 7://黑
+                            bitsR.set(x / 2, y);
+                            bitsG.set(x / 2, y);
+                            bitsB.set(x / 2, y);
+                            break;
+                        case 8://白
 
-                     if (((image.getH(xx,yy)>=0&&image.getH(xx,yy)<=14)||
-                            (image.getH(xx,yy)>=159&&image.getH(xx,yy)<=180))
-                            &&(image.getS(xx,yy)>=43&&image.getS(xx,yy)<=255)
-                            &&(image.getV(xx,yy)>=46&&image.getV(xx,yy)<=255)) {
-                        // 红
-                        bits.set(x / 2, y);
+                            break;
                     }
-                   else if ((image.getH(xx,yy)>=15&&image.getH(xx,yy)<=45)
-
-                            &&(image.getS(xx,yy)>=43&&image.getS(xx,yy)<=255)
-
-                            &&(image.getV(xx,yy)>=46&&image.getV(xx,yy)<=255)) {
-                       // 黄
-                        bits.set(x / 2, y);
-                    }
-
-
-                     else if (((image.getH(xx,yy))>=135&&(image.getH(xx,yy))<=160)
-                             &&(image.getS(xx,yy)>=43&&image.getS(xx,yy)<=255)
-                             &&(image.getV(xx,yy)>=46&&image.getV(xx,yy)<=255)) {
-                        // 品红
-                        bits.set(x / 2, y);
-                    }
-
-                     else if (((image.getH(xx,yy))>=0&&(image.getH(xx,yy))<=180)
-                             &&(image.getS(xx,yy)>=0&&image.getS(xx,yy)<=255)
-                             &&(image.getV(xx,yy)>=0&&image.getV(xx,yy)<=149)) {
-                         // 黑
-                         bits.set(x / 2, y);
-                     }
-
-                    else{
-
-                     }
                 }
             } catch (ArrayIndexOutOfBoundsException aioobe) {
                 // This feels wrong, but, sometimes if the finder patterns are misidentified, the resulting
@@ -110,16 +111,29 @@ public class ColorGridSampler extends GridSampler {
         }
 
        // return bits;
-        BitMatrix[] Bits = {bits,bits,bits};
+        BitMatrix[] Bits = {bitsR,bitsG,bitsB};
 
        // outputimage(bits);
 
-        outputimage(bits);
+        outputimage(bitsR,1);
+        outputimage(bitsG,2);
+        outputimage(bitsB,3);
 
         return Bits;
     }
+    private int calculateAvgH(HsvData image,int x,int y){
 
-    protected void outputimage(BitMatrix bitMatrix)  {
+        return (image.getH(x,y-1)+image.getH(x-1,y)+image.getH(x,y)+image.getH(x+1,y)+image.getH(x,y+1))/5;
+    }
+    private int calculateAvgS(HsvData image,int x,int y){
+
+        return (image.getS(x,y-1)+image.getS(x-1,y)+image.getH(x,y)+image.getS(x+1,y)+image.getS(x,y+1))/5;
+    }
+    private int calculateAvgV(HsvData image,int x,int y){
+
+        return (image.getV(x,y-1)+image.getV(x-1,y)+image.getV(x,y)+image.getV(x+1,y)+image.getH(x,y+1))/5;
+    }
+    protected void outputimage(BitMatrix bitMatrix,int index)  {
         int length = bitMatrix.getBits().length;
         int height = bitMatrix.getHeight();
         int width = bitMatrix.getWidth();
@@ -130,9 +144,21 @@ public class ColorGridSampler extends GridSampler {
                 image.setPixel(x, y, (bitMatrix.get(x, y) ? 0x00000000 : 0xFFFFFFFF));
             }
         }
-        File file = new File(String.valueOf(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+"test.jpg"));
-        //File myCaptureFile = new File( + fileName);
+        File file = null;
+        switch (index) {
+            case 1:
+             file = new File(String.valueOf(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "red.jpg"));
 
+            break;//File myCaptureFile = new File( + fileName);
+            case 2:
+                file = new File(String.valueOf(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "green.jpg"));
+
+                break;//File myCaptureFile = new File( + fileName);
+            case 3:
+                file = new File(String.valueOf(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "blue.jpg"));
+
+                break;//File myCaptureFile = new File( + fileName);
+        }
         BufferedOutputStream bos = null;
         try {
             bos = new BufferedOutputStream(new FileOutputStream(file));

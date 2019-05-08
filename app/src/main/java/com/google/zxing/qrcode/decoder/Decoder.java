@@ -22,11 +22,14 @@ import com.google.zxing.FormatException;
 import com.google.zxing.NotDataException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.common.DecoderResult;
+import com.google.zxing.common.DetectorResult;
 import com.google.zxing.common.reedsolomon.GenericGF;
 import com.google.zxing.common.reedsolomon.ReedSolomonDecoder;
 import com.google.zxing.common.reedsolomon.ReedSolomonException;
+import com.littlewhite.ColorCode.HSVColorTable;
 
 import java.util.Map;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * <p>The main class which implements QR Code decoding -- as opposed to locating and extracting
@@ -131,6 +134,37 @@ public final class Decoder {
     }
   }
 
+  /**
+   * 解析彩色二维码专用
+   *
+   * @param hints
+   * @return
+   * @throws FormatException
+   * @throws ChecksumException
+   */
+  public DecoderResult decodeColorCode(DetectorResult[] detectorResults, Map<DecodeHintType,?> hints)
+          throws FormatException, ChecksumException {
+
+    // Construct a parser and read version, error-correction level
+    //BitMatrixParser parser = new BitMatrixParser(bits);
+    BitMatrixParser[] parsers = new BitMatrixParser[3];
+    for(int i = 0;i<3;i++){
+      parsers[i] = new BitMatrixParser(detectorResults[i].getBits());
+    }
+
+    FormatException fe = null;
+    ChecksumException ce = null;
+    try {
+      return decodeColorCode(parsers, hints);
+    } catch (FormatException e) {
+      fe = e;
+      throw fe;
+    } catch (ChecksumException e) {
+      ce = e;
+      throw ce;
+    }
+
+  }
   private DecoderResult decode(BitMatrixParser parser, Map<DecodeHintType,?> hints)
       throws FormatException, ChecksumException {
     Version version = parser.readVersion();
@@ -166,6 +200,43 @@ public final class Decoder {
     return DecodedBitStreamParser.decode(resultBytes, version, ecLevel, hints);
   }
 
+  private DecoderResult decodeColorCode(BitMatrixParser[] parsers, Map<DecodeHintType,?> hints)
+          throws FormatException, ChecksumException {
+    Version version = parsers[0].readVersion();
+    ErrorCorrectionLevel ecLevel = parsers[0].readFormatInformation().getErrorCorrectionLevel();//纠错版本
+    LinkedBlockingQueue<byte[]> resultThreeBytes = new LinkedBlockingQueue<>();
+    for(int j = 0;j<3;j++) {
+      // Read codewords
+      byte[] codewords = parsers[j].readCodewords();//读取位矩阵中表示查找器模式的bit，按顺序排列，以重建二维码中包含的码字字节。
+      // Separate into data blocks
+      DataBlock[] dataBlocks = DataBlock.getDataBlocks(codewords, version, ecLevel);
+
+      // Count total number of data bytes
+      int totalBytes = 0;
+      for (DataBlock dataBlock : dataBlocks) {
+        totalBytes += dataBlock.getNumDataCodewords();
+      }
+      byte[] resultBytes = new byte[totalBytes];
+      int resultOffset = 0;
+
+      // Error-correct and copy data blocks together into a stream of bytes
+      for (DataBlock dataBlock : dataBlocks) {
+        byte[] codewordBytes = dataBlock.getCodewords();
+        int numDataCodewords = dataBlock.getNumDataCodewords();
+        correctErrors(codewordBytes, numDataCodewords);
+        for (int i = 0; i < numDataCodewords; i++) {
+          resultBytes[resultOffset++] = codewordBytes[i];
+        }
+      }
+      try {
+        resultThreeBytes.put(resultBytes);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+    }
+    // Decode the contents of that stream of bytes
+      return	DecodedBitStreamParser.decodeColorpayload(resultThreeBytes, version, ecLevel, hints);
+  }
   /**
    * <p>Given data and error-correction codewords received, possibly corrupted by errors, attempts to
    * correct the errors in-place using Reed-Solomon error correction.</p>

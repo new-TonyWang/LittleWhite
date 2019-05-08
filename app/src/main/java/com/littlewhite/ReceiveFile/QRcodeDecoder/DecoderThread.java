@@ -7,12 +7,17 @@ import android.os.Looper;
 import android.util.Log;
 
 import com.google.zxing.DecodeHintType;
+import com.google.zxing.EncodeHintType;
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
+import com.littlewhite.ColorCode.HSVColorTable;
 import com.littlewhite.ReceiveFile.MergeFileThread;
 import com.littlewhite.ReceiveFile.RaptorQDecoder;
 import com.littlewhite.ReceiveFile.ReceiveActivity;
 
 import java.util.HashMap;
 import java.util.concurrent.CountDownLatch;
+
+import static com.google.zxing.EncodeHintType.ERROR_CORRECTION;
 
 public class DecoderThread implements Runnable {
 
@@ -31,6 +36,7 @@ public class DecoderThread implements Runnable {
     }
     private void setHints(){
        //decodeHints.put(DecodeHintType.CHARACTER_SET, "UTF-8");
+        //decodeHints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.);
         decodeHints.put(DecodeHintType.FILEDATA,Boolean.TRUE);
     }
     public Handler getHandler(){
@@ -44,7 +50,7 @@ public class DecoderThread implements Runnable {
     @Override
     public void run() {
         Looper.prepare();
-        this.handler = new DecoderHandler(decodeHints,raptorQDecoder.getHandler(),ReceiveActivity);
+        this.handler = new DecoderHandler(decodeHints,raptorQDecoder.getHandler(),ReceiveActivity,new HSVColorTable());
         handlerInitLatch.countDown();
         Log.i(this.getClass().toString(),"启动");
         Looper.loop();

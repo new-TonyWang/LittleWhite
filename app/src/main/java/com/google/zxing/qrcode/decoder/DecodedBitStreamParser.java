@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * <p>
@@ -194,12 +195,13 @@ final class DecodedBitStreamParser {
 			decodeByte(bits,count, byteSegments, hints);
 			return new DecoderResult(bytes, byteSegments,
 					 ecLevel.toString(), -1, -1,mode);
-		case ALPHANUMERIC:
+		/*case ALPHANUMERIC:
 			count = bits.readBits(mode.getCharacterCountBits(version));
 			StringBuilder result = new StringBuilder(50);
 			decodeAlphanumericSegment(bits, result, count, false);
 			return new DecoderResult(bytes, result.toString(), byteSegments.isEmpty() ? null : byteSegments,
 					ecLevel == null ? null : ecLevel.toString(), -1, -1,mode);
+					*/
 		case ECI:
 			int value = parseECIValue(bits);
 			mode = Mode.forBits(bits.readBits(4));
@@ -228,6 +230,37 @@ final class DecodedBitStreamParser {
 		
 		//decodeByteSegment(bits, result, count, currentCharacterSetECI, byteSegments, hints);// hints正常为空,currentCharacterSetECI
 		
+	}
+	static DecoderResult decodeColorpayload(LinkedBlockingQueue<byte[]> bytes, Version version, ErrorCorrectionLevel ecLevel,
+											Map<DecodeHintType, ?> hints) throws FormatException {
+
+		BitSource bitsR = new BitSource(bytes.poll());
+		BitSource bitsG = new BitSource(bytes.poll());
+		BitSource bitsB = new BitSource(bytes.poll());
+		Mode modeR = Mode.forBits(bitsR.readBits(4));
+		Mode modeG = Mode.forBits(bitsG.readBits(4));
+		Mode modeB = Mode.forBits(bitsB.readBits(4));
+		List<byte[]> byteSegments = new ArrayList<>(1);
+		int countR =  bitsR.readBits(modeR.getCharacterCountBits(version));
+		int countG =  bitsG.readBits(modeG.getCharacterCountBits(version));
+		int countB =  bitsB.readBits(modeB.getCharacterCountBits(version));
+		//count =  bitsR.readBits(mode.getCharacterCountBits(version));
+		decodeColorByte(bitsR,bitsG,bitsB,countR, countG,countB,byteSegments, hints);
+		return new DecoderResult(null, byteSegments,//此处的null将在日后对彩色二维码代码重构上修复，应该设置一个二维数组来分开保存3个二维码
+				ecLevel.toString(), -1, -1,modeR);
+
+		//
+
+		//int symbolSequence = -1;
+		//int parityData = -1;
+		//CharacterSetECI currentCharacterSetECI = null;
+		//boolean fc1InEffect = false;
+
+		//byte[] result = new byte[count];
+		// case BYTE:
+
+		//decodeByteSegment(bits, result, count, currentCharacterSetECI, byteSegments, hints);// hints正常为空,currentCharacterSetECI
+
 	}
 	/**
 	 * See specification GBT 18284-2000
@@ -333,9 +366,9 @@ final class DecodedBitStreamParser {
 	/**
 	 * 解析成byte数组
 	 * @param bits
-	 * @param result
+	 * @param
 	 * @param count
-	 * @param currentCharacterSetECI
+	 * @param
 	 * @param byteSegments
 	 * @param hints
 	 * @throws FormatException
@@ -374,6 +407,55 @@ final class DecodedBitStreamParser {
 		byteSegments.add(readBytes);
 	}
 
+	/**
+	 * 尝试使三个二维码的byteSegments融合在一起
+	 *
+	 *
+	 * @param byteSegments
+	 * @param hints
+	 * @throws FormatException
+	 */
+	private static void decodeColorByte(BitSource bitsR,BitSource bitsG,BitSource bitsB,  int countR, int countG, int countB, Collection<byte[]> byteSegments, Map<DecodeHintType, ?> hints)
+			throws FormatException {
+// Don't crash trying to read more bits than we have available.
+		if (8 * countR > bitsR.available()) {
+			throw FormatException.getFormatInstance();
+		}
+		int length = countR+countG+countB;
+		int j = 0;
+		byte[] readBytes = new byte[length];
+		for (int i = 0; i < countR; i++) {//红
+			readBytes[i] = (byte) bitsR.readBits(8);
+		}
+		for (; j < countG; j++) {//绿
+			readBytes[countR+j] = (byte) bitsG.readBits(8);
+		}
+		j = 0;
+		for (int i = countR+countG; j < countB; j++) {//蓝
+			readBytes[i+j] = (byte) bitsB.readBits(8);
+		}
+		/*
+		//String encoding;
+		if (currentCharacterSetECI == null) {
+// The spec isn't clear on this mode; see
+// section 6.4.5: t does not say which encoding to assuming
+// upon decoding. I have seen ISO-8859-1 used as well as
+// Shift_JIS -- without anything like an ECI designator to
+// give a hint.
+			//encoding = StringUtils.guessEncoding(readBytes, hints);
+		} else {
+			//encoding = currentCharacterSetECI.name();
+		}
+
+		try {
+			//result.append(new String(readBytes, encoding));
+			result.append(new String(readBytes, encoding));
+		} catch (UnsupportedEncodingException ignored) {
+			throw FormatException.getFormatInstance();
+		}
+		*/
+		byteSegments.add(readBytes);
+	}
 	private static char toAlphaNumericChar(int value) throws FormatException {
 		if (value >= ALPHANUMERIC_CHARS.length) {
 			throw FormatException.getFormatInstance();

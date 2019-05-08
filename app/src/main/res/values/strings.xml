@@ -12,11 +12,17 @@
     <string name="FPS">视频帧率:</string>
     <string name="QRCodeSettings">二维码设置</string>
     <string name="ErrorCorrectionLevel">纠错码级别：</string>
+    <string name="QRCodeType">二维码类型：</string>
     <string name="QRCodeCapacity">二维码容量：</string>
     <string name="FileSelection">选择文件</string>
     <string name="VideoGeneration">生成视频</string>
     <string name="Progress">进度:</string>
     <string name="initProgress">0/NaN</string>
     <string name="hello">Little White</string>
-    <string name="title_activity_settings">SettingsActivity</string>
+    <string name="FPS_Default">23</string>
+    <string name="height_width_default">900</string>
+    <string name="black_white_QRCode_capacity_default">1935</string>
+    <string name="ColorCode_capacity_default">1747</string>
+
+
 </resources>

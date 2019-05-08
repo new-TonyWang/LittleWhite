@@ -154,7 +154,7 @@ Java_com_google_zxing_common_CBinarizer_convertToHSV(JNIEnv *env, jobject instan
     cv::Mat hsv;
     Mat out;
     cv::cvtColor(img,hsv,cv::COLOR_BGRA2BGR);
-    //cv::imwrite("sdcard/test.jpg",hsv);
+    cv::imwrite("sdcard/test.jpg",hsv);
     cv::cvtColor(hsv,img,cv::COLOR_BGR2HSV);
     std::vector<cv::Mat> channels;
     split(img,channels);
@@ -165,7 +165,7 @@ Java_com_google_zxing_common_CBinarizer_convertToHSV(JNIEnv *env, jobject instan
     jsize cheght = (jsize)channels[0].rows;
     jsize length = cwidth*cheght;
     //jsize length = cwidth*cheght;
-    //cv::imwrite("sdcard/test.jpg",hsv);
+    cv::imwrite("sdcard/test.jpg",hsv);
     free(ARGB);
     env->ReleaseByteArrayElements(luminances_, (jbyte *)luminances, 0);
     env->ReleaseByteArrayElements(uv_,(jbyte *) uv, 0);

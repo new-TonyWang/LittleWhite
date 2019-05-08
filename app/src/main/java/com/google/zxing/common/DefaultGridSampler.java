@@ -17,6 +17,7 @@
 package com.google.zxing.common;
 
 import com.google.zxing.NotFoundException;
+import com.littlewhite.ColorCode.HSVColorTable;
 
 /**
  * @author Sean Owen
@@ -86,8 +87,10 @@ public final class DefaultGridSampler extends GridSampler {
   }
 
   @Override
-  public BitMatrix[] ColorGrid(HsvData image, int dimensionX, int dimensionY, PerspectiveTransform transform) throws NotFoundException {
+  public BitMatrix[] ColorGrid(HsvData image, int dimensionX, int dimensionY, PerspectiveTransform transform, HSVColorTable hsvColorTable) throws NotFoundException {
     return new BitMatrix[0];
   }
+
+
 
 }

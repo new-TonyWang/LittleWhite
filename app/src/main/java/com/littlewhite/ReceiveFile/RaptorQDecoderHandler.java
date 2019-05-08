@@ -88,6 +88,8 @@ public class RaptorQDecoderHandler extends Handler {
 
                 break;
             case R.id.finish:
+                Message finish =  obtainMessage(R.id.finish);
+                this.zipThread.getZipHandler().sendMessageAtFrontOfQueue(finish);
                 requireNonNull(Looper.myLooper()).quit();
                 break;
             case R.id.stop:
@@ -132,7 +134,7 @@ public class RaptorQDecoderHandler extends Handler {
                    e.printStackTrace();
                }
                 sqllitData.Complete();
-               this.sqllitData.CloseSqLiteDatabase();
+               //this.sqllitData.CloseSqLiteDatabase();
                SendToUnzip();
 
                requireNonNull(Looper.myLooper()).quit();
