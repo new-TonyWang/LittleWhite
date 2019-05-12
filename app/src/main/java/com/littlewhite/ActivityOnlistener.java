@@ -2,15 +2,19 @@ package com.littlewhite;
 
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 
+import com.littlewhite.FileManager.FileManager;
 import com.littlewhite.ReceiveFile.ReceiveActivity;
 import com.littlewhite.ReceiveFile.SqllitUtil.SqllitData;
 import com.littlewhite.SendFile.SendFileActivity;
 
+import java.io.File;
 import java.util.ArrayList;
 
 public class ActivityOnlistener extends AppCompatActivity implements View.OnClickListener {
@@ -23,33 +27,45 @@ public class ActivityOnlistener extends AppCompatActivity implements View.OnClic
         setButtonsNotEnable();
         switch(v.getId()){
             case R.id.settings:
-                Intent settings = new Intent(this,SettingsActivity.class);//跳转到设置界面
-                startActivity(settings);
+               Intent settings = new Intent(this,SettingsActivity.class);//跳转到设置界面
+              startActivity(settings);
+                //Intent settings = new Intent(this, FileManager.class);//跳转到设置界面
+               // startActivity(settings);
                 break;
-            case R.id.action:
+            case R.id.receive:
                 Intent action = new Intent(this,ActionActivity.class);
                 //action.putExtras();
                 startActivity(action);
                 break;
-            case R.id.history:
-                break;
             case R.id.send:
+                Intent sendselect = new Intent(this, SendFileSelection.class);
+                startActivity(sendselect);
+                break;
+            case R.id.newStart:
                 Intent send = new Intent(this, SendFileActivity.class);
                 startActivity(send);
                 break;
-            case R.id.receive:
+            case R.id.fromVideo:
+                getFilePath(REQUEST_CODE_GET_FILE_PATH,"video/*");
+                break;
+            case R.id.receiveBlack:
                 Intent receive = new Intent(this, ReceiveActivity.class);
+                receive.putExtra("iscolor",false);
                 startActivity(receive);
                 break;
-            case R.id.FileSelection:
-                getFilePath(REQUEST_CODE_GET_FILE_PATH);
-               // Intent receive = new Intent(this, ReceiveActivity.class);
-                //startActivity(receive);
-                break;
-            case R.id.VideoGeneration:
+            case R.id.receiveColor:
+                Intent receiveColor = new Intent(this, ReceiveActivity.class);
+                receiveColor.putExtra("iscolor",true);
+                startActivity(receiveColor);
                 //Intent receive = new Intent(this, ReceiveActivity.class);
                 //startActivity(receive);
                 break;
+            case R.id.FileSelection:
+                getFilePath(REQUEST_CODE_GET_FILE_PATH,"*/*");
+               // Intent receive = new Intent(this, ReceiveActivity.class);
+                //startActivity(receive);
+                break;
+
         }
         setButtonsEnable();
     }
@@ -62,6 +78,7 @@ public class ActivityOnlistener extends AppCompatActivity implements View.OnClic
     protected void setOnclickListener(View v,View.OnClickListener listener){
         v.setOnClickListener(listener);
     }
+
     protected void setButtonsNotEnable(){
         for(int i = 0;i<this.list.size();i++){
             list.get(i).setEnabled(false);
@@ -72,12 +89,17 @@ public class ActivityOnlistener extends AppCompatActivity implements View.OnClic
             list.get(i).setEnabled(true);
         }
     }
-    private void getFilePath(int requestCode) {
+    private void getFilePath(int requestCode,String Type) {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("*/*");
+        intent.setType(Type);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         if (intent.resolveActivity(getPackageManager()) != null) {
             startActivityForResult(Intent.createChooser(intent, "Select a File"), requestCode);
+//            Intent intent2 = new Intent(Intent.ACTION_VIEW);
+//            Uri uri = Uri.fromFile(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS));
+//            //intent2.addCategory(Intent.CATEGORY_DEFAULT);
+//            intent2.setData(uri);
+//            startActivity(intent);
         } else {
             new AlertDialog.Builder(this).setTitle("未找到文件管理器")
                     .setMessage("请安装文件管理器以选择文件")

@@ -2,6 +2,7 @@ package com.littlewhite.SendFile;
 
 import android.graphics.Bitmap;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 
@@ -35,21 +36,47 @@ public class RaptorEncoderHandler extends Handler {
     private SendFileActivity sendFileActivity;
     private Hashtable<EncodeHintType, Object> encodeHints = new Hashtable<EncodeHintType, Object>();
     private DataEncoder arrayDataEncoder;
+    private FFMPEGHandler ffmpegHandler;
     // private LinkedBlockingQueue<byte[]> linkedBlockingQueue;
     private FECParameters fecParameters;
     private String QRCodeDir;
+    private String parentDir ;
     private Boolean isrunning;
     private SendConfigs sendConfigs;
-    private File encodeFile;
-    public RaptorEncoderHandler(SendFileActivity sendFileActivity) {
+   // private File encodeFile;
+    public RaptorEncoderHandler(SendFileActivity sendFileActivity,FFMPEGHandler ffmpegHandler) {
         this.sendFileActivity = sendFileActivity;
-       // this.fecParameters = new FECParameters();
+        this.ffmpegHandler = ffmpegHandler;
     }
     @Override
     public void handleMessage(Message message) {
         switch (message.what) {
+            case R.id.Init:
+                this.sendConfigs = (SendConfigs) message.obj;
+                initEncode();
+                break;
             case R.id.Encode:
+                this.sendFileActivity.getSendFileHandler().sendEmptyMessage(R.id.RaptorEncodePhase);
+                if(encodeData((File)message.obj)) {
+                    EncodeComplete();
+                }else {
+                    Log.e("raptor","出错");
+                }
+                break;
+            case R.id.EncodeColor:
+                this.sendFileActivity.getSendFileHandler().sendEmptyMessage(R.id.RaptorEncodePhase);
+                if(encodeColorData((File)message.obj)) {
+                    EncodeComplete();
+                }else {
 
+                }
+                break;
+            case R.id.finish:
+                sendFinishMessage();
+                Looper.myLooper().quit();
+                break;
+            case R.id.failed:
+                Looper.myLooper().quit();
                 break;
 
         }
@@ -61,36 +88,69 @@ public class RaptorEncoderHandler extends Handler {
     private void initEncode(){
         encodeHints.put(EncodeHintType.ERROR_CORRECTION, sendConfigs.getErrorCorrectionLevel());
         encodeHints.put(EncodeHintType.MARGIN, 1);
-       byte[] file = readAllBytes(encodeFile);
+
         //String filename = "file.docx";
-        this.QRCodeDir = sendConfigs.getPath().substring(0, sendConfigs.getPath().lastIndexOf("."));//获取了文件名前缀，用于创建文件夹
+        StringBuilder FileName = new StringBuilder(sendConfigs.getPath().substring(0, sendConfigs.getPath().lastIndexOf(".")));
+        String pureFileName  = FileName.substring(FileName.lastIndexOf("/"),FileName.length());
+        //this.QRCodeDir = sendConfigs.getPath().substring(0, sendConfigs.getPath().lastIndexOf("."));//获取了文件名前缀，用于创建文件夹
+        this.parentDir = this.sendFileActivity.getExternalFilesDir("send/"+pureFileName+System.currentTimeMillis()).getAbsolutePath();
+        //String sendPath =  this.sendFileActivity.getExternalFilesDir("send/"+parentDir).getAbsolutePath();
+        makedir(parentDir);
+        if(sendConfigs.getQRCodeType()==0){
+            this.QRCodeDir = parentDir+"/QRCodes";//黑白
+        }else{
+            this.QRCodeDir = parentDir+"/ColorCodes";//彩色
+        }
         makedir(QRCodeDir);
-        QRCodeDir=QRCodeDir+"/%0d.jpg";
+        QRCodeDir=QRCodeDir+"/%d.jpg";
+       // Log.i("QRCodeDir是",QRCodeDir);
         //System.out.println(QRCodeDir);
+
+    }
+
+    /**
+     * 加密黑白
+     */
+    public  boolean encodeData(File encodeFile) {
+        byte[] file = readAllBytes(encodeFile);
         int num = minAllowedNumSourceBlocks(file.length,this.sendConfigs.getQRCodeCapacity());
         this.fecParameters = FECParameters.newParameters(file.length,this.sendConfigs.getQRCodeCapacity(),num);
         this.arrayDataEncoder = OpenRQ.newEncoder(file,0,fecParameters);
-    }
-    private void encodeDataPackage(){
+       // int i = 0;
+        try {
+        for (SourceBlockEncoder sbEnc :  this.arrayDataEncoder.sourceBlockIterable()) {
 
-    }
-    public  void encodeData(DataEncoder dataEnc) {
-        int i = 0;
-        for (SourceBlockEncoder sbEnc : dataEnc.sourceBlockIterable()) {
-            encodeSourceBlock(sbEnc);
-            i++;
+                encodeSourceBlock(sbEnc);
+
+            // i++;
         }
+        } catch (Exception e) {
+            return  false;
+        }
+        return true;
         //System.out.println("encodeSourceBlocknum"+i);
     }
-    public  void encodeColorData(DataEncoder dataEnc) {
-        int i = 0;
-        for (SourceBlockEncoder sbEnc : dataEnc.sourceBlockIterable()) {
+
+    /**
+     * 加密彩色
+     */
+    public  boolean encodeColorData(File encodeFile) {
+       // int i = 0;
+        byte[] file = readAllBytes(encodeFile);
+        int num = minAllowedNumSourceBlocks(file.length,this.sendConfigs.getQRCodeCapacity());
+        this.fecParameters = FECParameters.newParameters(file.length,this.sendConfigs.getQRCodeCapacity(),num);
+        this.arrayDataEncoder = OpenRQ.newEncoder(file,0,fecParameters);
+        try {
+        for (SourceBlockEncoder sbEnc : this.arrayDataEncoder.sourceBlockIterable()) {
             encodeColorSourceBlock(sbEnc);
-            i++;
+           // i++;
         }
-        //System.out.println("encodeSourceBlocknum"+i);
+    } catch (Exception e) {
+       return  false;
     }
-    private  void encodeSourceBlock(SourceBlockEncoder sbEnc) {
+        return true;
+    }
+    private  void encodeSourceBlock(SourceBlockEncoder sbEnc) throws IOException, WriterException {
         int i = 1;
         // int m = 0;
         int j = 0;
@@ -99,18 +159,14 @@ public class RaptorEncoderHandler extends Handler {
         for (EncodingPacket pac : sbEnc.sourcePacketsIterable()) {//缂栫爜
             // sendPacket(pac);
             data = pac.asArray();
-            byte[] mlgb = null;
+           // byte[] mlgb = null;
             //鐢熸垚浜岀淮鐮�
 
             data = mergedata(this.fecParameters.asArray(),data);
-            try {
+
                 QrcodeUtil.encodebytearry(String.format(this.QRCodeDir,i),bitmap, data, sendConfigs.getWidth(), sendConfigs.getHeight());
                 //zxingutil.preEncodeColorByte(String.format("src/kaiti/%d.jpg",i).toString(),"jpg", data, 900, 900);
-            } catch (WriterException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+
 					/*try {
 						//mlgb = zxingutil.decodetobytearry(new File(String.format("src/sendtest/%d.png",i)));
 					} catch (NotDataException e) {
@@ -178,7 +234,7 @@ public class RaptorEncoderHandler extends Handler {
         //System.out.println(j);
     }
 
-    private  void encodeColorSourceBlock(SourceBlockEncoder sbEnc) {
+    private  void encodeColorSourceBlock(SourceBlockEncoder sbEnc) throws IOException, WriterException {
         int i = 1;
         // int m = 0;
         int j = 0;
@@ -187,7 +243,7 @@ public class RaptorEncoderHandler extends Handler {
         for (EncodingPacket pac : sbEnc.sourcePacketsIterable()) {//缂栫爜
             // sendPacket(pac);
             data = pac.asArray();
-            byte[] mlgb = null;
+            //byte[] mlgb = null;
             //鐢熸垚浜岀淮鐮�
 
             data = mergedata(this.fecParameters.asArray(),data);
@@ -232,7 +288,7 @@ public class RaptorEncoderHandler extends Handler {
             //  sendPacket(pac);
             data = pac.asArray();
             // byte[] mlgb = null;
-            try {
+
                 data = mergedata(this.fecParameters.asArray(),data);
                 QrcodeUtil.preEncodeColorByte(String.format(this.QRCodeDir,i+j),bitmap, this.encodeHints,data, sendConfigs.getWidth(), sendConfigs.getHeight());
                 //zxingutil.preEncodeColorByte(String.format("src/kaiti/%d.jpg",i+j).toString(),"jpg", data, 600, 600);
@@ -247,13 +303,6 @@ public class RaptorEncoderHandler extends Handler {
 						}
 					}
 					 */
-            } catch (WriterException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
 
             // if ((j & 0x1) == 0) {//閸嬭埖鏆�
 
@@ -266,8 +315,26 @@ public class RaptorEncoderHandler extends Handler {
         //System.out.println(j);
     }
 
-    // encode the source block
+    /**
+     * 二维码生成成功
+     */
+    private void EncodeComplete(){
+                Message message  = Message.obtain(this.ffmpegHandler,R.id.GenerateVideo,new FFmpegInOutPath(this.QRCodeDir.substring(0,this.QRCodeDir.lastIndexOf("/")),this.parentDir));
+                message.sendToTarget();
 
+    }
+    private void sendFinishMessage(){
+        Message message = obtainMessage(R.id.finish);
+       this.ffmpegHandler.sendMessageAtFrontOfQueue(message);
+    }
+    /**
+     * 二维码生成失败
+     */
+    private void EncodeFailed(){
+        Message message  = Message.obtain(this.ffmpegHandler,R.id.failed);
+        message.sendToTarget();
+
+    }
     private static int numberOfRepairSymbols(int EncodingPacketsize){
         return EncodingPacketsize;
     }
@@ -311,12 +378,12 @@ public class RaptorEncoderHandler extends Handler {
         }
         return byteBuffer.array();
     }
-    public String makedir(String path){//生成存放二维码的目录，同时返回目录路径
+    public void makedir(String sendPath){//生成存放二维码的目录，同时返回目录路径
         // String  dirpath = path+"/"+new Date().getTime();
         //String dirpath = path+"/1";
         File file = null;
         try {
-            file = new File(path);
+            file = new File(sendPath);
             if (!file.exists()) {
                 file.mkdir();
             }else{
@@ -327,7 +394,7 @@ public class RaptorEncoderHandler extends Handler {
             Log.i("error:", e+"");
         }
 
-        Log.i(TAG,path);
-        return path;
+        Log.i(TAG,sendPath);
+        //return sendPath;
     }
 }

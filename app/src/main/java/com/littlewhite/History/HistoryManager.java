@@ -16,19 +16,19 @@ public class HistoryManager {
     private File DownLoadPath;
     public HistoryManager(Context context){
     this.sqllitData = new SqllitData(context);
-    this.DownLoadPath = initReceivePath();
+    this.DownLoadPath = initReceivePath(context);
     }
 
-    private File initReceivePath() {
-        File DOWNLOADSDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);//外存DownLoad目录
+    private File initReceivePath(Context context) {
+        File DOWNLOADSDir = context.getExternalFilesDir("");//外存DownLoad目录
         if (!DOWNLOADSDir.exists()) {
             DOWNLOADSDir.mkdir();
         }
-        File DownloadFileDir = new File(DOWNLOADSDir.getAbsolutePath() + "/QRCodes");
-        if (!DownloadFileDir.exists()) {
-            DownloadFileDir.mkdir();
+        File DOWNLOADDir = context.getExternalFilesDir("receive");//外存DownLoad目录
+        if (!DOWNLOADDir.exists()) {
+            DOWNLOADDir.mkdir();
         }
-        return DownloadFileDir;
+        return DOWNLOADSDir;
     }
     public List<FileInfo> SearchHistory(){
        return sqllitData.SearchHistory();

@@ -84,9 +84,6 @@ public class RaptorQDecoderHandler extends Handler {
 
                 decodeRaptor((byte[]) message.obj);
                 break;
-            case R.id.restart_decode:
-
-                break;
             case R.id.finish:
                 Message finish =  obtainMessage(R.id.finish);
                 this.zipThread.getZipHandler().sendMessageAtFrontOfQueue(finish);
@@ -118,8 +115,9 @@ public class RaptorQDecoderHandler extends Handler {
                    } catch (IOException e) {
                        e.printStackTrace();
                    }
+                   sqllitData.UpdateReceivedSymbolNum(this.num);
                    // this.sqllitData.UpdateReceivedSymbolNum(this.stringBuilder,this.num);
-                   SendToReceiveHandler(this.num, this.sum);
+                   SendToReceiveHandler(this.num);
                }
                break;
            case DECODED:
@@ -161,7 +159,9 @@ public class RaptorQDecoderHandler extends Handler {
         }
 
         //this.sqllitData.UpdateReceivedSymbolNum(this.stringBuilder,this.num);
-        SendToReceiveHandler(this.num, this.sum);
+        SendToReceiveInit(this.sum);
+        SendToReceiveHandler(this.num);
+
         objectOutputStream = MyObjectStream.newInstance(this.receiveFile);
         encodingPacket = null;
     }
@@ -197,11 +197,12 @@ public class RaptorQDecoderHandler extends Handler {
     private void RestartDecode(FileInfo fileInfo){
         this.fecParameters = FECParameters.ExtractFECParameters(fileInfo.getFECParameters()).value();//耗时操作，应该再做一点别的东西
         this.receiveFile = new File(this.receivePath.getAbsolutePath()+"/"+fileInfo.getFileName());
-        this.arrayDataDecoder = OpenRQ.newDecoderWithTwoOverhead(this.fecParameters);//终于加上了断点续传hhhh
+        this.arrayDataDecoder = OpenRQ.newDecoderWithTwoOverhead(this.fecParameters,this.receiveActivity);//终于加上了断点续传hhhh
         this.sum = this.fecParameters.totalSymbols();
         this.total = this.sum;
         this.sum += 2;
         this.num = fileInfo.getReceivedNum();
+        SendToReceiveInit(this.sum);
        // String ReceivedSymbol = fileInfo.getReceivedSymbolNum();
         //String[] ReceivedSymbolString = ReceivedSymbol.split(",",ReceivedSymbol.length()-1);
         //int length = ReceivedSymbolString.length;
@@ -215,9 +216,10 @@ public class RaptorQDecoderHandler extends Handler {
         //this.sqllitData.UpdateFECParameters(fecParameters.asArray(), this.total * 2);
         LinkedBlockingQueue<SerializablePacket> linkedBlockingQueue = ReadObject(this.receiveFile);
         EncodingPacket Epackage = null;
+        SourceBlockState sourceBlockState = null;
         for(SerializablePacket pac: linkedBlockingQueue){
             Epackage = this.arrayDataDecoder.parsePacket(pac,true).value();
-            arrayDataDecoder.sourceBlock(pac.sourceBlockNumber()).putEncodingPacket(Epackage);
+            sourceBlockState =   arrayDataDecoder.sourceBlock(pac.sourceBlockNumber()).putEncodingPacket(Epackage);
 
             //SourceBlockDecoder sourceBlock = arrayDataDecoder.sourceBlock(encodingPacket.sourceBlockNumber());
             if(!check[Epackage.fecPayloadID()]) {
@@ -225,18 +227,36 @@ public class RaptorQDecoderHandler extends Handler {
             this.num++;
             }
         }
+        if(sourceBlockState==SourceBlockState.DECODED){//极限情况下已经接收了所有包但是没有生成源文件，那么就从这里运行
+            byte[] CompleteData = arrayDataDecoder.dataArray();
+            try {
+                this.receiveFile.delete();
+                this.receiveFile.createNewFile();
+                FileOutputStream fos = new FileOutputStream(this.receiveFile);
+                fos.write(CompleteData);
+                fos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            sqllitData.Complete();
+            //this.sqllitData.CloseSqLiteDatabase();
+            SendToUnzip();
+
+            requireNonNull(Looper.myLooper()).quit();
+        }
     }
     private void StartNewOne(byte[] fecParameters){
         this.fecParameters = FECParameters.ExtractFECParameters(fecParameters).value();//耗时操作，应该再做一点别的东西
         this.receiveFile = initReceiveFile(this.receivePath);
         InsertNewFile(receiveFile.getName());
-        this.arrayDataDecoder = OpenRQ.newDecoderWithTwoOverhead(this.fecParameters);//终于加上了断点续传hhhh
+        this.arrayDataDecoder = OpenRQ.newDecoderWithTwoOverhead(this.fecParameters,this.receiveActivity);//终于加上了断点续传hhhh
+
         this.sum = this.fecParameters.totalSymbols();
         this.total = this.sum;
         this.sum += 2;
         check = new boolean[(int) Math.ceil(this.total * 2)+1];
        // stringBuilder = new StringBuilder();
-        this.sqllitData.UpdateFECParameters(this.fecParameters.asArray(), (this.total * 2)+1);
+        this.sqllitData.UpdateFECParameters(this.fecParameters.asArray(), this.sum);
         objectOutputStream = requireNonNull(MyObjectStream.newInstance(this.receiveFile));
         decodeFirst(fecParameters);
     }
@@ -252,11 +272,19 @@ public class RaptorQDecoderHandler extends Handler {
         }
         return receiveFile;
     }
-    private void SendToReceiveHandler(int CorrectNum, int sum){
-        Message message = Message.obtain(receiveActivity.getHandler(), R.id.update_progress,CorrectNum,sum);
+    private void SendToReceiveHandler(int CorrectNum){
+        Message message = Message.obtain(receiveActivity.getHandler(), R.id.update_progress);
+        message.arg1 = CorrectNum;
        // message.setData(bundle);
         message.sendToTarget();
     }
+    private void SendToReceiveInit(int sum){
+        Message message = Message.obtain(receiveActivity.getHandler(), R.id.Init);
+        message.arg1 = sum;
+        // message.setData(bundle);
+        message.sendToTarget();
+    }
+
     private void SendToUnzip(){//解压文件
         Bundle bundle = new Bundle();
         //ArrayList<String> stringArrayList= new ArrayList<>();

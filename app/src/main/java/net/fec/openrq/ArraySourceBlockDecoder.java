@@ -16,6 +16,9 @@
 package net.fec.openrq;
 
 
+import com.littlewhite.R;
+import com.littlewhite.ReceiveFile.ReceiveActivity;
+
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -72,13 +75,14 @@ import net.fec.openrq.util.rq.SystematicIndices;
 
         return new ArraySourceBlockDecoder(dataDecoder, sbn, sourceSymbols, symbOver);//
     }
-    static ArraySourceBlockDecoder RestartDecoder(
+    static ArraySourceBlockDecoder newDecoder(
             ArrayDataDecoder dataDecoder,
             final byte[] array,
             int arrayOff,//每个块的offset
             FECParameters fecParams,
             int sbn,
-            int symbOver)
+            int symbOver,
+            ReceiveActivity receiveActivity)
     {
 
         ImmutableList<SourceSymbol> sourceSymbols = DataUtils.partitionSourceBlock(
@@ -94,7 +98,7 @@ import net.fec.openrq.util.rq.SystematicIndices;
                     }
                 });
 
-        return new ArraySourceBlockDecoder(dataDecoder, sbn, sourceSymbols, symbOver);//
+        return new ArraySourceBlockDecoder(dataDecoder, sbn, sourceSymbols, symbOver,receiveActivity);//
     }
 
     private final ArrayDataDecoder dataDecoder;
@@ -102,6 +106,12 @@ import net.fec.openrq.util.rq.SystematicIndices;
     private final int sbn;
 
     private final SymbolsState symbolsState;
+
+    public void setReceiveActivity(ReceiveActivity receiveActivity) {
+        this.receiveActivity = receiveActivity;
+    }
+
+    private  ReceiveActivity receiveActivity;
    // private FileChannel fileChannel;
     private final int LastSymbol;
     private ArraySourceBlockDecoder(
@@ -116,6 +126,21 @@ import net.fec.openrq.util.rq.SystematicIndices;
         this.sbn = sbn;
         this.symbolsState = new SymbolsState(sourceSymbols, symbOver);//
         this.LastSymbol = fecParameters().totalSymbols()-1;
+    }
+    private ArraySourceBlockDecoder(
+            ArrayDataDecoder dataDecoder,
+            int sbn,
+            ImmutableList<SourceSymbol> sourceSymbols,
+            int symbOver,
+            ReceiveActivity receiveActivity
+    )
+    {
+
+        this.dataDecoder = Objects.requireNonNull(dataDecoder);
+        this.sbn = sbn;
+        this.symbolsState = new SymbolsState(sourceSymbols, symbOver);//
+        this.LastSymbol = fecParameters().totalSymbols()-1;
+        this.receiveActivity = receiveActivity;
     }
 
     private FECParameters fecParameters() {
@@ -275,7 +300,7 @@ import net.fec.openrq.util.rq.SystematicIndices;
                 if (putNewSymbol &&
                     !symbolsState.isSourceBlockDecoded() &&
                     symbolsState.haveEnoughSymbolsToDecode())
-                {
+                {   this.receiveActivity.getHandler().sendEmptyMessage(R.id.RaptorDecodeFile);
                     decode();
                 }
             }

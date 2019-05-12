@@ -26,6 +26,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -65,12 +66,17 @@ public class SendFileActivity extends ActivityOnlistener {
     private SendFileHandler sendFileHandler;
     private int QRCodeType;
     private int QRCodeCapacity;
-
+    private Spinner ErrorCorrectionLevelSelection;
+    private Spinner QRCodeTypeSelection;
     private String ErrorCorrectionLevel;
     private Button VideoGeneration;
     private ArrayAdapter<CharSequence> adapter;
     private boolean haschange = false;
     // private List<CharSequence> List = new ArrayList<CharSequence>();
+
+    public SendFileHandler getSendFileHandler() {
+        return sendFileHandler;
+    }
 
     //  private spin
     @Override
@@ -81,7 +87,9 @@ public class SendFileActivity extends ActivityOnlistener {
         //bt = findViewById(R.id.bt);
 
         this.sendFileHandler = new SendFileHandler(this);
-        // String apppath = this.getExternalFilesDir(null).getPath();
+
+
+            // String apppath = this.getExternalFilesDir(null).getPath();
         // path = apppath;
         // String dirpath = makedir(path);//获取文件夹路径
         //通过zxing生成无数张二维码图片并存放在dirpath并且返回生成文件的数量
@@ -91,6 +99,7 @@ public class SendFileActivity extends ActivityOnlistener {
         //利用ffmpeg生成视频
         // runffmepg(dirpath,number);
     }
+
         /*
         public void onClick(View v) {
             pb.setVisibility(View.VISIBLE);
@@ -130,8 +139,8 @@ public class SendFileActivity extends ActivityOnlistener {
         this.VideoGeneration = findViewById(R.id.VideoGeneration);
         this.QRCodeCapacityEdit = findViewById(R.id.QRCodeCapacity);
         this.QRCodeCapacity = Integer.valueOf(QRCodeCapacityEdit.getText().toString());
-        Spinner ErrorCorrectionLevelSelection = findViewById(R.id.ErrorCorrectionLevelSelection);
-        Spinner QRCodeTypeSelection = findViewById(R.id.QRCodeType);
+        ErrorCorrectionLevelSelection = findViewById(R.id.ErrorCorrectionLevelSelection);
+        QRCodeTypeSelection = findViewById(R.id.QRCodeType);
         ErrorCorrectionLevel = "L";
         QRCodeType = 0;
         adapter = ArrayAdapter.createFromResource(this, R.array.Error_Correction_Level, android.R.layout.simple_spinner_item);//创建spinner的适配器
@@ -143,10 +152,31 @@ public class SendFileActivity extends ActivityOnlistener {
         initSpanner(ErrorCorrectionLevelSelection);
         initSpanner(QRCodeTypeSelection);
         setOnclickListener(mBFileSelection, this);
+        setOnclickListener(VideoGeneration, this);
         setEditTextListener(widthEdit);
         setEditTextListener(heightEdit);
         setEditTextListener(FPSEdit);
         setEditTextListener(QRCodeCapacityEdit);
+        Intent intent = getIntent();
+        String action = intent.getAction();
+        String type = intent.getType();
+        if (Intent.ACTION_SEND.equals(action) && type != null /*&& "video/mp4".equals(type)*/)
+        {
+            Uri uri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
+            //如果是媒体类型需要从数据库获取路径
+            File chosenFile =new File(getRealPathFromURI(uri));
+            if (chosenFile.length() < 1048576) {//文件必须小于1MB，不然手会累死的
+                this.path = chosenFile.getAbsolutePath();
+                FilePathTV.setText(path + "\n 文件大小:" + chosenFile.length() + "B");
+                FilePathTV.setTextColor(0xFF868585);
+            } else {
+                path = null;
+                FilePathTV.setText("文件必须小于1MiB");
+                FilePathTV.setTextColor(Color.rgb(255, 0, 0));
+                Toast.makeText(this, "文件必须小于1MiB", Toast.LENGTH_SHORT).show();
+            }
+            //pathTextView.setText("文件路径:"+filePath);
+        }
     }
 
     private void initSpanner(final Spinner spinner) {//设置监听
@@ -177,6 +207,7 @@ public class SendFileActivity extends ActivityOnlistener {
 
 
     }
+
 
     private void setEditTextListener(final EditText editText) {
         editText.addTextChangedListener(new TextWatcher() {
@@ -221,6 +252,20 @@ public class SendFileActivity extends ActivityOnlistener {
                 this.height = Integer.valueOf(heightEdit.getText().toString());
                 this.QRCodeCapacity = Integer.valueOf(QRCodeCapacityEdit.getText().toString());
                 SendConfigs Configs = new SendConfigs(path,FPS,width,height,QRCodeType,ErrorCorrectionLevel,QRCodeCapacity);
+                this.mBFileSelection.setClickable(false);
+                this.VideoGeneration.setClickable(false);
+                FrameLayout frameLayout = findViewById(R.id.grayCover);
+                ProgressBar progressBar = findViewById(R.id.progressBar);
+                frameLayout.setVisibility(View.VISIBLE);
+                progressBar.setVisibility(View.VISIBLE);
+                setCanNotEditNoClick(this.FPSEdit);
+                setCanNotEditNoClick(this.widthEdit);
+                setCanNotEditNoClick(this.heightEdit);
+                setCanNotEditNoClick(this.QRCodeCapacityEdit);
+                stopSpanner(this.ErrorCorrectionLevelSelection);
+                stopSpanner(this.QRCodeTypeSelection);
+                //StartRaptorEncode();
+                this.sendFileHandler.StartProgress(Configs);
 
         }
     }
@@ -238,6 +283,21 @@ public class SendFileActivity extends ActivityOnlistener {
             }
 
         });
+    }
+    public void setCanNotEditNoClick(View v) {
+        v.setFocusable(false);
+        v.setFocusableInTouchMode(false);
+        // 如果之前没设置过点击事件，该处可省略
+        v.setOnClickListener(null);
+    }
+    public void stopSpanner(AdapterView v) {
+        v.setFocusable(false);
+        v.setFocusableInTouchMode(false);
+       // v.removeAllViewsInLayout();
+        v.setAdapter(null);
+
+        // 如果之前没设置过点击事件，该处可省略
+        //v.setOnItemClickListener(null);
     }
 
     /*
@@ -271,7 +331,28 @@ public class SendFileActivity extends ActivityOnlistener {
                     .show();
         }
     }
+    public void playVideo(String videoPath){
+        ProgressBar progressBar = findViewById(R.id.progressBar);
+        progressBar.setVisibility(View.INVISIBLE);
+        TextView phase = findViewById(R.id.phase);
+        phase.setText("开始视频播放");
+        Intent intent  = new Intent(this,VideoPlayer.class);
+        intent.putExtra("videoPath",videoPath);
+        startActivity(intent);
 
+    }
+    public void StartRaptorEncode(){
+            TextView phase = findViewById(R.id.phase);
+        phase.setVisibility(View.VISIBLE);
+            phase.setText("正在生成二维码序列......");
+       // adapter.clear();
+
+    }
+    public void StartFFmpeg(){
+        TextView phase = findViewById(R.id.phase);
+        phase.setText("正在生成视频......");
+
+    }
     //String path;
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

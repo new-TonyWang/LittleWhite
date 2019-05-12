@@ -31,7 +31,7 @@ public class ReceiveHandler extends Handler {
         SUCCESS,
         DONE
     }
-    public ReceiveHandler(ReceiveActivity receiveActivity, newCameraManager cameraManager)  {
+    public ReceiveHandler(ReceiveActivity receiveActivity, newCameraManager cameraManager,Boolean iscolor)  {
         Log.i(this.getClass().toString(),"启动");
         this.receiveActivity = receiveActivity;
         this.cameraManager = cameraManager;
@@ -55,24 +55,33 @@ public class ReceiveHandler extends Handler {
         DecoderThread.start();
         state = State.SUCCESS;
         this.cameraManager.startPreview();
-        //restartPreviewAndDecode();
-        restartPreviewAndDecodeColorcode();
+        if(iscolor) {
+            restartPreviewAndDecodeColorcode();//解码彩色
+        }else{
+            restartPreviewAndDecode();//解码黑白
+        }
     }
     @Override
     public void handleMessage(Message message) {
             switch(message.what){
+                case R.id.Init:
+                    receiveActivity.setTotalQRnum(message.arg1);
+                  // receiveActivity.UpgradeProgress(message.arg1);
+                    break;
                 case R.id.update_progress:
-                    receiveActivity.setTotalQRnum(message.arg2);
+                   // receiveActivity.setTotalQRnum(message.arg2);
                     receiveActivity.UpgradeProgress(message.arg1);
-
                     break;
                 case R.id.finish:
-                    Message finish = obtainMessage(R.id.finish);
-                    decoderThread.getHandler().sendMessageAtFrontOfQueue(finish);//发送消息到对第一个位置
-                   // Looper.myLooper().quit();
+                    // Looper.myLooper().quit();
                     Bundle bundle = message.getData();
                     receiveActivity.TransmissionComplete(bundle);
                     break;
+                    case R.id.RaptorDecodeFile://Raptor码开始生成文件，可以将其他线程关闭
+                        this.receiveActivity.RaptorCalculationStart();
+                        Message finish = obtainMessage(R.id.finish);
+                        decoderThread.getHandler().sendMessageAtFrontOfQueue(finish);//发送消息到对第一个位置
+                        break;
                  //case R.id.
                 case R.id.stop:
                     break;

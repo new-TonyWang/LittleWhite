@@ -20,7 +20,7 @@ int TEST(int width,int height,uint8_t *RGB){
    //hsvmask(hsv, 0,120,25,255);
    // colorDetection(img,width,height);
     cv::cvtColor(img,out,cv::COLOR_HSV2BGR);
-    cv::imwrite("sdcard/test.jpg",out);
+   // cv::imwrite("sdcard/test.jpg",out);
     return 1;
 }
 void getHSVchnnels(int width,int height,uint8_t *RGB,uint8_t* H,uint8_t* S,uint8_t* V){

@@ -2,17 +2,21 @@ package com.littlewhite.ReceiveFile;
 
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.littlewhite.Camera.CameraManager;
 import com.littlewhite.Camera.ViewfinderView;
 import com.littlewhite.Camera.newCameraManager;
+import com.littlewhite.FileManager.FileManager;
 import com.littlewhite.History.HistoryActivity;
 import com.littlewhite.R;
 import com.littlewhite.ReceiveFile.QRcodeDecoder.MultiDecoder;
@@ -104,11 +108,8 @@ public class ReceiveActivity extends SendReceive<ReceiveHandler> implements Surf
     public void TransmissionComplete(Bundle fileBundle){
       //  receiveHandler.quitSynchronously();
         handler = null;
-        Intent intent = new Intent(this, HistoryActivity.class);
-        Bundle bundle = new Bundle();
-        bundle.putInt("sum",this.TotalQRnum);
-        bundle.putAll(fileBundle);
-        intent.putExtras(bundle);
+        Intent intent = new Intent(this, FileManager.class);
+        intent.putExtra("dir",getExternalFilesDir("receive").getAbsolutePath());
         startActivity(intent);
     }
 
@@ -145,7 +146,13 @@ public class ReceiveActivity extends SendReceive<ReceiveHandler> implements Surf
             cameraManager.openDriver(surfaceHolder);
             // Creating the handler starts the preview, which can also throw a RuntimeException.
             if(handler==null) {
-                this.handler = new ReceiveHandler(this, this.cameraManager);//期望它只执行一次
+                Intent intent = getIntent();
+                if(intent.getBooleanExtra("iscolor",false)) {
+                    this.handler = new ReceiveHandler(this, this.cameraManager,true);//解码彩色
+                }
+                else{
+                    this.handler = new ReceiveHandler(this, this.cameraManager,false);//解码黑白
+                }
             }
            // decodeOrStoreSavedBitmap(null, null);
         } catch (IOException ioe) {
@@ -170,6 +177,7 @@ public class ReceiveActivity extends SendReceive<ReceiveHandler> implements Surf
     protected void onPause() {
         if (handler != null) {
             handler.quitSynchronously();
+            handler = null;
             //receiveHandler = null;//程序未退出的时候就不删除handler
         }
 
@@ -181,5 +189,20 @@ public class ReceiveActivity extends SendReceive<ReceiveHandler> implements Surf
             surfaceHolder.removeCallback(this);
         }
         super.onPause();
+    }
+
+    /**
+     * raptor解析所有数据包的时候调用，加上progressbar和文字提示。
+     */
+    public void RaptorCalculationStart(){
+        this.progress.setVisibility(View.GONE);
+        View view = findViewById(R.id.result_view);
+        view.setVisibility(View.VISIBLE);
+        ProgressBar progressBar = findViewById(R.id.progressBarReceive);
+        progressBar.setVisibility(View.VISIBLE);
+
+        TextView  textview = findViewById(R.id.ProgressTextView);
+        textview.setText("正在解析文件......");
+
     }
 }

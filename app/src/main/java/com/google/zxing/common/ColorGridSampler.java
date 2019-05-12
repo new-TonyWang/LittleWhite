@@ -115,9 +115,9 @@ public  class ColorGridSampler extends GridSampler {
 
        // outputimage(bits);
 
-        outputimage(bitsR,1);
-        outputimage(bitsG,2);
-        outputimage(bitsB,3);
+       // outputimage(bitsR,1);
+       // outputimage(bitsG,2);
+       // outputimage(bitsB,3);
 
         return Bits;
     }

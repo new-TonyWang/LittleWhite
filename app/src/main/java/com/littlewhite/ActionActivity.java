@@ -7,18 +7,18 @@ import android.widget.Button;
 import java.util.ArrayList;
 
 public class ActionActivity extends ActivityOnlistener {
-    private Button mBsend,mBreceive;
+    private Button mBreceive,mBreceiveColor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_action);
-        mBsend = findViewById(R.id.send);
-        mBreceive = findViewById(R.id.receive);
-        list.add(mBsend);
+        mBreceive = findViewById(R.id.receiveBlack);
+        mBreceiveColor = findViewById(R.id.receiveColor);
         list.add(mBreceive);
-        setOnclickListener(mBsend,this);
+        list.add(mBreceiveColor);
         setOnclickListener(mBreceive,this);
+        setOnclickListener(mBreceiveColor,this);
     }
     @Override
     protected void onResume() {

@@ -57,6 +57,7 @@ public class HistoryActivity extends Activity{
        //静态赋值
         historyManager = new HistoryManager(this);
       this.listData =  historyManager.SearchHistory();
+
       /* listData = new ArrayList<String>();
         for (int i = 0; i < 80; i++) {
             listData.add("item" + i);

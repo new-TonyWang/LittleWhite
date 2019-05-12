@@ -17,6 +17,8 @@
 package net.fec.openrq;
 
 
+import com.littlewhite.ReceiveFile.ReceiveActivity;
+
 import net.fec.openrq.decoder.DataDecoder;
 import net.fec.openrq.decoder.SourceBlockDecoder;
 import net.fec.openrq.encoder.DataEncoder;
@@ -111,6 +113,11 @@ public final class OpenRQ {
         // exceptions are checked inside the invoked method
         return ArrayDataDecoder.newDecoder(fecParams, symbolOverhead);
     }
+    public static ArrayDataDecoder newDecoder(FECParameters fecParams, int symbolOverhead,ReceiveActivity receiveActivity) {
+
+        // exceptions are checked inside the invoked method
+        return ArrayDataDecoder.newDecoder(fecParams, symbolOverhead,receiveActivity);
+    }
 
     /**
      * Returns a {@link DataDecoder} object that decodes source data into an array of bytes, configured according to the
@@ -183,6 +190,10 @@ public final class OpenRQ {
     public static ArrayDataDecoder newDecoderWithTwoOverhead(FECParameters fecParams) {
 
         return newDecoder(fecParams, 2);
+    }
+    public static ArrayDataDecoder newDecoderWithTwoOverhead(FECParameters fecParams, ReceiveActivity receiveActivity) {
+
+        return newDecoder(fecParams, 2,receiveActivity);
     }
 
     /**

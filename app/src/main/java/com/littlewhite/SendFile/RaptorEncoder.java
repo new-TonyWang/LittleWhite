@@ -14,7 +14,7 @@ import static android.content.ContentValues.TAG;
 public class RaptorEncoder extends SendReceive<RaptorEncoderHandler> implements Runnable {
     private SendFileActivity sendFileActivity;
     private FFMPEGThread ffmpegThread;
-    private RaptorEncoderHandler raptorEncoderHandler;
+   // private RaptorEncoderHandler raptorEncoderHandler;
     private final CountDownLatch handlerInitLatch;
 
 
@@ -36,8 +36,8 @@ public class RaptorEncoder extends SendReceive<RaptorEncoderHandler> implements 
     @Override
     public void run() {
         Looper.prepare();
+        handler = new RaptorEncoderHandler(this.sendFileActivity, this.ffmpegThread.getHandler());
         handlerInitLatch.countDown();
-        this.raptorEncoderHandler = new RaptorEncoderHandler(this.sendFileActivity);
         Looper.loop();
 
     }

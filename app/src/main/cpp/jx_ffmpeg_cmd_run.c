@@ -4,7 +4,7 @@
  //ANDROID
 
 JNIEXPORT jint JNICALL
-Java_com_littlewhite_SendFile_SendFileHandler_ffmpegRun(JNIEnv *env, jobject instance,
+Java_com_littlewhite_SendFile_FFMPEGHandler_ffmpegRun(JNIEnv *env, jobject instance,
                                                         jobjectArray cmd) {
     int argc = (*env)->GetArrayLength(env, cmd);//长度
     char *chars = NULL;
@@ -21,3 +21,4 @@ Java_com_littlewhite_SendFile_SendFileHandler_ffmpegRun(JNIEnv *env, jobject ins
     // TODO
 
 }
+

@@ -14,23 +14,25 @@ public class SqllitData {
     private SqllitHelper helper;
     private String FileID;
     private SQLiteDatabase sqLiteDatabase;
-    //private final String sql = "UPDATE File_Logs SET ReceivedSymbolNum=? ,ReceivedNum=? WHERE ID=?";
-    private File DownLoadPath = initReceivePath();
+    private final String sql = "UPDATE File_Logs SET ReceivedNum=? WHERE ID=?";
+    private File DownLoadPath;
+    private Context context;
     public SqllitData(Context context){
-        File path = initReceivePath();
-        String dbname = path.getAbsolutePath()+"/LittleWhite.db";
+        String path = initReceivePath(context);
+        String dbname = path+"/LittleWhite.db";
         helper = new SqllitHelper(context,dbname,null,1);
+        DownLoadPath = new File(path+"/receive");
     }
-    private File initReceivePath() {
-        File DOWNLOADSDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);//外存DownLoad目录
+    private String initReceivePath(Context context) {
+        File DOWNLOADSDir = context.getExternalFilesDir("");//外存DownLoad目录
         if (!DOWNLOADSDir.exists()) {
             DOWNLOADSDir.mkdir();
         }
-        File DownloadFileDir = new File(DOWNLOADSDir.getAbsolutePath() + "/QRCodes");
-        if (!DownloadFileDir.exists()) {
-            DownloadFileDir.mkdir();
+        File DOWNLOADDir = context.getExternalFilesDir("receive");//外存DownLoad目录
+        if (!DOWNLOADDir.exists()) {
+            DOWNLOADDir.mkdir();
         }
-        return DownloadFileDir;
+        return DOWNLOADSDir.getAbsolutePath();
     }
 
     /**
@@ -120,14 +122,14 @@ public class SqllitData {
      * 更新接收到的数据包。
      * 这里已经开始进行文件接收，理论上sqLiteDatabase不会再改变，
      *
-     *//*
-    public void UpdateReceivedSymbolNum(StringBuilder builder,int ReceivedNum){
+     */
+    public void UpdateReceivedSymbolNum(int ReceivedNum){
     //String ReceivedSymbolNum = builder.toString();
-    Object[] bindArray = new Object[]{builder.toString(),ReceivedNum,this.FileID};
+    Object[] bindArray = new Object[]{ReceivedNum,this.FileID};
     this.sqLiteDatabase.execSQL(sql,bindArray);
         //SQLiteStatement statement = new SQLiteStatement(this.sqLiteDatabase,sql,bindArray);
     }
-    */
+
     public void SetDataBase(){
         this.sqLiteDatabase = this.helper.getWritableDatabase();
     }
@@ -158,6 +160,9 @@ public class SqllitData {
             filenames.add(cursor.getString(0));
         }
         File[] files = this.DownLoadPath.listFiles();
+        if(files.length==0){
+            return;//里面没有文件，不需要继续操作
+        }
        // LinkedList<String> Deletefile = new LinkedList<>();
         StringBuilder Deletefile = new StringBuilder();
         for (int i = 0;i<files.length-1;i++) {

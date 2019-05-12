@@ -16,6 +16,8 @@
 package net.fec.openrq;
 
 
+import com.littlewhite.ReceiveFile.ReceiveActivity;
+
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -61,7 +63,7 @@ public final class ArrayDataDecoder implements DataDecoder {
             return null;
         }
     }
-    static ArrayDataDecoder RestartDecoder(FECParameters fecParams, int symbOver,File receivefile,byte[] data) {
+    static ArrayDataDecoder newDecoder(FECParameters fecParams, int symbOver, ReceiveActivity receiveActivity) {
 
         // throws NullPointerException if null fecParams
         if (fecParams.dataLength() > Integer.MAX_VALUE) {
@@ -72,11 +74,7 @@ public final class ArrayDataDecoder implements DataDecoder {
         }
 
         final byte[] dataArray = new byte[fecParams.dataLengthAsInt()];
-        try {
-            return new ArrayDataDecoder(dataArray, fecParams, symbOver);
-        } catch (FileNotFoundException e) {
-            return null;
-        }
+        return new ArrayDataDecoder(dataArray, fecParams, symbOver,receiveActivity);
     }
 
 
@@ -106,11 +104,11 @@ public final class ArrayDataDecoder implements DataDecoder {
                         sbn, symbOver);
                 }
             });
-    }/*
-    private ArrayDataDecoder(byte[] dataArray, FECParameters fecParams, final int symbOver,File receivefile) throws FileNotFoundException {
+    }
+    private ArrayDataDecoder(byte[] dataArray, FECParameters fecParams, final int symbOver, final ReceiveActivity receiveActivity)  {
         //this.receivefile = new File("D:\\workspace\\idea\\OpenRQ\\src\\imageout.png");
-        FileOutputStream fileOutputStream = new FileOutputStream(receivefile);
-        this.fileChannel = fileOutputStream.getChannel();
+       // FileOutputStream fileOutputStream = new FileOutputStream(receivefile);
+
         this.dataArray = dataArray;
         //this.dataArray = null;
         this.fecParams = fecParams;
@@ -124,11 +122,11 @@ public final class ArrayDataDecoder implements DataDecoder {
                         return ArraySourceBlockDecoder.newDecoder(
                                 ArrayDataDecoder.this, ArrayDataDecoder.this.dataArray, off,
                                 ArrayDataDecoder.this.fecParams,
-                                sbn, symbOver,ArrayDataDecoder.this.fileChannel);
+                                sbn, symbOver,receiveActivity);
                     }
                 });
     }
-    */
+
     @Override
     public FECParameters fecParameters() {
 

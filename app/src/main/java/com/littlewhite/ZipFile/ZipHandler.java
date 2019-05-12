@@ -8,6 +8,7 @@ import android.os.Message;
 
 import com.littlewhite.R;
 import com.littlewhite.ReceiveFile.SqllitUtil.SqllitData;
+import com.littlewhite.SendFile.SendConfigs;
 import com.littlewhite.SendReceive;
 
 import java.io.File;
@@ -21,8 +22,11 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 public class ZipHandler extends Handler {
+    private static int BLACK_WHITE = 0;
+    private static int COLOR = 1;
     private SendReceive sendReceive;
     private SqllitData sqllitData;
+    private File zFile;
    // private File Zipfile;
     //private ZipUtil zipUtil= new ZipUtil();
    // private Handler handler;
@@ -36,18 +40,25 @@ public class ZipHandler extends Handler {
         Bundle bundle= message.getData();
         switch (message.what) {
             case R.id.ZipFile:
-                String zipfile = bundle.getString("FilePath");
-                ZipFile(zipfile);
+                SendConfigs file = (SendConfigs)message.obj;
+                this.zFile =  ZipFile(file);
                 break;
             case R.id.UnZipFile:
                // Bundle bundle= message.getData();
                 String unzipfile = bundle.getString("FilePath");
                 UnZipFile(unzipfile);
-                //File deleteFile = new File(unzipfile);
-                //deleteFile.delete();
+                File deleteFile = new File(unzipfile);
+                deleteFile.delete();
                 break;
             case R.id.finish:
+                this.zFile.delete();
+
                 Looper.myLooper().quit();
+                sendFinishMessage();
+                break;
+            case R.id.failed:
+                Looper.myLooper().quit();
+                break;
             default:
 
         }
@@ -73,21 +84,33 @@ public class ZipHandler extends Handler {
 
     /**
      * 压缩
-     * @param FilePath
+     * @param
      */
-    private  void ZipFile(String FilePath){
-        File zipDirectoryFile =  zipDirectory(FilePath);
+    private  File ZipFile(SendConfigs File){
+        File zipDirectoryFile =  zipDirectory(File.getPath());
         if(!Objects.equals(zipDirectoryFile, null)){
             Message message = Message.obtain((Handler) sendReceive.getHandler());
             message.obj = zipDirectoryFile;
-            message.what = R.id.Encode;
+            if(File.getQRCodeType()==BLACK_WHITE) {
+                message.what = R.id.Encode;
+            }
+            else if(File.getQRCodeType()==COLOR){
+                message.what = R.id.EncodeColor;
+            }
             message.sendToTarget();
+            return  zipDirectoryFile;
         }else{
             Message message = Message.obtain((Handler) sendReceive.getHandler());
            // message.obj = zipDirectoryFile;
             message.what = R.id.failed;
             message.sendToTarget();
+            return null;
         }
+    }
+    private void sendFinishMessage(){
+        Message message = obtainMessage(R.id.finish);
+        Handler handler =  (Handler)this.sendReceive.getHandler();
+        handler.sendMessageAtFrontOfQueue(message);
     }
     /**
      * 压缩一个文件夹

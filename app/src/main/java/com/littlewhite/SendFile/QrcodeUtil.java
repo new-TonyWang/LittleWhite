@@ -108,7 +108,7 @@ public class QrcodeUtil {
     /**
      * 使用彩色二维码传输文件
      * @param imgpath
-     * @param format
+     * @param
      * @param content1
      * @param content2
      * @param content3

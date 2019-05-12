@@ -24,6 +24,13 @@ public class ZipThread implements Runnable{
       //  this.NextStepHandler = NextStepHandler;
         //this.zipfile = new File(file);
     }
+    public ZipThread(SendReceive SendReceive){
+        this.SendReceive  = SendReceive;
+        //this.sqllitData = sqllitData;
+        this.handlerInitLatch = new CountDownLatch(1);
+        //  this.NextStepHandler = NextStepHandler;
+        //this.zipfile = new File(file);
+    }
 
     public Handler getZipHandler() {
         try {

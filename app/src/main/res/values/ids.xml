@@ -31,6 +31,12 @@
   <item type="id" name="return_scan_result"/>
   <item type="id" name="ZipFile"/>
   <item type="id" name="UnZipFile"/>
+  <item type="id" name="Init"/>
+  <item type="id" name="GenerateVideo"/>
   <item type="id" name="Encode"/>
+  <item type="id" name="EncodeColor"/>
+  <item type="id" name="RaptorEncodePhase"/>
+  <item type="id" name="FFmpegPhase"/>
+  <item type="id" name="RaptorDecodeFile"/>
 
 </resources>

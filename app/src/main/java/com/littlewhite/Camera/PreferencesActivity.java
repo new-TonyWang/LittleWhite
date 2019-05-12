@@ -18,6 +18,7 @@ package com.littlewhite.Camera;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Environment;
 
 /**
  * The main settings activity.

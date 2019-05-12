@@ -17,18 +17,18 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <Button
-            android:id="@+id/action"
+            android:id="@+id/send"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="30dp"
-            android:text="@string/action" />
+            android:text="@string/send" />
 
         <Button
-            android:id="@+id/history"
+            android:id="@+id/receive"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="30dp"
-            android:text="@string/history" />
+            android:text="@string/receive" />
 
         <Button
             android:id="@+id/settings"
