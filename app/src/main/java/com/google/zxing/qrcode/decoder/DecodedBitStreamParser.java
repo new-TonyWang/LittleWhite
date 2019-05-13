@@ -542,7 +542,7 @@ final class DecodedBitStreamParser {
 
 	private static int parseECIValue(BitSource bits) throws FormatException {
 		int firstByte = bits.readBits(8);
-		if ((firstByte & 0x80) == 0) {
+		if ((firstByte & 0x80) == 0) {//0100
 			// just one byte
 			return firstByte & 0x7F;
 		}

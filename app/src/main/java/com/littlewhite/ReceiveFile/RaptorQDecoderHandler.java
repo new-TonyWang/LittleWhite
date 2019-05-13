@@ -201,7 +201,8 @@ public class RaptorQDecoderHandler extends Handler {
         this.sum = this.fecParameters.totalSymbols();
         this.total = this.sum;
         this.sum += 2;
-        this.num = fileInfo.getReceivedNum();
+        this.num = 0;
+        //this.num = fileInfo.getReceivedNum();
         SendToReceiveInit(this.sum);
        // String ReceivedSymbol = fileInfo.getReceivedSymbolNum();
         //String[] ReceivedSymbolString = ReceivedSymbol.split(",",ReceivedSymbol.length()-1);
