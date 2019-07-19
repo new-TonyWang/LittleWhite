@@ -46,6 +46,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class SendFileActivity extends ActivityOnlistener {
 
@@ -73,7 +75,7 @@ public class SendFileActivity extends ActivityOnlistener {
     private ArrayAdapter<CharSequence> adapter;
     private boolean haschange = false;
     // private List<CharSequence> List = new ArrayList<CharSequence>();
-
+    private boolean hasinit;
     public SendFileHandler getSendFileHandler() {
         return sendFileHandler;
     }
@@ -128,54 +130,56 @@ public class SendFileActivity extends ActivityOnlistener {
     @Override
     protected void onResume() {
         super.onResume();
-        this.mBFileSelection = findViewById(R.id.FileSelection);
-        this.FilePathTV = findViewById(R.id.Filepath);
-        this.widthEdit = findViewById(R.id.widthEdit);
-        this.width = Integer.valueOf(widthEdit.getText().toString());
-        this.heightEdit = findViewById(R.id.heightEdit);
-        this.height = Integer.valueOf(heightEdit.getText().toString());
-        this.FPSEdit = findViewById(R.id.FPS);
-        this.FPS = Integer.valueOf(FPSEdit.getText().toString());
-        this.VideoGeneration = findViewById(R.id.VideoGeneration);
-        this.QRCodeCapacityEdit = findViewById(R.id.QRCodeCapacity);
-        this.QRCodeCapacity = Integer.valueOf(QRCodeCapacityEdit.getText().toString());
-        ErrorCorrectionLevelSelection = findViewById(R.id.ErrorCorrectionLevelSelection);
-        QRCodeTypeSelection = findViewById(R.id.QRCodeType);
-        ErrorCorrectionLevel = "L";
-        QRCodeType = 0;
-        adapter = ArrayAdapter.createFromResource(this, R.array.Error_Correction_Level, android.R.layout.simple_spinner_item);//创建spinner的适配器
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        ErrorCorrectionLevelSelection.setAdapter(adapter);
-        ArrayAdapter<CharSequence> adapterQRCodeType = ArrayAdapter.createFromResource(this, R.array.QRCodeType, android.R.layout.simple_spinner_item);
-        adapterQRCodeType.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        QRCodeTypeSelection.setAdapter(adapterQRCodeType);
-        initSpanner(ErrorCorrectionLevelSelection);
-        initSpanner(QRCodeTypeSelection);
-        setOnclickListener(mBFileSelection, this);
-        setOnclickListener(VideoGeneration, this);
-        setEditTextListener(widthEdit);
-        setEditTextListener(heightEdit);
-        setEditTextListener(FPSEdit);
-        setEditTextListener(QRCodeCapacityEdit);
-        Intent intent = getIntent();
-        String action = intent.getAction();
-        String type = intent.getType();
-        if (Intent.ACTION_SEND.equals(action) && type != null /*&& "video/mp4".equals(type)*/)
-        {
-            Uri uri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
-            //如果是媒体类型需要从数据库获取路径
-            File chosenFile =new File(getRealPathFromURI(uri));
-            if (chosenFile.length() < 1048576) {//文件必须小于1MB，不然手会累死的
-                this.path = chosenFile.getAbsolutePath();
-                FilePathTV.setText(path + "\n 文件大小:" + chosenFile.length() + "B");
-                FilePathTV.setTextColor(0xFF868585);
-            } else {
-                path = null;
-                FilePathTV.setText("文件必须小于1MiB");
-                FilePathTV.setTextColor(Color.rgb(255, 0, 0));
-                Toast.makeText(this, "文件必须小于1MiB", Toast.LENGTH_SHORT).show();
+        if(!hasinit) {
+            this.mBFileSelection = findViewById(R.id.FileSelection);
+            this.FilePathTV = findViewById(R.id.Filepath);
+            this.widthEdit = findViewById(R.id.widthEdit);
+            this.width = Integer.valueOf(widthEdit.getText().toString());
+            this.heightEdit = findViewById(R.id.heightEdit);
+            this.height = Integer.valueOf(heightEdit.getText().toString());
+            this.FPSEdit = findViewById(R.id.FPS);
+            this.FPS = Integer.valueOf(FPSEdit.getText().toString());
+            this.VideoGeneration = findViewById(R.id.VideoGeneration);
+            this.QRCodeCapacityEdit = findViewById(R.id.QRCodeCapacity);
+            this.QRCodeCapacity = Integer.valueOf(QRCodeCapacityEdit.getText().toString());
+            ErrorCorrectionLevelSelection = findViewById(R.id.ErrorCorrectionLevelSelection);
+            QRCodeTypeSelection = findViewById(R.id.QRCodeType);
+            ErrorCorrectionLevel = "L";
+            QRCodeType = R.id.BW;
+            adapter = ArrayAdapter.createFromResource(this, R.array.Error_Correction_Level, android.R.layout.simple_spinner_item);//创建spinner的适配器
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            ErrorCorrectionLevelSelection.setAdapter(adapter);
+            ArrayAdapter<CharSequence> adapterQRCodeType = ArrayAdapter.createFromResource(this, R.array.QRCodeType, android.R.layout.simple_spinner_item);
+            adapterQRCodeType.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            QRCodeTypeSelection.setAdapter(adapterQRCodeType);
+            initSpanner(ErrorCorrectionLevelSelection);
+            initSpanner(QRCodeTypeSelection);
+            setOnclickListener(mBFileSelection, this);
+            setOnclickListener(VideoGeneration, this);
+            setEditTextListener(widthEdit);
+            setEditTextListener(heightEdit);
+            setEditTextListener(FPSEdit);
+            setEditTextListener(QRCodeCapacityEdit);
+            Intent intent = getIntent();
+            String action = intent.getAction();
+            String type = intent.getType();
+            if (Intent.ACTION_SEND.equals(action) && type != null /*&& "video/mp4".equals(type)*/) {
+                Uri uri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
+                //如果是媒体类型需要从数据库获取路径
+                File chosenFile = new File(getRealPathFromURI(uri));
+                if (chosenFile.length() < 1048576) {//文件必须小于1MB，不然手会累死的
+                    this.path = chosenFile.getAbsolutePath();
+                    FilePathTV.setText(path + "\n 文件大小:" + chosenFile.length() + "B");
+                    FilePathTV.setTextColor(0xFF868585);
+                } else {
+                    path = null;
+                    FilePathTV.setText("文件必须小于1MiB");
+                    FilePathTV.setTextColor(Color.rgb(255, 0, 0));
+                    Toast.makeText(this, "文件必须小于1MiB", Toast.LENGTH_SHORT).show();
+                }
+                //pathTextView.setText("文件路径:"+filePath);
             }
-            //pathTextView.setText("文件路径:"+filePath);
+            hasinit = true;
         }
     }
 
@@ -190,7 +194,18 @@ public class SendFileActivity extends ActivityOnlistener {
                         ErrorCorrectionLevel = (String) adapter.getItem(position);
                         break;
                     case R.id.QRCodeType:
-                        QRCodeType = (int) id;//0为黑白，1为彩色
+                        //QRCodeType = (int) id;//0为黑白，1为彩色
+                        switch ((int)id){
+                            case 0:
+                                QRCodeType = R.id.BW;
+                                break;
+                            case 1:
+                                QRCodeType = R.id.HSV;
+                                break;
+                            case 2:
+                                QRCodeType = R.id.RGB;
+                                break;
+                        }
                         break;
                 }
                 checkConfig();
@@ -364,6 +379,7 @@ public class SendFileActivity extends ActivityOnlistener {
                 if (chosenFile.length() < 1048576) {//文件必须小于1MB，不然手会累死的
                     FilePathTV.setText(path + "\n 文件大小:" + chosenFile.length() + "B");
                     FilePathTV.setTextColor(0xFF868585);
+                    checkConfig();
                 } else {
                     path = null;
                     FilePathTV.setText("文件必须小于1MiB");
@@ -386,6 +402,7 @@ public class SendFileActivity extends ActivityOnlistener {
             if (chosenFile.length() < 1048576) {//文件必须小于1MB，不然手会累死的
                 FilePathTV.setText(path + "\n 文件大小:" + chosenFile.length() + "B");
                 FilePathTV.setTextColor(0xFF868585);
+                checkConfig();
             } else {
                 path = null;
                 FilePathTV.setText("文件必须小于1MiB");
@@ -394,7 +411,22 @@ public class SendFileActivity extends ActivityOnlistener {
             }
         }
     }
-
+    private void showMyToast(final Toast toast, final int cnt) {
+        final Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                toast.show();
+            }
+        }, 0, 1000);
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                toast.cancel();
+                timer.cancel();
+            }
+        }, cnt );
+    }
     public String getRealPathFromURI(Uri contentUri) {
         String res = null;
         String[] proj = {MediaStore.Images.Media.DATA};
@@ -533,7 +565,8 @@ public class SendFileActivity extends ActivityOnlistener {
             if (this.FPS > 25 || this.FPS == 0) {
                 this.VideoGeneration.setClickable(false);
                 //this.FPSEdit.setText(R.string.FPS_Default);
-                Toast.makeText(this, "视频帧率必须在1-25之间", Toast.LENGTH_SHORT).show();
+                Toast inf = Toast.makeText(this, "视频帧率必须在1-25之间", Toast.LENGTH_SHORT);
+                showMyToast(inf,1000);
                 return false;
             }
             if (this.width < 100
@@ -541,20 +574,22 @@ public class SendFileActivity extends ActivityOnlistener {
                 this.VideoGeneration.setClickable(false);
                 //widthEdit.setText(R.string.height_width_default);
                 //heightEdit.setText(R.string.height_width_default);
-                Toast.makeText(this, "视频分辨率必须大于100", Toast.LENGTH_SHORT).show();
+                Toast inf = Toast.makeText(this, "视频分辨率必须大于100", Toast.LENGTH_SHORT);
+                showMyToast(inf,1000);
                 return false;
             }
             switch (this.QRCodeType) {
 
-                case 0://黑白
+                case  R.id.BW://黑白
                     switch (ErrorCorrectionLevel) {
                         case "L":
-                            if (this.QRCodeCapacity > 1935
+                            if (this.QRCodeCapacity > 2100
                                     || this.QRCodeCapacity < 21) {
 
                                 this.VideoGeneration.setClickable(false);
                                 //  QRCodeCapacityEdit.setText(R.string.black_white_QRCode_capacity_default);
-                                Toast.makeText(this, "L级别纠错的时候黑白二维码容量必须在21-1935之间", Toast.LENGTH_SHORT).show();
+                                Toast inf = Toast.makeText(this, "容量必须在21-2100之间", Toast.LENGTH_SHORT);
+                                showMyToast(inf,1000);
                                 return false;
                             }
                             break;
@@ -564,7 +599,8 @@ public class SendFileActivity extends ActivityOnlistener {
 
                                 this.VideoGeneration.setClickable(false);
                                 // QRCodeCapacityEdit.setText(Integer.toString(1750));
-                                Toast.makeText(this, "M级别纠错的时候黑白二维码容量必须在21-1705之间", Toast.LENGTH_SHORT).show();
+                                Toast inf = Toast.makeText(this, "容量必须在21-1705之间", Toast.LENGTH_SHORT);
+                                showMyToast(inf,1000);
                                 return false;
                             }
                             break;
@@ -574,7 +610,8 @@ public class SendFileActivity extends ActivityOnlistener {
 
                                 this.VideoGeneration.setClickable(false);
                                 // QRCodeCapacityEdit.setText(Integer.toString(1211));
-                                Toast.makeText(this, "Q级别纠错的时候黑白二维码容量必须在21-1211之间", Toast.LENGTH_SHORT).show();
+                                Toast inf = Toast.makeText(this, "容量必须在21-1211之间", Toast.LENGTH_SHORT);
+                                showMyToast(inf,1000);
                                 return false;
                             }
                             break;
@@ -584,7 +621,8 @@ public class SendFileActivity extends ActivityOnlistener {
 
                                 this.VideoGeneration.setClickable(false);
                                 //QRCodeCapacityEdit.setText(Integer.toString(941));
-                                Toast.makeText(this, "H级别纠错的时候黑白二维码容量必须在21-941之间", Toast.LENGTH_SHORT).show();
+                                Toast inf = Toast.makeText(this, "容量必须在21-941之间", Toast.LENGTH_SHORT);
+                                showMyToast(inf,1000);
                                 return false;
                             }
                             break;
@@ -593,15 +631,17 @@ public class SendFileActivity extends ActivityOnlistener {
                 //this.VideoGeneration.setClickable(true);
                 //return  true;
 
-                case 1://彩色
+                case  R.id.HSV://HSV彩色
+                case R.id.RGB://RGB
                     switch (ErrorCorrectionLevel) {
                         case "L":
-                            if (this.QRCodeCapacity > 1747
+                            if (this.QRCodeCapacity > 6000
                                     || this.QRCodeCapacity < 21) {
 
                                 this.VideoGeneration.setClickable(false);
                                 // QRCodeCapacityEdit.setText(R.string.ColorCode_capacity_default);
-                                Toast.makeText(this, "L级别纠错的时候彩色二维码容量必须在21-1747之间", Toast.LENGTH_SHORT).show();
+                                Toast inf = Toast.makeText(this, "容量必须在21-6000之间", Toast.LENGTH_SHORT);
+                                showMyToast(inf,1000);
                                 return false;
                             }
                             break;
@@ -611,7 +651,8 @@ public class SendFileActivity extends ActivityOnlistener {
 
                                 this.VideoGeneration.setClickable(false);
                                 // QRCodeCapacityEdit.setText(Integer.toString(1339));
-                                Toast.makeText(this, "M级别纠错的时候彩色二维码容量必须在21-1339之间", Toast.LENGTH_SHORT).show();
+                                Toast inf = Toast.makeText(this, "容量必须在21-1339之间", Toast.LENGTH_SHORT);
+                                showMyToast(inf,1000);
                                 return false;
                             }
 
@@ -622,7 +663,8 @@ public class SendFileActivity extends ActivityOnlistener {
 
                                 this.VideoGeneration.setClickable(false);
                                 // QRCodeCapacityEdit.setText(Integer.toString(955));
-                                Toast.makeText(this, "Q级别纠错的时候彩色二维码容量必须在21-955之间", Toast.LENGTH_SHORT).show();
+                                Toast inf = Toast.makeText(this, "容量必须在21-955之间", Toast.LENGTH_SHORT);
+                                showMyToast(inf,1000);
                                 return false;
                             }
                             break;
@@ -632,7 +674,8 @@ public class SendFileActivity extends ActivityOnlistener {
 
                                 this.VideoGeneration.setClickable(false);
                                 //QRCodeCapacityEdit.setText(Integer.toString(739));
-                                Toast.makeText(this, "H级别纠错的时候彩色二维码容量必须在21-739之间", Toast.LENGTH_SHORT).show();
+                                Toast inf = Toast.makeText(this, "容量必须在21-739之间", Toast.LENGTH_SHORT);
+                                showMyToast(inf,1000);
                                 return false;
                             }
                             break;

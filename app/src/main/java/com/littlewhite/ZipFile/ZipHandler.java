@@ -22,8 +22,6 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 public class ZipHandler extends Handler {
-    private static int BLACK_WHITE = 0;
-    private static int COLOR = 1;
     private SendReceive sendReceive;
     private SqllitData sqllitData;
     private File zFile;
@@ -91,11 +89,13 @@ public class ZipHandler extends Handler {
         if(!Objects.equals(zipDirectoryFile, null)){
             Message message = Message.obtain((Handler) sendReceive.getHandler());
             message.obj = zipDirectoryFile;
-            if(File.getQRCodeType()==BLACK_WHITE) {
+            if(File.getQRCodeType()==R.id.BW) {
                 message.what = R.id.Encode;
             }
-            else if(File.getQRCodeType()==COLOR){
-                message.what = R.id.EncodeColor;
+            else if(File.getQRCodeType()==R.id.HSV){
+                message.what = R.id.EncodeHSV;
+            }else if(File.getQRCodeType()==R.id.RGB){
+                message.what = R.id.EncodeRGB;
             }
             message.sendToTarget();
             return  zipDirectoryFile;

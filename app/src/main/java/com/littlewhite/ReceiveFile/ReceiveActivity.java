@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -12,6 +13,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.littlewhite.Camera.CameraManager;
 import com.littlewhite.Camera.ViewfinderView;
@@ -26,6 +28,8 @@ import com.littlewhite.SendReceive;
 import com.littlewhite.TransmissionCompleteActivity;
 
 import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class ReceiveActivity extends SendReceive<ReceiveHandler> implements SurfaceHolder.Callback{
     private ViewfinderView viewfinderView;//扫描框
@@ -37,6 +41,7 @@ public class ReceiveActivity extends SendReceive<ReceiveHandler> implements Surf
     private SurfaceView surfaceView;
     private TextView progress;
     private boolean hasSurface = false;
+    private boolean isautofocus = true;
     //private FileInfo fileHistory;
     //private final CountDownLatch handlerInitLatch = new CountDownLatch(1);
    // private final CountDownLatch handlerInitLatch = new CountDownLatch(1);;
@@ -130,10 +135,54 @@ public class ReceiveActivity extends SendReceive<ReceiveHandler> implements Surf
     }
 
     @Override
-    public void surfaceDestroyed(SurfaceHolder holder) {
+    public void surfaceDestroyed(SurfaceHolder holder) {hasSurface = false;
 
     }
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_BACK:
 
+                return super.onKeyDown(keyCode,event);
+            case KeyEvent.KEYCODE_VOLUME_DOWN:
+                switchAutoFocus();
+                return true;
+            case KeyEvent.KEYCODE_VOLUME_UP:
+                switchAutoFocus();
+                return true;
+        }
+        return false;
+    }
+
+    private void switchAutoFocus(){
+        if(isautofocus){
+            isautofocus = false;
+            cameraManager.setAutoFocus();
+            Toast inf = Toast.makeText(this,"锁定焦距",Toast.LENGTH_SHORT);
+            showMyToast(inf,1000);
+        }else{
+            isautofocus = true;
+            cameraManager.setAutoFocus();
+            Toast inf = Toast.makeText(this,"自动对焦",Toast.LENGTH_SHORT);
+            showMyToast(inf,1000);
+        }
+    }
+    private void showMyToast(final Toast toast, final int cnt) {
+        final Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                toast.show();
+            }
+        }, 0, 1000);
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                toast.cancel();
+                timer.cancel();
+            }
+        }, cnt );
+    }
     private void initCamera(SurfaceHolder surfaceHolder) {
         if (surfaceHolder == null) {
             throw new IllegalStateException("No SurfaceHolder provided");
@@ -147,12 +196,18 @@ public class ReceiveActivity extends SendReceive<ReceiveHandler> implements Surf
             // Creating the handler starts the preview, which can also throw a RuntimeException.
             if(handler==null) {
                 Intent intent = getIntent();
-                if(intent.getBooleanExtra("iscolor",false)) {
-                    this.handler = new ReceiveHandler(this, this.cameraManager,true);//解码彩色
+                switch(intent.getIntExtra("iscolor",R.id.BW)) {
+                    case R.id.BW:
+                    this.handler = new ReceiveHandler(this, this.cameraManager,R.id.BW);//解码黑白
+                        break;
+                    case R.id.HSV:
+                        this.handler = new ReceiveHandler(this, this.cameraManager,R.id.HSV);//解码HSV
+                        break;
+                    case R.id.RGB:
+                        this.handler = new ReceiveHandler(this, this.cameraManager,R.id.RGB);//解码RGB
+                        break;
                 }
-                else{
-                    this.handler = new ReceiveHandler(this, this.cameraManager,false);//解码黑白
-                }
+
             }
            // decodeOrStoreSavedBitmap(null, null);
         } catch (IOException ioe) {
@@ -187,11 +242,13 @@ public class ReceiveActivity extends SendReceive<ReceiveHandler> implements Surf
            // SurfaceView surfaceView = (SurfaceView) findViewById(R.id.surfaceView);
             SurfaceHolder surfaceHolder = surfaceView.getHolder();
             surfaceHolder.removeCallback(this);
+
         }
         super.onPause();
     }
 
     /**
+     *
      * raptor解析所有数据包的时候调用，加上progressbar和文字提示。
      */
     public void RaptorCalculationStart(){

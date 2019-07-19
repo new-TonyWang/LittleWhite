@@ -50,13 +50,20 @@ public class ActivityOnlistener extends AppCompatActivity implements View.OnClic
                 break;
             case R.id.receiveBlack:
                 Intent receive = new Intent(this, ReceiveActivity.class);
-                receive.putExtra("iscolor",false);
+                receive.putExtra("iscolor",R.id.BW);
                 startActivity(receive);
                 break;
             case R.id.receiveColor:
                 Intent receiveColor = new Intent(this, ReceiveActivity.class);
-                receiveColor.putExtra("iscolor",true);
+                receiveColor.putExtra("iscolor",R.id.HSV);
                 startActivity(receiveColor);
+                //Intent receive = new Intent(this, ReceiveActivity.class);
+                //startActivity(receive);
+                break;
+            case R.id.receiveRGB:
+                Intent receiveRGB = new Intent(this, ReceiveActivity.class);
+                receiveRGB.putExtra("iscolor",R.id.RGB);
+                startActivity(receiveRGB);
                 //Intent receive = new Intent(this, ReceiveActivity.class);
                 //startActivity(receive);
                 break;

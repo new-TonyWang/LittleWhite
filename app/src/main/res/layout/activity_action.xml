@@ -29,5 +29,12 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="30dp"
             android:text="@string/receiveColor" />
+
+        <Button
+            android:id="@+id/receiveRGB"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="30dp"
+            android:text="@string/receiveRGB" />
     </LinearLayout>
 </android.support.constraint.ConstraintLayout>

@@ -52,7 +52,7 @@ public class DecoderThread implements Runnable {
         Looper.prepare();
         this.handler = new DecoderHandler(decodeHints,raptorQDecoder.getHandler(),ReceiveActivity,new HSVColorTable());
         handlerInitLatch.countDown();
-        Log.i(this.getClass().toString(),"启动");
+        //Log.i(this.getClass().toString(),"启动");
         Looper.loop();
     }
 }

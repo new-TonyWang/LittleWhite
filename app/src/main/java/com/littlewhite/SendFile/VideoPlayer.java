@@ -1,13 +1,19 @@
 package com.littlewhite.SendFile;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
+import android.graphics.Point;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
+import android.view.Display;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.MediaController;
 import android.widget.VideoView;
 
@@ -19,14 +25,29 @@ public class VideoPlayer extends Activity {
 
     VideoView videoView;
     MediaController mController;
+    BrightUtil brightUtil;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().setFormat(PixelFormat.TRANSLUCENT);
         setContentView(R.layout.activity_video_play);
+        BrightUtil brightUtil = new BrightUtil(this);
+        brightUtil.setScreenBrightness(255);
         // 获取界面上VideoView组件
+        Window window = getWindow();
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        WindowManager manager = (WindowManager) this.getSystemService(Context.WINDOW_SERVICE);
+        Display display = manager.getDefaultDisplay();
+        Point theScreenResolution = new Point();
+        display.getSize(theScreenResolution);
         videoView = (VideoView) findViewById(R.id.video);
+        ViewGroup.LayoutParams layoutParams = videoView.getLayoutParams();
+        layoutParams.height = theScreenResolution.y;
+        layoutParams.width = layoutParams.height ;
+        videoView.setLayoutParams(layoutParams);
+        //videoView.setH
         // 创建MediaController对象
         mController = new MediaController(this);
         //Enviornment.g

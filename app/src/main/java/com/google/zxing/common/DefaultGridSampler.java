@@ -91,6 +91,10 @@ public final class DefaultGridSampler extends GridSampler {
     return new BitMatrix[0];
   }
 
+  @Override
+  public BitMatrix[] RGBGrid(RGBData image, int dimensionX, int dimensionY, PerspectiveTransform transform) throws NotFoundException {
+    return new BitMatrix[0];
+  }
 
 
 }

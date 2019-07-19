@@ -36,6 +36,7 @@ public abstract class GridSampler {
 
   private static GridSampler gridSampler = new DefaultGridSampler();
   private static ColorGridSampler ColorgridSampler = new ColorGridSampler();
+  private static RGBGridSampler rgbGridSampler = new RGBGridSampler();
   /**
    * Sets the implementation of GridSampler used by the library. One global
    * instance is stored, which may sound problematic. But, the implementation provided
@@ -57,6 +58,9 @@ public abstract class GridSampler {
   }
   public static ColorGridSampler getColorInstance() {
     return ColorgridSampler;
+  }
+  public static RGBGridSampler getRGBGridInstance() {
+    return rgbGridSampler;
   }
 
   /**
@@ -109,6 +113,10 @@ public abstract class GridSampler {
                                        int dimensionY,
                                        PerspectiveTransform transform,
                                         HSVColorTable hsvColorTable) throws NotFoundException;
+  public abstract BitMatrix[] RGBGrid(RGBData image,
+                               int dimensionX,
+                               int dimensionY,
+                               PerspectiveTransform transform) throws NotFoundException;
   /**
    * <p>Checks a set of points that have been transformed to sample points on an image against
    * the image's dimensions to see if the point are even within the image.</p>

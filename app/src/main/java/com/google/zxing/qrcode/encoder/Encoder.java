@@ -376,13 +376,12 @@ public final class Encoder {
 			 * recommendVersion(ecLevel, mode1, headerBits, dataBits1);//
 			 * dataBits可以用来判断是否处于相同级别 }
 			 */
-		System.out.println("1版本:" + versionnumber[0].getVersion().getVersionNumber() + " 2版本" + versionnumber[1].getVersion().getVersionNumber() + " 3版本"
-				+ versionnumber[2].getVersion().getVersionNumber());
+		//System.out.println("1版本:" + versionnumber[0].getVersion().getVersionNumber() + " 2版本" + versionnumber[1].getVersion().getVersionNumber() + " 3版本"
+		//		+ versionnumber[2].getVersion().getVersionNumber());
 		QRCode qrcode1 = setqrcode(headerBits, versionnumber[0].getMode(), versionnumber[0].getBitArray(), versionnumber[0].getContent(), versionnumber[0].getVersion(), ecLevel);
-		QRCode qrcode2 = setqrcode(headerBits, versionnumber[1].getMode(), versionnumber[1].getBitArray(), versionnumber[1].getContent(), versionnumber[1].getVersion(), ecLevel);
-		QRCode qrcode3 = setqrcode(headerBits,  versionnumber[2].getMode(),  versionnumber[2].getBitArray(),  versionnumber[2].getContent(), versionnumber[2].getVersion(), ecLevel);
-		QRCode qrcode[] = { qrcode1, qrcode2, qrcode3 };
-		return qrcode;
+		QRCode qrcode2 = setqrcode(headerBits, versionnumber[1].getMode(), versionnumber[1].getBitArray(), versionnumber[1].getContent(), versionnumber[1].getVersion(), ecLevel, qrcode1.getMaskPattern());
+		QRCode qrcode3 = setqrcode(headerBits,  versionnumber[2].getMode(),  versionnumber[2].getBitArray(),  versionnumber[2].getContent(), versionnumber[2].getVersion(), ecLevel,qrcode1.getMaskPattern());
+		return new QRCode[]{ qrcode1, qrcode2, qrcode3 };
 	}
 	public static QRCode[] encode(byte[] content1, byte[] content2, byte[] content3, ErrorCorrectionLevel ecLevel,
 								  Map<EncodeHintType, ?> hints) throws WriterException {
@@ -393,6 +392,7 @@ public final class Encoder {
 		if (hasEncodingHint) {
 			encoding = hints.get(EncodeHintType.CHARACTER_SET).toString();
 		}
+
 
 		// Pick an encoding mode appropriate for the content. Note that this will not
 		// attempt to use
@@ -444,8 +444,8 @@ public final class Encoder {
 			version1 = recommendVersion(ecLevel, mode1, headerBits, dataBits1);// 第一个二维码(红色的)包含FEC，肯定是最长的。
 			version2 = version1;
 			version3 = version1;
-			System.out.println("1版本:" + version1.getVersionNumber() + " 2版本" + version2.getVersionNumber() + " 3版本"
-					+ version3.getVersionNumber());
+//			System.out.println("1版本:" + version1.getVersionNumber() + " 2版本" + version2.getVersionNumber() + " 3版本"
+//					+ version3.getVersionNumber());
 
 		}/*
 		 * if (hints != null && hints.containsKey(EncodeHintType.QR_VERSION)) { int
@@ -465,14 +465,15 @@ public final class Encoder {
 		 * recommendVersion(ecLevel, mode1, headerBits, dataBits1);//
 		 * dataBits可以用来判断是否处于相同级别 }
 		*/
+
 		QRCode qrcode1 = setqrcode(headerBits, Mode.DATA, dataBits1, version1, ecLevel);
-		QRCode qrcode2 = setqrcode(headerBits, Mode.DATA, dataBits2, version2, ecLevel);
-		QRCode qrcode3 = setqrcode(headerBits,  Mode.DATA, dataBits3, version3, ecLevel);
+		QRCode qrcode2 = setqrcodewithmask(headerBits, Mode.DATA, dataBits2, version2, ecLevel,qrcode1.getMaskPattern());
+		QRCode qrcode3 = setqrcodewithmask(headerBits,  Mode.DATA, dataBits3, version3, ecLevel,qrcode1.getMaskPattern());
 		return new QRCode[]{ qrcode1, qrcode2, qrcode3 };
 	}
 
 	public static QRCode setqrcode(BitArray headerBits, Mode mode, BitArray dataBits, String content, Version version,
-			ErrorCorrectionLevel ecLevel) throws WriterException {
+								   ErrorCorrectionLevel ecLevel) throws WriterException {
 		BitArray headerAndDataBits = new BitArray();
 		headerAndDataBits.appendBitArray(headerBits);
 		// Find "length" of main segment and write it
@@ -544,6 +545,84 @@ public final class Encoder {
 
 		// Build the matrix and set it to "qrCode".
 		MatrixUtil.buildMatrix(finalBits, ecLevel, version, maskPattern, matrix);
+		qrCode.setMatrix(matrix);
+
+		return qrCode;
+
+	}
+	public static QRCode setqrcodewithmask(BitArray headerBits, Mode mode, BitArray dataBits, Version version,
+								   ErrorCorrectionLevel ecLevel,int mask) throws WriterException {
+		BitArray headerAndDataBits = new BitArray();
+		headerAndDataBits.appendBitArray(headerBits);
+		// Find "length" of main segment and write it
+		//int numLetters = mode == Mode.BYTE ? dataBits.getSizeInBytes() : content.length;
+		appendLengthInfo(dataBits.getSizeInBytes(), version, mode, headerAndDataBits);
+		// Put data together into the overall payload
+		headerAndDataBits.appendBitArray(dataBits);
+
+		Version.ECBlocks ecBlocks = version.getECBlocksForLevel(ecLevel);
+		int numDataBytes = version.getTotalCodewords() - ecBlocks.getTotalECCodewords();
+
+		// Terminate the bits properly.
+		terminateBits(numDataBytes, headerAndDataBits);
+
+		// Interleave data bits with error correction code.
+		BitArray finalBits = interleaveWithECBytes(headerAndDataBits, version.getTotalCodewords(), numDataBytes,
+				ecBlocks.getNumBlocks());
+
+		QRCode qrCode = new QRCode();
+
+		qrCode.setECLevel(ecLevel);
+		qrCode.setMode(mode);
+		qrCode.setVersion(version);
+
+		// Choose the mask pattern and set to "qrCode".
+		int dimension = version.getDimensionForVersion();
+		ByteMatrix matrix = new ByteMatrix(dimension, dimension);
+		//int maskPattern = chooseMaskPattern(finalBits, ecLevel, version, matrix);
+		qrCode.setMaskPattern(mask);
+
+		// Build the matrix and set it to "qrCode".
+		MatrixUtil.buildMatrix(finalBits, ecLevel, version, mask, matrix);
+		qrCode.setMatrix(matrix);
+
+		return qrCode;
+
+	}
+	public static QRCode setqrcode(BitArray headerBits, Mode mode, BitArray dataBits, String content, Version version,
+								   ErrorCorrectionLevel ecLevel,int mask) throws WriterException {
+		BitArray headerAndDataBits = new BitArray();
+		headerAndDataBits.appendBitArray(headerBits);
+		// Find "length" of main segment and write it
+		int numLetters = mode == Mode.BYTE ? dataBits.getSizeInBytes() : content.length();
+		appendLengthInfo(numLetters, version, mode, headerAndDataBits);
+		// Put data together into the overall payload
+		headerAndDataBits.appendBitArray(dataBits);
+
+		Version.ECBlocks ecBlocks = version.getECBlocksForLevel(ecLevel);
+		int numDataBytes = version.getTotalCodewords() - ecBlocks.getTotalECCodewords();
+
+		// Terminate the bits properly.
+		terminateBits(numDataBytes, headerAndDataBits);
+
+		// Interleave data bits with error correction code.
+		BitArray finalBits = interleaveWithECBytes(headerAndDataBits, version.getTotalCodewords(), numDataBytes,
+				ecBlocks.getNumBlocks());
+
+		QRCode qrCode = new QRCode();
+
+		qrCode.setECLevel(ecLevel);
+		qrCode.setMode(mode);
+		qrCode.setVersion(version);
+
+		// Choose the mask pattern and set to "qrCode".
+		int dimension = version.getDimensionForVersion();
+		ByteMatrix matrix = new ByteMatrix(dimension, dimension);
+		//int maskPattern = chooseMaskPattern(finalBits, ecLevel, version, matrix);
+		qrCode.setMaskPattern(mask);
+
+		// Build the matrix and set it to "qrCode".
+		MatrixUtil.buildMatrix(finalBits, ecLevel, version, mask, matrix);
 		qrCode.setMatrix(matrix);
 
 		return qrCode;

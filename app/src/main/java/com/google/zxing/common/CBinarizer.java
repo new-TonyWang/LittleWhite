@@ -32,7 +32,7 @@ public class CBinarizer extends GlobalHistogramBinarizer {
     }
 
     private HsvData hsvData;
-
+    private RGBData rgbData;
 
 
 
@@ -43,7 +43,7 @@ public class CBinarizer extends GlobalHistogramBinarizer {
 
     public HsvData getHsvData() throws NotFoundException {
 
-        long start = System.currentTimeMillis();
+       // long start = System.currentTimeMillis();
 
         if (hsvData != null) {
             return hsvData;
@@ -76,14 +76,64 @@ public class CBinarizer extends GlobalHistogramBinarizer {
         //outputRGB(RGB,width,height,"rgb");
         int[][] blackPoints = calculateBlackPoints(luminances, subWidth, subHeight, width, height);
 
-        long end = System.currentTimeMillis();
-        System.out.println("时长" + (end - start) + "ms");
+       // long end = System.currentTimeMillis();
+       // System.out.println("时长" + (end - start) + "ms");
 
         BitMatrix newMatrix = new BitMatrix(width, height);
         calculateThresholdForBlock(luminances, subWidth, subHeight, width, height, blackPoints, newMatrix);
         hsvData = new HsvData(H, S, V, newMatrix);
 
         return hsvData;
+    }
+    public RGBData getRGBData() throws NotFoundException {
+
+         long start = System.currentTimeMillis();
+
+        if (rgbData != null) {
+            return rgbData;
+        }
+        LuminanceSource source = getLuminanceSource();
+        int width = source.getWidth();
+        int height = source.getHeight();
+
+        byte[] luminances = source.getMatrix();//灰度数组
+        int subWidth = width >> BLOCK_SIZE_POWER;
+        if ((width & BLOCK_SIZE_MASK) != 0) {
+            subWidth++;
+        }
+        int subHeight = height >> BLOCK_SIZE_POWER;
+        if ((height & BLOCK_SIZE_MASK) != 0) {
+            subHeight++;
+        }
+        byte[] uv = source.getUVMatrix();//获取UV矩阵
+        // byte[] RGB = new byte[luminances.length*4];
+        // byte[] H = new byte[luminances.length];
+        //byte[] S = new byte[luminances.length];
+        //byte[] V = new byte[luminances.length];
+        byte[] R = new byte[luminances.length];
+        byte[] G = new byte[luminances.length];
+        byte[] B = new byte[luminances.length];
+        convertToRGB(luminances, uv, R, G, B, width, height);
+
+        // luminances = calculateY(luminances, subWidth, subHeight, width, height);
+        //outputmatrix(luminances,uv,width,height,true,Math.random());
+        //outputRGB(RGB,width,height,"rgb");
+        int[][] blackPoints = calculateBlackPoints(R, subWidth, subHeight, width, height);
+        BitMatrix newMatrixR = new BitMatrix(width, height);
+        calculateThresholdForBlock(R, subWidth, subHeight, width, height, blackPoints, newMatrixR);
+         blackPoints = calculateBlackPoints(G, subWidth, subHeight, width, height);
+        BitMatrix newMatrixG = new BitMatrix(width, height);
+        calculateThresholdForBlock(G, subWidth, subHeight, width, height, blackPoints, newMatrixG);
+        blackPoints = calculateBlackPoints(B, subWidth, subHeight, width, height);
+        BitMatrix newMatrixB = new BitMatrix(width, height);
+        calculateThresholdForBlock(B, subWidth, subHeight, width, height, blackPoints, newMatrixB);
+         long end = System.currentTimeMillis();
+         System.out.println("时长" + (end - start) + "ms");
+
+
+        rgbData = new RGBData(newMatrixR,newMatrixG,newMatrixB);
+
+        return rgbData;
     }
 
     //System.out.println("二值化后的BitMatrix宽:"+matrix.getWidth()+"，高:"+matrix.getHeight());
@@ -394,16 +444,18 @@ public class CBinarizer extends GlobalHistogramBinarizer {
                                                      int width,
                                                      int height);
 
-    private native int convertToRGB(byte[] luminances, byte[] uv,
-                                    byte[] ARGB,
-                                    int width,
-                                    int height);
 
     private native int convertToHSV(byte[] luminances,
                                     byte[] uv,
                                     byte[] H,
                                     byte[] S,
                                     byte[] V,
+                                    int width,
+                                    int height);
+    private native int convertToRGB(byte[] luminances, byte[] uv,
+                                    byte[] R,
+                                    byte[] G,
+                                    byte[] B,
                                     int width,
                                     int height);
 

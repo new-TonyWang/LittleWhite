@@ -42,6 +42,7 @@ final class AutoFocusManager implements Camera.AutoFocusCallback {
   }
 
   private boolean stopped;
+  private boolean puse = false;
   private boolean focusing;
   private final boolean useAutoFocus;
   private final Camera camera;
@@ -60,8 +61,9 @@ final class AutoFocusManager implements Camera.AutoFocusCallback {
 
   @Override
   public synchronized void onAutoFocus(boolean success, Camera theCamera) {
-    focusing = false;
-    autoFocusAgainLater();
+      focusing = false;
+       //Log.i("对焦","开始");
+      autoFocusAgainLater();
   }
 
   private synchronized void autoFocusAgainLater() {
@@ -79,6 +81,7 @@ final class AutoFocusManager implements Camera.AutoFocusCallback {
   synchronized void start() {
     if (useAutoFocus) {
       outstandingTask = null;
+
       if (!stopped && !focusing) {
         try {
           camera.autoFocus(this);

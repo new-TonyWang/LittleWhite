@@ -62,6 +62,6 @@ final class PreviewCallback implements Camera.PreviewCallback {
       Log.d(TAG, "Got preview callback, but no handler");
     }
     camera.addCallbackBuffer(data);
-    camera.addCallbackBuffer(data);
+   // camera.addCallbackBuffer(data);
   }
 }

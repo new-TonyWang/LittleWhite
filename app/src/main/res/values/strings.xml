@@ -7,7 +7,8 @@
     <string name="sendNew">发送文件</string>
     <string name="sendFromVieo">从二维码视频发送</string>
     <string name="receiveBlack">接收黑白二维码</string>
-    <string name="receiveColor">接收彩色二维码</string>
+    <string name="receiveColor">接收HSV二维码</string>
+    <string name="receiveRGB">接收RGB二维码</string>
     <string name="videoSettings">视频设置</string>
     <string name="resolution">视频分辨率:</string>
     <string name="width">宽:</string>

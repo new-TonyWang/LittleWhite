@@ -136,6 +136,11 @@ public class newCameraManager {
         theCamera.getCamera().startPreview();
         previewing = true;
         autoFocusManager = new AutoFocusManager(context, theCamera.getCamera());
+        Point cameraResolution = configManager.getCameraResolution();
+        theCamera.getCamera().addCallbackBuffer(new byte[((cameraResolution.x * cameraResolution.y) * ImageFormat.getBitsPerPixel(ImageFormat.NV21)) / 8]);
+        theCamera.getCamera().addCallbackBuffer(new byte[((cameraResolution.x * cameraResolution.y) * ImageFormat.getBitsPerPixel(ImageFormat.NV21)) / 8]);
+        theCamera.getCamera().setPreviewCallbackWithBuffer(previewCallback);
+        //autoFocusManager.start();
       }
     }
 
@@ -174,7 +179,20 @@ public class newCameraManager {
         }
       }
     }
-
+  public synchronized void setAutoFocus() {
+    OpenCamera theCamera = camera;
+    if (theCamera != null) {
+      boolean wasAutoFocusManager = autoFocusManager != null;
+      if (wasAutoFocusManager) {
+        autoFocusManager.stop();
+        autoFocusManager = null;
+      }
+      else {
+        autoFocusManager = new AutoFocusManager(context, theCamera.getCamera());
+        autoFocusManager.start();
+      }
+    }
+  }
     /**
      * A single preview frame will be returned to the handler supplied. The data will arrive as byte[]
      * in the message.obj field, with width and height encoded as message.arg1 and message.arg2,
@@ -187,6 +205,7 @@ public class newCameraManager {
       OpenCamera theCamera = camera;
       if (theCamera != null && previewing) {
         previewCallback.setHandler(handler, message);
+        previewCallback.setResolution();
         theCamera.getCamera().setOneShotPreviewCallback(previewCallback);
       }
     }
@@ -195,10 +214,7 @@ public class newCameraManager {
     if (theCamera != null && previewing) {
       previewCallback.setHandler(handler, message);
       previewCallback.setResolution();
-      Point cameraResolution = configManager.getCameraResolution();
-      theCamera.getCamera().addCallbackBuffer(new byte[((cameraResolution.x * cameraResolution.y) * ImageFormat.getBitsPerPixel(ImageFormat.NV21)) / 8]);
-      theCamera.getCamera().addCallbackBuffer(new byte[((cameraResolution.x * cameraResolution.y) * ImageFormat.getBitsPerPixel(ImageFormat.NV21)) / 8]);
-      theCamera.getCamera().setPreviewCallbackWithBuffer(previewCallback);
+
     }
   }
     /**
@@ -220,7 +236,7 @@ public class newCameraManager {
         }
 
 
-        int height = findDesiredDimensionInRange(screenResolution.y, MIN_FRAME_HEIGHT, MAX_FRAME_HEIGHT);
+        int height = findBiggestDimensionInRange(screenResolution.y, MIN_FRAME_HEIGHT, MAX_FRAME_HEIGHT);
         //int width = findDesiredDimensionInRange(screenResolution.x, MIN_FRAME_WIDTH, MAX_FRAME_WIDTH);
          // width = (width&1)+width;
           height = (height&1)+height;
@@ -245,6 +261,13 @@ public class newCameraManager {
       return dim;
     }
 
+  private static int findBiggestDimensionInRange(int resolution, int hardMin, int hardMax) {//不设置最大值
+    int dim = 9 * resolution / 10; // Target 9/10 of each dimension
+    if (dim < hardMin) {
+      return hardMin;
+    }
+    return dim;
+  }
     /**
      * Like {@link #getFramingRect} but coordinates are in terms of the preview frame,
      * not UI / screen.

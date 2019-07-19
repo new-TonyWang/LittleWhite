@@ -19,6 +19,7 @@ package com.google.zxing;
 import com.google.zxing.common.BitArray;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.common.HsvData;
+import com.google.zxing.common.RGBData;
 
 /**
  * This class is the core bitmap class used by ZXing to represent 1 bit data. Reader objects
@@ -30,6 +31,7 @@ public  class BinaryBitmap {
 
   private final Binarizer binarizer;
   private  HsvData hsvData;
+  private RGBData rgbData;
   private BitMatrix matrix;
 
   public BinaryBitmap(Binarizer binarizer) {
@@ -106,7 +108,19 @@ public  class BinaryBitmap {
     }
     return hsvData;//从二值化得来的图像
   }
+  public RGBData getRGBData() throws NotFoundException {
+    // The matrix is created on demand the first time it is requested, then cached. There are two
+    // reasons for this:
+    // 1. This work will never be done if the caller only installs 1D Reader objects, or if a
+    //    1D Reader finds a barcode before the 2D Readers run.
+    // 2. This work will only be done once even if the caller installs multiple 2D Readers.
+    if (rgbData == null) {
 
+      rgbData = binarizer.getRGBData();
+      //System.out.println("matrix的高:"+matrix.getHeight()+"matrix的宽:"+matrix.getWidth());
+    }
+    return rgbData;//从二值化得来的图像
+  }
   /**
    * @return Whether this bitmap can be cropped.
    */

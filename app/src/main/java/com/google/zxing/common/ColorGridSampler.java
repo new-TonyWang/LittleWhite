@@ -121,6 +121,12 @@ public  class ColorGridSampler extends GridSampler {
 
         return Bits;
     }
+
+    @Override
+    public BitMatrix[] RGBGrid(RGBData image, int dimensionX, int dimensionY, PerspectiveTransform transform) throws NotFoundException {
+        return new BitMatrix[0];
+    }
+
     private int calculateAvgH(HsvData image,int x,int y){
 
         return (image.getH(x,y-1)+image.getH(x-1,y)+image.getH(x,y)+image.getH(x+1,y)+image.getH(x,y+1))/5;

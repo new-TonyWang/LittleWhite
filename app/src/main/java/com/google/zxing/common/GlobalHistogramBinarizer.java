@@ -135,6 +135,11 @@ public class GlobalHistogramBinarizer extends Binarizer {
   }
 
   @Override
+  public RGBData getRGBData() throws NotFoundException {
+    return null;
+  }
+
+  @Override
   public Binarizer createBinarizer(LuminanceSource source) {
     return new GlobalHistogramBinarizer(source);
   }

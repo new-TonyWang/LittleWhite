@@ -151,14 +151,14 @@ final class BitMatrixParser {
    * @return bytes encoded within the QR Code
    * @throws FormatException if the exact number of bytes expected is not read
    */
-  byte[] readCodewords() throws FormatException {
+  byte[] readCodewords(Version version,DataMask dataMask) throws FormatException {
 
-    FormatInformation formatInfo = readFormatInformation();
-    Version version = readVersion();
+   // FormatInformation formatInfo = readFormatInformation();
+    //Version version = readVersion();
 
     // Get the data mask for the format used in this QR Code. This will exclude
     // some bits from reading as we wind through the bit matrix.
-    DataMask dataMask = DataMask.values()[formatInfo.getDataMask()];
+    //DataMask dataMask = DataMask.values()[formatInfo.getDataMask()];
     int dimension = bitMatrix.getHeight();
     dataMask.unmaskBitMatrix(bitMatrix, dimension);
 

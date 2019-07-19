@@ -81,8 +81,9 @@ public class RaptorQDecoderHandler extends Handler {
                      this.List = null;
                      this.receivePath = null;
                 }
-
+               // Long start  =System.currentTimeMillis();
                 decodeRaptor((byte[]) message.obj);
+                //System.out.println("Raptor解析时间:"+(System.currentTimeMillis()-start)+"ms");
                 break;
             case R.id.finish:
                 Message finish =  obtainMessage(R.id.finish);

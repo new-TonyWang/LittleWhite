@@ -31,7 +31,7 @@ public class ReceiveHandler extends Handler {
         SUCCESS,
         DONE
     }
-    public ReceiveHandler(ReceiveActivity receiveActivity, newCameraManager cameraManager,Boolean iscolor)  {
+    public ReceiveHandler(ReceiveActivity receiveActivity, newCameraManager cameraManager,int iscolor)  {
         Log.i(this.getClass().toString(),"启动");
         this.receiveActivity = receiveActivity;
         this.cameraManager = cameraManager;
@@ -55,11 +55,19 @@ public class ReceiveHandler extends Handler {
         DecoderThread.start();
         state = State.SUCCESS;
         this.cameraManager.startPreview();
-        if(iscolor) {
-            restartPreviewAndDecodeColorcode();//解码彩色
-        }else{
-            restartPreviewAndDecode();//解码黑白
+        switch(iscolor) {
+            case R.id.BW:
+                restartPreviewAndDecode();//解码黑白
+                break;
+            case R.id.HSV:
+                restartPreviewAndDecodeColorcode();//解码HSV
+                break;
+            case R.id.RGB:
+                restartPreviewAndDecodeRGB();//解码RGB
+                break;
         }
+
+
     }
     @Override
     public void handleMessage(Message message) {
@@ -92,13 +100,23 @@ public class ReceiveHandler extends Handler {
             state = State.PREVIEW;
             //cameraManager.requestPreviewFrameWithBuffer(multiDecoder.getHandler(), R.id.decode);
             cameraManager.requestPreviewFrameWithBuffer(decoderThread.getHandler(), R.id.decode);
+           // cameraManager.requestPreviewFrame(decoderThread.getHandler(), R.id.decode);
         }
     }
     private void restartPreviewAndDecodeColorcode() {
         if (state == State.SUCCESS) {
             state = State.PREVIEW;
             //cameraManager.requestPreviewFrameWithBuffer(multiDecoder.getHandler(), R.id.decode);
-            cameraManager.requestPreviewFrameWithBuffer(decoderThread.getHandler(), R.id.decodeColor);
+           cameraManager.requestPreviewFrameWithBuffer(decoderThread.getHandler(), R.id.decodeColor);
+            //cameraManager.requestPreviewFrame(decoderThread.getHandler(), R.id.decode);
+        }
+    }
+    private void restartPreviewAndDecodeRGB() {
+        if (state == State.SUCCESS) {
+            state = State.PREVIEW;
+            //cameraManager.requestPreviewFrameWithBuffer(multiDecoder.getHandler(), R.id.decode);
+            cameraManager.requestPreviewFrameWithBuffer(decoderThread.getHandler(), R.id.decodeRGB);
+            //cameraManager.requestPreviewFrame(decoderThread.getHandler(), R.id.decode);
         }
     }
     public void quitSynchronously() {

@@ -167,11 +167,15 @@ public final class Decoder {
   }
   private DecoderResult decode(BitMatrixParser parser, Map<DecodeHintType,?> hints)
       throws FormatException, ChecksumException {
+    FormatInformation formatInfo = parser.readFormatInformation();
     Version version = parser.readVersion();
-    ErrorCorrectionLevel ecLevel = parser.readFormatInformation().getErrorCorrectionLevel();//纠错版本
+    ErrorCorrectionLevel ecLevel = formatInfo.getErrorCorrectionLevel();//纠错版本
+    DataMask dataMask = DataMask.values()[formatInfo.getDataMask()];
+    //Version version = parser.readVersion();
+   // ErrorCorrectionLevel ecLevel = parser.readFormatInformation().getErrorCorrectionLevel();//纠错版本
 
     // Read codewords
-    byte[] codewords = parser.readCodewords();//读取位矩阵中表示查找器模式的bit，按顺序排列，以重建二维码中包含的码字字节。
+    byte[] codewords = parser.readCodewords(version,dataMask);//读取位矩阵中表示查找器模式的bit，按顺序排列，以重建二维码中包含的码字字节。
     // Separate into data blocks
     DataBlock[] dataBlocks = DataBlock.getDataBlocks(codewords, version, ecLevel);
 
@@ -202,12 +206,14 @@ public final class Decoder {
 
   private DecoderResult decodeColorCode(BitMatrixParser[] parsers, Map<DecodeHintType,?> hints)
           throws FormatException, ChecksumException {
+    FormatInformation formatInfo = parsers[0].readFormatInformation();
     Version version = parsers[0].readVersion();
-    ErrorCorrectionLevel ecLevel = parsers[0].readFormatInformation().getErrorCorrectionLevel();//纠错版本
+    ErrorCorrectionLevel ecLevel = formatInfo.getErrorCorrectionLevel();//纠错版本
+    DataMask dataMask = DataMask.values()[formatInfo.getDataMask()];
     LinkedBlockingQueue<byte[]> resultThreeBytes = new LinkedBlockingQueue<>();
     for(int j = 0;j<3;j++) {
       // Read codewords
-      byte[] codewords = parsers[j].readCodewords();//读取位矩阵中表示查找器模式的bit，按顺序排列，以重建二维码中包含的码字字节。
+      byte[] codewords = parsers[j].readCodewords(version,dataMask);//读取位矩阵中表示查找器模式的bit，按顺序排列，以重建二维码中包含的码字字节。
       // Separate into data blocks
       DataBlock[] dataBlocks = DataBlock.getDataBlocks(codewords, version, ecLevel);
 

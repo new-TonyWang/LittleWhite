@@ -34,6 +34,7 @@ import com.google.zxing.qrcode.decoder.Decoder;
 import com.google.zxing.qrcode.decoder.QRCodeDecoderMetaData;
 import com.google.zxing.qrcode.detector.ColorDetector;
 import com.google.zxing.qrcode.detector.Detector;
+import com.google.zxing.qrcode.detector.RGBDetector;
 import com.littlewhite.ColorCode.HSVColorTable;
 
 import java.util.List;
@@ -200,6 +201,40 @@ public class QRCodeReader implements Reader {
            }
            // String ecLevel = decoderResult.getECLevel();
            // result.putMetadata(ResultMetadataType.ERROR_CORRECTION_LEVEL, ecLevel);
+
+	    /*
+	    if (decoderResult.hasStructuredAppend()) {
+	      result.putMetadata(ResultMetadataType.STRUCTURED_APPEND_SEQUENCE,
+	                         decoderResult.getStructuredAppendSequenceNumber());
+	      result.putMetadata(ResultMetadataType.STRUCTURED_APPEND_PARITY,
+	                         decoderResult.getStructuredAppendParity());
+	    }
+
+	    */
+
+        return result;
+    }
+    public final Result decodeRGBCode(BinaryBitmap image, Map<DecodeHintType,?> hints)
+            throws NotFoundException, ChecksumException, FormatException {
+        DecoderResult decoderResult;
+        ResultPoint[] points;
+        DetectorResult[] detectorResults = new RGBDetector(image.getRGBData()).detect(hints);//寻找二维码定位码，透视变换，将二维码点阵化
+        decoderResult = decoder.decodeColorCode(detectorResults, hints);//解析二维码
+        //System.out.println("bits宽:"+detectorResult.getBits().getWidth()+"bits高:"+detectorResult.getBits().getHeight());//获取到的是二维码的行列数
+        points = detectorResults[0].getPoints();
+        // If the code was mirrored: swap the bottom-left and the top-right points.
+	      /*
+	    if (decoderResult.getOther() instanceof QRCodeDecoderMetaData) {
+	      ((QRCodeDecoderMetaData) decoderResult.getOther()).applyMirroredCorrection(points);
+	    }*/
+        Result result = new Result(decoderResult.getRawBytes(), points, BarcodeFormat.QR_CODE, decoderResult.getMode());
+        // results[i] = result;
+        List<byte[]> byteSegments = decoderResult.getByteSegments();
+        if (byteSegments != null) {
+            result.putMetadata(ResultMetadataType.BYTE_SEGMENTS, byteSegments);
+        }
+        // String ecLevel = decoderResult.getECLevel();
+        // result.putMetadata(ResultMetadataType.ERROR_CORRECTION_LEVEL, ecLevel);
 
 	    /*
 	    if (decoderResult.hasStructuredAppend()) {

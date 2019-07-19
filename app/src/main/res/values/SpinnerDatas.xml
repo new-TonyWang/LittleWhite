@@ -8,6 +8,7 @@
     </string-array>
     <string-array name="QRCodeType">
         <item>黑白</item>
-        <item>彩色</item>
+        <item>HSV彩色</item>
+        <item>RGB彩色</item>
     </string-array>
 </resources>

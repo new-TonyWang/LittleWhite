@@ -17,6 +17,10 @@
 <resources>
   <item type="id" name="decode"/>
   <item type="id" name="decodeColor"/>
+  <item type="id" name="decodeRGB"/>
+  <item type="id" name="BW"/>
+  <item type="id" name="HSV"/>
+  <item type="id" name="RGB"/>
   <item type="id" name="failed"/>
   <item type="id" name="decode_succeeded"/>
   <item type="id" name="Merge"/>
@@ -34,7 +38,8 @@
   <item type="id" name="Init"/>
   <item type="id" name="GenerateVideo"/>
   <item type="id" name="Encode"/>
-  <item type="id" name="EncodeColor"/>
+  <item type="id" name="EncodeHSV"/>
+  <item type="id" name="EncodeRGB"/>
   <item type="id" name="RaptorEncodePhase"/>
   <item type="id" name="FFmpegPhase"/>
   <item type="id" name="RaptorDecodeFile"/>

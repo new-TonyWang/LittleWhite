@@ -57,6 +57,7 @@ public class ColorDetector  {
         return processFinderPatternInfo(info,hsvColorTable);
     }
 
+
     protected final DetectorResult[] processFinderPatternInfo(FinderPatternInfo info, HSVColorTable hsvColorTable)
             throws NotFoundException, FormatException {
 
