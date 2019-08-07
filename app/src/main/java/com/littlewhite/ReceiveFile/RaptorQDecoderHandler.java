@@ -77,7 +77,12 @@ public class RaptorQDecoderHandler extends Handler {
             case R.id.decode:
                 if (!hasinit) {
                     hasinit = true;
-                     CompareWithList(this.List,(byte[]) message.obj);
+                    try {
+                        CompareWithList(this.List, (byte[]) message.obj);
+                    }catch (Exception e){
+                        hasinit = false;
+                        return;
+                    }
                      this.List = null;
                      this.receivePath = null;
                 }
