@@ -78,7 +78,7 @@ public class RaptorQDecoderHandler extends Handler {
                 if (!hasinit) {
                     hasinit = true;
                     try {
-                        CompareWithList(this.List, (byte[]) message.obj);
+                        CompareWithList(this.List, (byte[]) message.obj);//解析收到的第一个RaptorQ，用于启动解码器，同时查看数据库中有没有记录断点续传记录
                     }catch (Exception e){
                         hasinit = false;
                         return;
@@ -87,10 +87,10 @@ public class RaptorQDecoderHandler extends Handler {
                      this.receivePath = null;
                 }
                // Long start  =System.currentTimeMillis();
-                decodeRaptor((byte[]) message.obj);
+                decodeRaptor((byte[]) message.obj);//解析RaotprQ
                 //System.out.println("Raptor解析时间:"+(System.currentTimeMillis()-start)+"ms");
                 break;
-            case R.id.finish:
+            case R.id.finish://解析完成之后传给解压缩线程
                 Message finish =  obtainMessage(R.id.finish);
                 this.zipThread.getZipHandler().sendMessageAtFrontOfQueue(finish);
                 requireNonNull(Looper.myLooper()).quit();
@@ -117,7 +117,7 @@ public class RaptorQDecoderHandler extends Handler {
                   /* stringBuilder.append(encodingPacket.fecPayloadID());
                    stringBuilder.append(",");*/
                    try {
-                       objectOutputStream.writeObject(encodingPacket.asSerializable());
+                       objectOutputStream.writeObject(encodingPacket.asSerializable());//使用Object流输出临时文件，用于断点续传
                    } catch (IOException e) {
                        e.printStackTrace();
                    }
@@ -126,7 +126,7 @@ public class RaptorQDecoderHandler extends Handler {
                    SendToReceiveHandler(this.num);
                }
                break;
-           case DECODED:
+           case DECODED://收到足够的RaptorQ码，开始解码
                byte[] CompleteData = arrayDataDecoder.dataArray();
                try {
                    this.receiveFile.delete();
@@ -150,7 +150,7 @@ public class RaptorQDecoderHandler extends Handler {
 
        }
     }
-    private void decodeFirst(byte[] FirstRaptorData){
+    private void decodeFirst(byte[] FirstRaptorData){//解析第一张RaptorQ
         EncodingPacket encodingPacket = null;
         encodingPacket = this.arrayDataDecoder.parsePacket(FirstRaptorData,12,FirstRaptorData.length-12, true).value();
         arrayDataDecoder.sourceBlock(encodingPacket.sourceBlockNumber()).putEncodingPacket(encodingPacket);

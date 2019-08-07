@@ -1,6 +1,6 @@
 package com.littlewhite.ColorCode;
 
-public class HSVColorTable {
+public class HSVColorTable {//hsv方式识别颜色的时候使用，首先生成一个三维矩阵来表示不同颜色
     private  int ColorTable[][][] = new int [181][256][256];
     public HSVColorTable(){
         for(int avgH = 0;avgH<181;avgH++){

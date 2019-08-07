@@ -75,7 +75,7 @@ public class ColorYUV extends LuminanceSource {
   }
 
   /**
-   * 获取uv数组
+   * 获取uv通道
    * @return
    */
   public byte[] getUVMatrix() {

@@ -15,17 +15,12 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.littlewhite.Camera.CameraManager;
 import com.littlewhite.Camera.ViewfinderView;
 import com.littlewhite.Camera.newCameraManager;
 import com.littlewhite.FileManager.FileManager;
-import com.littlewhite.History.HistoryActivity;
 import com.littlewhite.R;
-import com.littlewhite.ReceiveFile.QRcodeDecoder.MultiDecoder;
-import com.littlewhite.ReceiveFile.SqllitUtil.FileInfo;
-import com.littlewhite.ReceiveFile.SqllitUtil.SqllitData;
+
 import com.littlewhite.SendReceive;
-import com.littlewhite.TransmissionCompleteActivity;
 
 import java.io.IOException;
 import java.util.Timer;

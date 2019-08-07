@@ -27,7 +27,7 @@ public class newCameraManager {
   @SuppressWarnings("deprecation") // camera APIs
 
 
-    private static final String TAG = CameraManager.class.getSimpleName();
+    private static final String TAG = newCameraManager.class.getSimpleName();
 
     private static final int MIN_FRAME_WIDTH = 240;
     private static final int MIN_FRAME_HEIGHT = 240;
@@ -293,11 +293,11 @@ public class newCameraManager {
         //rect.top = rect.top * cameraResolution.y / screenResolution.y;
       //  rect.bottom = rect.bottom * cameraResolution.y / screenResolution.y;
 
-        rect.left = rect.left * cameraResolution.x / screenResolution.x;
-        rect.right = rect.right * cameraResolution.x / screenResolution.x;
-        rect.top = rect.top * cameraResolution.y / screenResolution.y;
-        rect.bottom = rect.bottom * cameraResolution.y / screenResolution.y;
-
+        rect.left = rect.left * cameraResolution.x / screenResolution.x-((rect.left * cameraResolution.x / screenResolution.x)&1);
+        rect.right = rect.right * cameraResolution.x / screenResolution.x-(( rect.right * cameraResolution.x / screenResolution.x)&1);
+        rect.top = rect.top * cameraResolution.y / screenResolution.y-((rect.top * cameraResolution.y / screenResolution.y)&1);
+        rect.bottom = rect.bottom * cameraResolution.y / screenResolution.y-((rect.bottom * cameraResolution.y / screenResolution.y)&1);
+        //强行设置为偶数
         framingRectInPreview = rect;
       }
       return framingRectInPreview;

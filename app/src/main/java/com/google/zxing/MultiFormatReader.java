@@ -17,7 +17,6 @@
 package com.google.zxing;
 
 
-import com.google.zxing.maxicode.MaxiCodeReader;
 import com.google.zxing.qrcode.QRCodeReader;
 
 import java.util.ArrayList;
@@ -117,13 +116,11 @@ public final class MultiFormatReader implements Reader {
       if (formats.contains(BarcodeFormat.QR_CODE)) {
         readers.add(new QRCodeReader());
       }
-      if (formats.contains(BarcodeFormat.MAXICODE)) {
-         readers.add(new MaxiCodeReader());
-      }
+
       // At end in "try harder" mode
 
       readers.add(new QRCodeReader());
-      readers.add(new MaxiCodeReader());
+
 
     }
     this.readers = readers.toArray(EMPTY_READER_ARRAY);

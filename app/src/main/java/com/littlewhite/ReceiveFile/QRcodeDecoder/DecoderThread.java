@@ -10,7 +10,6 @@ import com.google.zxing.DecodeHintType;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import com.littlewhite.ColorCode.HSVColorTable;
-import com.littlewhite.ReceiveFile.MergeFileThread;
 import com.littlewhite.ReceiveFile.RaptorQDecoder;
 import com.littlewhite.ReceiveFile.ReceiveActivity;
 
@@ -31,7 +30,7 @@ public class DecoderThread implements Runnable {
         this.raptorQDecoder = raptorQDecoder;
         this.ReceiveActivity = ReceiveActivity;
        // this.sharedPreferences = this.ReceiveActivity.getSharedPreferences("data", Context.MODE_PRIVATE);//获取context的存储对象，用于读取设置
-        setHints();//读取用户设置的功能还未完成
+        setHints();
         this.handlerInitLatch = new CountDownLatch(1);
     }
     private void setHints(){

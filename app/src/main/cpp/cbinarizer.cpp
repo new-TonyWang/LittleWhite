@@ -117,7 +117,7 @@ jobjectArray calculateBlackPoints(JNIEnv *env,
     return blackpoints;
 }
 extern "C"
-JNIEXPORT jint JNICALL
+JNIEXPORT jint JNICALL//YUV转HSV
 Java_com_google_zxing_common_CBinarizer_convertToHSV(JNIEnv *env, jobject instance,
                                                      jbyteArray luminances_, jbyteArray uv_,
                                                      jbyteArray H_, jbyteArray S_, jbyteArray V_,
@@ -163,7 +163,7 @@ Java_com_google_zxing_common_CBinarizer_convertToHSV(JNIEnv *env, jobject instan
     return 1;
 }
 extern "C"
-JNIEXPORT jint JNICALL
+JNIEXPORT jint JNICALL//YUV转RGB
 Java_com_google_zxing_common_CBinarizer_convertToRGB(JNIEnv *env, jobject instance,
                                                      jbyteArray luminances_, jbyteArray uv_,
                                                      jbyteArray R_, jbyteArray G_, jbyteArray B_,

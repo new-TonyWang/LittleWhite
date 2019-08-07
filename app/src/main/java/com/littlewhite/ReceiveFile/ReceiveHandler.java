@@ -6,12 +6,11 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
-import com.littlewhite.Camera.CameraManager;
+
 import com.littlewhite.Camera.newCameraManager;
 import com.littlewhite.R;
 import com.littlewhite.ReceiveFile.QRcodeDecoder.DecoderThread;
-import com.littlewhite.ReceiveFile.QRcodeDecoder.MultiDecoder;
-import com.littlewhite.ReceiveFile.SqllitUtil.FileInfo;
+
 import com.littlewhite.ReceiveFile.SqllitUtil.SqllitData;
 import com.littlewhite.ZipFile.ZipThread;
 
@@ -35,8 +34,8 @@ public class ReceiveHandler extends Handler {
         Log.i(this.getClass().toString(),"启动");
         this.receiveActivity = receiveActivity;
         this.cameraManager = cameraManager;
-        this.sqllitData = new SqllitData(this.receiveActivity);
-        this.zipThread = new ZipThread(this.receiveActivity,sqllitData);
+        this.sqllitData = new SqllitData(this.receiveActivity);//启动数据库，记录接收到的文件信息
+        this.zipThread = new ZipThread(this.receiveActivity,sqllitData);//压缩文件线程
         /*
         this.mergeFile =  new MergeFileThread(this.receiveActivity);
         this.multiDecoder = new MultiDecoder(this.receiveActivity,this.mergeFile);
@@ -45,8 +44,8 @@ public class ReceiveHandler extends Handler {
        // MergeThread.start();
         //MultiDecoder.start();
         */
-        this.raptorQDecoder = new RaptorQDecoder(this.receiveActivity,this.zipThread,sqllitData);
-        this.decoderThread = new DecoderThread(this.receiveActivity,this.raptorQDecoder);
+        this.raptorQDecoder = new RaptorQDecoder(this.receiveActivity,this.zipThread,sqllitData);//RaptorQ线程
+        this.decoderThread = new DecoderThread(this.receiveActivity,this.raptorQDecoder);//二维码解析线程
         Thread raptorQDecoderThread = new Thread(this.raptorQDecoder);
         Thread DecoderThread = new Thread(this.decoderThread);
         Thread ZipThread = new Thread(this.zipThread);
@@ -72,15 +71,15 @@ public class ReceiveHandler extends Handler {
     @Override
     public void handleMessage(Message message) {
             switch(message.what){
-                case R.id.Init:
+                case R.id.Init://初始化进度
                     receiveActivity.setTotalQRnum(message.arg1);
                   // receiveActivity.UpgradeProgress(message.arg1);
                     break;
-                case R.id.update_progress:
+                case R.id.update_progress://更新进度
                    // receiveActivity.setTotalQRnum(message.arg2);
                     receiveActivity.UpgradeProgress(message.arg1);
                     break;
-                case R.id.finish:
+                case R.id.finish://传输完成
                     // Looper.myLooper().quit();
                     Bundle bundle = message.getData();
                     receiveActivity.TransmissionComplete(bundle);

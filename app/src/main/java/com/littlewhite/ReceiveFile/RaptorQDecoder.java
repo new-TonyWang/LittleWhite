@@ -44,17 +44,7 @@ public class RaptorQDecoder implements Runnable {
         */
         this.handlerInitLatch = new CountDownLatch(1);
     }
-    private File ReceivePath() {
-        File DOWNLOADSDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);//外存DownLoad目录
-        if (!DOWNLOADSDir.exists()) {
-            DOWNLOADSDir.mkdir();
-        }
-        File DownloadFileDir = new File(DOWNLOADSDir.getAbsolutePath() + "/QRCodes");
-        if (!DownloadFileDir.exists()) {
-            DownloadFileDir.mkdir();
-        }
-        return DownloadFileDir;
-    }
+
     private File initReceivePath() {
         File DOWNLOADSDir = this.receiveActivity.getExternalFilesDir("receive");//外存
         if (!DOWNLOADSDir.exists()) {
@@ -74,17 +64,7 @@ public class RaptorQDecoder implements Runnable {
         }
         return receiveFile;
     }*/
-    /**
-     * 断点续传的时候用
-     * @param ReceivePath
-     * @param FileName
-     * @return
-     */
-    private File RestartReceiveFile(File ReceivePath,String FileName){
-        // Log.i(this.getClass().toString(),"启动");
-        return new File(ReceivePath.getAbsolutePath()+"/"+FileName);
-    }
-
+   
     public Handler getHandler(){
         try {
             handlerInitLatch.await();
