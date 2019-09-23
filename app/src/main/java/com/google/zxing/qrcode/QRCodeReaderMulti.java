@@ -30,7 +30,6 @@ import com.google.zxing.ResultPoint;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.common.DecoderResult;
 import com.google.zxing.common.DetectorResult;
-import com.google.zxing.common.RGBData;
 import com.google.zxing.qrcode.decoder.Decoder;
 import com.google.zxing.qrcode.decoder.QRCodeDecoderMetaData;
 import com.google.zxing.qrcode.detector.ColorDetector;
@@ -46,7 +45,7 @@ import java.util.Map;
  *
  * @author Sean Owen
  */
-public class QRCodeReader implements Reader {
+public class QRCodeReaderMulti implements Reader,Runnable {
 
   private static final ResultPoint[] NO_POINTS = new ResultPoint[0];
 
@@ -215,11 +214,11 @@ public class QRCodeReader implements Reader {
 
         return result;
     }
-    public final Result decodeRGBCode(RGBData image, Map<DecodeHintType,?> hints)
+    public final Result decodeRGBCode(BinaryBitmap image, Map<DecodeHintType,?> hints)
             throws NotFoundException, ChecksumException, FormatException {
         DecoderResult decoderResult;
         ResultPoint[] points;
-        DetectorResult[] detectorResults = new RGBDetector(image).detect(hints);//寻找二维码定位码，透视变换，将二维码点阵化
+        DetectorResult[] detectorResults = new RGBDetector(image.getRGBData()).detect(hints);//寻找二维码定位码，透视变换，将二维码点阵化
         decoderResult = decoder.decodeColorCode(detectorResults, hints);//解析二维码
         //System.out.println("bits宽:"+detectorResult.getBits().getWidth()+"bits高:"+detectorResult.getBits().getHeight());//获取到的是二维码的行列数
         points = detectorResults[0].getPoints();
@@ -369,4 +368,8 @@ public class QRCodeReader implements Reader {
     return (x - leftTopBlack[0]) / 7.0f;
   }
 
+    @Override
+    public void run() {
+
+    }
 }

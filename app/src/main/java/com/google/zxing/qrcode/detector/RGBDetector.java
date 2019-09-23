@@ -1,5 +1,7 @@
 package com.google.zxing.qrcode.detector;
 
+import android.util.Log;
+
 import com.google.zxing.DecodeHintType;
 import com.google.zxing.FormatException;
 import com.google.zxing.NotFoundException;
@@ -44,9 +46,11 @@ public class RGBDetector {
 
         resultPointCallback = hints == null ? null :
                 (ResultPointCallback) hints.get(DecodeHintType.NEED_RESULT_POINT_CALLBACK);
-
+        //long start =System.currentTimeMillis();
         FinderPatternFinder finder = new FinderPatternFinder(image.getBitMatrixB(), resultPointCallback);//找到定位图标!!!!重点来了
         FinderPatternInfo info = finder.find(hints);
+       // long end = System.currentTimeMillis();
+
     /*
     System.out.println("BitMatrix宽:"+image.getWidth()+"BitMatrix高:"+image.getHeight());
     System.out.println("左下"+info.getBottomLeft().toString());

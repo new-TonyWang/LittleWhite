@@ -1,4 +1,4 @@
-package com.google.zxing.common;
+package com.littlewhite.ReceiveFile.ColorCode;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -6,13 +6,15 @@ import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.os.Environment;
-
-import com.google.zxing.Binarizer;
-
-import com.google.zxing.ColorYUV;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 
 import com.google.zxing.LuminanceSource;
-import com.google.zxing.NotFoundException;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.common.RGBData;
+import com.littlewhite.R;
+import com.littlewhite.ReceiveFile.ReceiveActivity;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
@@ -20,120 +22,78 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-public class CBinarizer extends GlobalHistogramBinarizer {
+public class RGBbinaryHandler extends Handler {
+
     private static final int BLOCK_SIZE_POWER = 3;
     private static final int BLOCK_SIZE = 1 << BLOCK_SIZE_POWER; // ...0100...00，1往左移动3位==8
     private static final int BLOCK_SIZE_MASK = BLOCK_SIZE - 1;   // ...0011...11，==7
     private static final int MINIMUM_DIMENSION = BLOCK_SIZE * 5;//==40
     private static final int MIN_DYNAMIC_RANGE = 24;//
+    protected Handler handler;
+    protected ReceiveActivity receiveActivity;
+
+    public RGBbinaryHandler(Handler handler, ReceiveActivity receiveActivity) {
+        this.handler = handler;
+        this.receiveActivity = receiveActivity;
+    }
 
     static {
         System.loadLibrary("cbinarizer");
     }
 
-    private HsvData hsvData;
-    private RGBData rgbData;
+
+    //private RGBData rgbData;
 
 
+    public RGBmatrixChannel getRGBData(byte[] channel,int RGB,int subWidth,int subHeight,int width,int height,long timemillis)  {
 
-    public CBinarizer(LuminanceSource source) {
+      //  long start = System.currentTimeMillis();
 
-        super(source);
-    }
+       // LuminanceSource source = getLuminanceSource();
+       // int width = source.getWidth();
+        //int height = source.getHeight();
 
-    public HsvData getHsvData() throws NotFoundException {
+      //  byte[] luminances = source.getMatrix();//灰度数组
 
-       // long start = System.currentTimeMillis();
-
-        if (hsvData != null) {
-            return hsvData;
-        }
-        LuminanceSource source = getLuminanceSource();
-        int width = source.getWidth();
-        int height = source.getHeight();
-
-        byte[] luminances = source.getMatrix();//灰度数组
-        int subWidth = width >> BLOCK_SIZE_POWER;
-        if ((width & BLOCK_SIZE_MASK) != 0) {
-            subWidth++;
-        }
-        int subHeight = height >> BLOCK_SIZE_POWER;
-        if ((height & BLOCK_SIZE_MASK) != 0) {
-            subHeight++;
-        }
-        byte[] uv = source.getUVMatrix();//获取UV矩阵
-        // byte[] RGB = new byte[luminances.length*4];
-       // byte[] H = new byte[luminances.length];
-        //byte[] S = new byte[luminances.length];
-        //byte[] V = new byte[luminances.length];
-        byte[] H = new byte[luminances.length];
-        byte[] S = new byte[luminances.length];
-        byte[] V = new byte[luminances.length];
-        convertToHSV(luminances, uv, H, S, V, width, height);
-
-        // luminances = calculateY(luminances, subWidth, subHeight, width, height);
-        //outputmatrix(luminances,uv,width,height,true,Math.random());
-        //outputRGB(RGB,width,height,"rgb");
-        int[][] blackPoints = calculateBlackPoints(luminances, subWidth, subHeight, width, height);
-
-       // long end = System.currentTimeMillis();
-       // System.out.println("时长" + (end - start) + "ms");
-
-        BitMatrix newMatrix = new BitMatrix(width, height);
-        calculateThresholdForBlock(luminances, subWidth, subHeight, width, height, blackPoints, newMatrix);
-        hsvData = new HsvData(H, S, V, newMatrix);
-
-        return hsvData;
-    }
-    public RGBData getRGBData()  {
-
-        long start = System.currentTimeMillis();
-
-        if (rgbData != null) {
-            return rgbData;
-        }
-        LuminanceSource source = getLuminanceSource();
-        int width = source.getWidth();
-        int height = source.getHeight();
-
-        byte[] luminances = source.getMatrix();//灰度数组
-        int subWidth = width >> BLOCK_SIZE_POWER;
-        if ((width & BLOCK_SIZE_MASK) != 0) {
-            subWidth++;
-        }
-        int subHeight = height >> BLOCK_SIZE_POWER;
-        if ((height & BLOCK_SIZE_MASK) != 0) {
-            subHeight++;
-        }
-        byte[] uv = source.getUVMatrix();//获取UV矩阵
+        //byte[] uv = source.getUVMatrix();//获取UV矩阵
         // byte[] RGB = new byte[luminances.length*4];
         // byte[] H = new byte[luminances.length];
         //byte[] S = new byte[luminances.length];
         //byte[] V = new byte[luminances.length];
-        byte[] R = new byte[luminances.length];
-        byte[] G = new byte[luminances.length];
-        byte[] B = new byte[luminances.length];
-        convertToRGB(luminances, uv, R, G, B, width, height);
+       // byte[] channel = new byte[luminances.length];
+       // byte[] GC = new byte[luminances.length];
+        //byte[] BC = new byte[luminances.length];
+       // getRGBchannel(luminances, uv, channel, width, height);
 
         // luminances = calculateY(luminances, subWidth, subHeight, width, height);
         //outputmatrix(luminances,uv,width,height,true,Math.random());
         //outputRGB(RGB,width,height,"rgb");
-        int[][] blackPoints = calculateBlackPoints(R, subWidth, subHeight, width, height);
-        BitMatrix newMatrixR = new BitMatrix(width, height);
-        calculateThresholdForBlock(R, subWidth, subHeight, width, height, blackPoints, newMatrixR);
-        blackPoints = calculateBlackPoints(G, subWidth, subHeight, width, height);
-        BitMatrix newMatrixG = new BitMatrix(width, height);
-        calculateThresholdForBlock(G, subWidth, subHeight, width, height, blackPoints, newMatrixG);
-        blackPoints = calculateBlackPoints(B, subWidth, subHeight, width, height);
-        BitMatrix newMatrixB = new BitMatrix(width, height);
-        calculateThresholdForBlock(B, subWidth, subHeight, width, height, blackPoints, newMatrixB);
-         long end = System.currentTimeMillis();
-         System.out.println("二值化时长" + (end - start) + "ms");
+        int[][] blackPoints = calculateBlackPoints(channel, subWidth, subHeight, width, height);
+        BitMatrix newMatrix = new BitMatrix(width, height);
+        switch (RGB){
+            case R.id.Convert_R:
+                calculateThresholdForBlock(channel, subWidth, subHeight, width, height, blackPoints, newMatrix);
+                break;
+            case R.id.Convert_G:
+                calculateThresholdForBlock(channel, subWidth, subHeight, width, height, blackPoints, newMatrix);
+                break;
+            case R.id.Convert_B:
+                calculateThresholdForBlock(channel, subWidth, subHeight, width, height, blackPoints, newMatrix);
+                break;
+
+        }
+        //int[][] blackPoints = calculateBlackPoints(RC, subWidth, subHeight, width, height);
+        //blackPoints = calculateBlackPoints(GC, subWidth, subHeight, width, height);
+
+        //blackPoints = calculateBlackPoints(BC, subWidth, subHeight, width, height);
+
+       // long end = System.currentTimeMillis();
+        //System.out.println("二值化时长" + (end - start) + "ms");
 
 
-        rgbData = new RGBData(newMatrixR,newMatrixG,newMatrixB);
+       //  rgbData = new RGBData(newMatrixR,newMatrixG,newMatrixB);
 
-        return rgbData;
+        return new RGBmatrixChannel(newMatrix,RGB,timemillis);
     }
 
     //System.out.println("二值化后的BitMatrix宽:"+matrix.getWidth()+"，高:"+matrix.getHeight());
@@ -198,10 +158,7 @@ public class CBinarizer extends GlobalHistogramBinarizer {
 
     }
 
-    @Override
-    public Binarizer createBinarizer(LuminanceSource source) {
-        return new HybridBinarizer(source);
-    }
+
 
     /**
      * For each block in the image, calculate the average black point using a 5x5 grid
@@ -436,28 +393,16 @@ public class CBinarizer extends GlobalHistogramBinarizer {
             }
         }
         return luminances;
+
     }
-
-    private native int[][] calculateBlackPointsfromC(byte[] luminances,
-                                                     int subWidth,
-                                                     int subHeight,
-                                                     int width,
-                                                     int height);
-
-
-    private native int convertToHSV(byte[] luminances,
-                                    byte[] uv,
-                                    byte[] H,
-                                    byte[] S,
-                                    byte[] V,
-                                    int width,
-                                    int height);
-    private native int convertToRGB(byte[] luminances, byte[] uv,
-                                    byte[] R,
-                                    byte[] G,
-                                    byte[] B,
-                                    int width,
-                                    int height);
-
+    protected void send_to_QRDecoder(RGBmatrixChannel rgBmatrixChannel){
+        Message message = Message.obtain(this.handler,R.id.decode,rgBmatrixChannel);
+            message.sendToTarget();
+    }
+    protected void send_to_finish(){
+        Looper.myLooper().quit();
+       Message message = Message.obtain(this.handler,R.id.finish);
+       message.sendToTarget();
+    }
 
 }

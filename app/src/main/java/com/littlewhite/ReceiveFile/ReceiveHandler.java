@@ -9,6 +9,10 @@ import android.util.Log;
 
 import com.littlewhite.Camera.newCameraManager;
 import com.littlewhite.R;
+import com.littlewhite.ReceiveFile.ColorCode.Bbinary;
+import com.littlewhite.ReceiveFile.ColorCode.Gbinary;
+import com.littlewhite.ReceiveFile.ColorCode.QRCodeDecodeThread;
+import com.littlewhite.ReceiveFile.ColorCode.Rbinary;
 import com.littlewhite.ReceiveFile.QRcodeDecoder.DecoderThread;
 
 import com.littlewhite.ReceiveFile.SqllitUtil.SqllitData;
@@ -23,7 +27,11 @@ public class ReceiveHandler extends Handler {
     private RaptorQDecoder raptorQDecoder;
     private ZipThread zipThread;
     private SqllitData sqllitData;
-    private SharedPreferences sharedPreferences;
+    private QRCodeDecodeThread qrCodeDecodeThread;
+    private Rbinary rbinary;
+    private Gbinary gbinary;
+    private Bbinary bbinary;
+   // private SharedPreferences sharedPreferences;
     private State state;
     private enum State {
         PREVIEW,
@@ -44,13 +52,26 @@ public class ReceiveHandler extends Handler {
        // MergeThread.start();
         //MultiDecoder.start();
         */
+
         this.raptorQDecoder = new RaptorQDecoder(this.receiveActivity,this.zipThread,sqllitData);//RaptorQ线程
-        this.decoderThread = new DecoderThread(this.receiveActivity,this.raptorQDecoder);//二维码解析线程
+        this.qrCodeDecodeThread = new QRCodeDecodeThread(this.receiveActivity,this.raptorQDecoder);
+        this.rbinary = new Rbinary(this.receiveActivity,this.qrCodeDecodeThread);
+        this.gbinary = new Gbinary(this.receiveActivity,this.qrCodeDecodeThread);
+        this.bbinary = new Bbinary(this.receiveActivity,this.qrCodeDecodeThread);
+        this.decoderThread = new DecoderThread(this.receiveActivity,this.raptorQDecoder,this.rbinary,this.gbinary,this.bbinary);//二维码解析线程
         Thread raptorQDecoderThread = new Thread(this.raptorQDecoder);
         Thread DecoderThread = new Thread(this.decoderThread);
         Thread ZipThread = new Thread(this.zipThread);
+        Thread rbin = new Thread(this.rbinary);
+        Thread gbin = new Thread(this.gbinary);
+        Thread bbin = new Thread(this.bbinary);
+        Thread qrcodedecode = new Thread(this.qrCodeDecodeThread);
         ZipThread.start();
         raptorQDecoderThread.start();
+        qrcodedecode.start();
+        rbin.start();
+        gbin.start();
+        bbin.start();
         DecoderThread.start();
         state = State.SUCCESS;
         this.cameraManager.startPreview();

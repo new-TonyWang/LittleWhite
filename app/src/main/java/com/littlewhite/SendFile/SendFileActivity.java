@@ -167,15 +167,15 @@ public class SendFileActivity extends ActivityOnlistener {
                 Uri uri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
                 //如果是媒体类型需要从数据库获取路径
                 File chosenFile = new File(getRealPathFromURI(uri));
-                if (chosenFile.length() < 1048576) {//文件必须小于1MB，不然手会累死的
+                if (chosenFile.length() < 1073741824) {//文件必须小于1GB，不然手会累死的
                     this.path = chosenFile.getAbsolutePath();
                     FilePathTV.setText(path + "\n 文件大小:" + chosenFile.length() + "B");
                     FilePathTV.setTextColor(0xFF868585);
                 } else {
                     path = null;
-                    FilePathTV.setText("文件必须小于1MiB");
+                    FilePathTV.setText("文件必须小于1GiB");
                     FilePathTV.setTextColor(Color.rgb(255, 0, 0));
-                    Toast.makeText(this, "文件必须小于1MiB", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "文件必须小于1GiB", Toast.LENGTH_SHORT).show();
                 }
                 //pathTextView.setText("文件路径:"+filePath);
             }
@@ -376,15 +376,15 @@ public class SendFileActivity extends ActivityOnlistener {
             if ("file".equalsIgnoreCase(uri.getScheme())) {//使用第三方应用打开
                 path = uri.getPath();
                 File chosenFile = new File(path);
-                if (chosenFile.length() < 1048576) {//文件必须小于1MB，不然手会累死的
+                if (chosenFile.length() < 1073741824) {//文件必须小于1MB，不然手会累死的
                     FilePathTV.setText(path + "\n 文件大小:" + chosenFile.length() + "B");
                     FilePathTV.setTextColor(0xFF868585);
                     checkConfig();
                 } else {
                     path = null;
-                    FilePathTV.setText("文件必须小于1MiB");
+                    FilePathTV.setText("文件必须小于1GiB");
                     FilePathTV.setTextColor(Color.rgb(255, 0, 0));
-                    Toast.makeText(this, "文件必须小于1MiB", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "文件必须小于1GiB", Toast.LENGTH_SHORT).show();
                 }
                 // Toast.makeText(this,path+"11111",Toast.LENGTH_SHORT).show();
                 return;
@@ -399,15 +399,15 @@ public class SendFileActivity extends ActivityOnlistener {
                 //Toast.makeText(this, path+"222222", Toast.LENGTH_SHORT).show();
             }
             File chosenFile = new File(path);
-            if (chosenFile.length() < 1048576) {//文件必须小于1MB，不然手会累死的
+            if (chosenFile.length() < 1073741824) {//文件必须小于1MB，不然手会累死的
                 FilePathTV.setText(path + "\n 文件大小:" + chosenFile.length() + "B");
                 FilePathTV.setTextColor(0xFF868585);
                 checkConfig();
             } else {
                 path = null;
-                FilePathTV.setText("文件必须小于1MiB");
+                FilePathTV.setText("文件必须小于1GiB");
                 FilePathTV.setTextColor(Color.rgb(255, 0, 0));
-                Toast.makeText(this, "文件必须小于1MiB", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "文件必须小于1GiB", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -562,10 +562,10 @@ public class SendFileActivity extends ActivityOnlistener {
             this.width = Integer.valueOf(widthEdit.getText().toString().equals("") ? "0" : widthEdit.getText().toString());
             this.height = Integer.valueOf(heightEdit.getText().toString().equals("") ? "0" : heightEdit.getText().toString());
             this.QRCodeCapacity = Integer.valueOf(QRCodeCapacityEdit.getText().toString().equals("") ? "0" : QRCodeCapacityEdit.getText().toString());
-            if (this.FPS > 25 || this.FPS == 0) {
+            if (this.FPS > 60 || this.FPS == 0) {
                 this.VideoGeneration.setClickable(false);
                 //this.FPSEdit.setText(R.string.FPS_Default);
-                Toast inf = Toast.makeText(this, "视频帧率必须在1-25之间", Toast.LENGTH_SHORT);
+                Toast inf = Toast.makeText(this, "视频帧率必须在1-60之间", Toast.LENGTH_SHORT);
                 showMyToast(inf,1000);
                 return false;
             }

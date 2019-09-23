@@ -43,5 +43,9 @@
   <item type="id" name="RaptorEncodePhase"/>
   <item type="id" name="FFmpegPhase"/>
   <item type="id" name="RaptorDecodeFile"/>
+  <item type="id" name="Convert_R"/>
+  <item type="id" name="Convert_G"/>
+  <item type="id" name="Convert_B"/>
+  <item type="id" name="Binarize"/>
 
 </resources>

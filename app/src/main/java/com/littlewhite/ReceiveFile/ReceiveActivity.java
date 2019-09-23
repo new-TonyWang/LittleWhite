@@ -228,7 +228,6 @@ public class ReceiveActivity extends SendReceive<ReceiveHandler> implements Surf
         if (handler != null) {
             handler.quitSynchronously();
             handler = null;
-            //receiveHandler = null;//程序未退出的时候就不删除handler
         }
 
         cameraManager.closeDriver();
@@ -247,6 +246,8 @@ public class ReceiveActivity extends SendReceive<ReceiveHandler> implements Surf
      * raptor解析所有数据包的时候调用，加上progressbar和文字提示。
      */
     public void RaptorCalculationStart(){
+            handler.quitSynchronously();
+            //handler = null;
         this.progress.setVisibility(View.GONE);
         View view = findViewById(R.id.result_view);
         view.setVisibility(View.VISIBLE);
