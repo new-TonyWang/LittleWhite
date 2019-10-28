@@ -1,10 +1,14 @@
 <resources>
-    <string name="app_name">Little White</string>
-    <string name="action">发送或接收文件</string>
-    <string name="history">历史记录</string>
+    <string name="app_name">I am QRCode</string>
+    <string name="action">发送</string>
     <string name="setting">设置</string>
     <string name="send">发送文件</string>
     <string name="receive">接收文件</string>
+    <string name="sendNew">发送文件</string>
+    <string name="sendFromVieo">从二维码视频发送</string>
+    <string name="receiveBlack">接收黑白二维码</string>
+    <string name="receiveColor">接收HSV二维码</string>
+    <string name="receiveRGB">接收RGB二维码</string>
     <string name="videoSettings">视频设置</string>
     <string name="resolution">视频分辨率:</string>
     <string name="width">宽:</string>
@@ -12,11 +16,21 @@
     <string name="FPS">视频帧率:</string>
     <string name="QRCodeSettings">二维码设置</string>
     <string name="ErrorCorrectionLevel">纠错码级别：</string>
+    <string name="QRCodeType">二维码类型：</string>
     <string name="QRCodeCapacity">二维码容量：</string>
     <string name="FileSelection">选择文件</string>
     <string name="VideoGeneration">生成视频</string>
     <string name="Progress">进度:</string>
     <string name="initProgress">0/NaN</string>
     <string name="hello">Little White</string>
-    <string name="title_activity_settings">SettingsActivity</string>
+    <string name="FPS_Default">23</string>
+    <string name="height_width_default">900</string>
+    <string name="black_white_QRCode_capacity_default">1935</string>
+    <string name="ColorCode_capacity_default">1747</string>
+    <string name="Clean">清理空间</string>
+    <string name="DoClean">清理</string>
+    <string name="FileExplorer">文件管理</string>
+    <string name="Burst_shoot">shoot</string>
+
+
 </resources>
