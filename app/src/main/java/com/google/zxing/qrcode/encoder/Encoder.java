@@ -141,8 +141,10 @@ public final class Encoder {
 		terminateBits(numDataBytes, headerAndDataBits);
 
 		// Interleave data bits with error correction code.
-		BitArray finalBits = interleaveWithECBytes(headerAndDataBits, version.getTotalCodewords(), numDataBytes,
-				ecBlocks.getNumBlocks());
+//		BitArray finalBits = interleaveWithECBytes(headerAndDataBits, version.getTotalCodewords(), numDataBytes,
+//				ecBlocks.getNumBlocks());
+		BitArray finalBits = interWithECBytes(headerAndDataBits, version.getTotalCodewords(), numDataBytes,
+			ecBlocks.getNumBlocks());
 
 		QRCode qrCode = new QRCode();
 
@@ -215,8 +217,10 @@ public final class Encoder {
 		terminateBits(numDataBytes, headerAndDataBits);
 
 		// Interleave data bits with error correction code.
-		BitArray finalBits = interleaveWithECBytes(headerAndDataBits, version.getTotalCodewords(), numDataBytes,
-				ecBlocks.getNumBlocks());
+//		BitArray finalBits = interleaveWithECBytes(headerAndDataBits, version.getTotalCodewords(), numDataBytes,
+//				ecBlocks.getNumBlocks());
+		BitArray finalBits = interWithECBytes(headerAndDataBits, version.getTotalCodewords(), numDataBytes,
+			ecBlocks.getNumBlocks());
 
 		QRCode qrCode = new QRCode();
 
@@ -911,6 +915,81 @@ public final class Encoder {
 				}
 			}
 		}
+		if (numTotalBytes != result.getSizeInBytes()) { // Should be same.
+			throw new WriterException(
+					"Interleaving error: " + numTotalBytes + " and " + result.getSizeInBytes() + " differ.");
+		}
+
+		return result;
+	}
+
+	/**
+	 * 将数据和纠错包连接在一起而不是分开存
+	 * @param bits
+	 * @param numTotalBytes
+	 * @param numDataBytes
+	 * @param numRSBlocks
+	 * @return
+	 * @throws WriterException
+	 */
+	static BitArray interWithECBytes(BitArray bits, int numTotalBytes, int numDataBytes, int numRSBlocks)
+			throws WriterException {
+
+		// "bits" must have "getNumDataBytes" bytes of data.
+		if (bits.getSizeInBytes() != numDataBytes) {
+			throw new WriterException("Number of bits and data bytes does not match");
+		}
+
+		// Step 1. Divide data bytes into blocks and generate error correction bytes for
+		// them. We'll
+		// store the divided data bytes blocks and error correction bytes blocks into
+		// "blocks".
+		int dataBytesOffset = 0;
+		int maxNumDataBytes = 0;
+		int maxNumEcBytes = 0;
+
+		// Since, we know the number of reedsolmon blocks, we can initialize the vector
+		// with the number.
+		Collection<BlockPair> blocks = new ArrayList<>(numRSBlocks);
+
+		for (int i = 0; i < numRSBlocks; ++i) {
+			int[] numDataBytesInBlock = new int[1];
+			int[] numEcBytesInBlock = new int[1];
+			getNumDataBytesAndNumECBytesForBlockID(numTotalBytes, numDataBytes, numRSBlocks, i, numDataBytesInBlock,
+					numEcBytesInBlock);
+
+			int size = numDataBytesInBlock[0];
+			byte[] dataBytes = new byte[size];
+			bits.toBytes(8 * dataBytesOffset, dataBytes, 0, size);
+			byte[] ecBytes = generateECBytes(dataBytes, numEcBytesInBlock[0]);
+			blocks.add(new BlockPair(dataBytes, ecBytes));
+
+			maxNumDataBytes = Math.max(maxNumDataBytes, size);
+			maxNumEcBytes = Math.max(maxNumEcBytes, ecBytes.length);
+			dataBytesOffset += numDataBytesInBlock[0];
+		}
+		if (numDataBytes != dataBytesOffset) {
+			throw new WriterException("Data bytes does not match offset");
+		}
+
+		BitArray result = new BitArray();
+
+		for (BlockPair block : blocks) {//每一块数据后面紧跟纠错码
+			for (int i = 0; i < maxNumDataBytes; ++i) {
+				byte[] dataBytes = block.getDataBytes();
+				if (i < dataBytes.length) {
+					result.appendBits(dataBytes[i], 8);
+				}
+
+			}
+			for (int i = 0; i < maxNumEcBytes; ++i) {
+					byte[] ecBytes = block.getErrorCorrectionBytes();
+					if (i < ecBytes.length) {
+						result.appendBits(ecBytes[i], 8);
+					}
+				}
+		}
+
 		if (numTotalBytes != result.getSizeInBytes()) { // Should be same.
 			throw new WriterException(
 					"Interleaving error: " + numTotalBytes + " and " + result.getSizeInBytes() + " differ.");

@@ -121,10 +121,16 @@ public class DecoderHandler extends Handler {
             BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
             try {
                 result = reader.decodetobytearry(bitmap, this.hints);
-            } catch (ReaderException e) {
-               // Log.i(TAG,"解析失败");
+            } catch (ChecksumException e) {
+                Log.i(TAG,"校验失败");
                 return;//解析不到的时候跳出该方法
 
+            } catch (FormatException e) {
+                Log.i(TAG,"格式错误");
+                return;//解析不到的时候跳出该方法
+            } catch (NotFoundException e) {
+                Log.i(TAG,"未找到二维码");
+                return;//解析不到的时候跳出该方法
             }
             sendToRaptorDecoder(((List<byte[]>) result.getResultMetadata().get(ResultMetadataType.BYTE_SEGMENTS)).get(0));
 

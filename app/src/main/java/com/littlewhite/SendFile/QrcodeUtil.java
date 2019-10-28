@@ -29,12 +29,13 @@ public class QrcodeUtil {
      * @param
      * @throws IOException
      */
-    public static void encodebytearry(String imgpath,Bitmap bitmap, byte[] content, int width, int height)
+    public static void encodebytearry(String imgpath,Bitmap bitmap, byte[] content, Hashtable<EncodeHintType, Object> hints,int width, int height)
             throws WriterException, IOException {
-        Hashtable<EncodeHintType, Object> hints = new Hashtable<EncodeHintType, Object>();
-        hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);// 纠错级别
+
+        //hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);// 纠错级别
         //hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");// 字符编码格式
-        hints.put(EncodeHintType.MARGIN, 1);// 外边距Margin
+        //hints.put(EncodeHintType.MARGIN, 1);// 外边距Margin
+        //hints.put(EncodeHintType.QR_VERSION,7);
         //hints.put(EncodeHintType.QR_VERSION,40);
         // hints.put(EncodeHintType.QR_VERSION, 2);
         // hints.put(EncodeHintType.);

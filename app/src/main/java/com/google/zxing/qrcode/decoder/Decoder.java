@@ -177,8 +177,8 @@ public final class Decoder {
     // Read codewords
     byte[] codewords = parser.readCodewords(version,dataMask);//读取位矩阵中表示查找器模式的bit，按顺序排列，以重建二维码中包含的码字字节。
     // Separate into data blocks
-    DataBlock[] dataBlocks = DataBlock.getDataBlocks(codewords, version, ecLevel);
-
+   // DataBlock[] dataBlocks = DataBlock.getDataBlocks(codewords, version, ecLevel);
+    DataBlock[] dataBlocks = DataBlock.getDataBlocksInNewWay(codewords, version, ecLevel);
     // Count total number of data bytes
     int totalBytes = 0;
     for (DataBlock dataBlock : dataBlocks) {

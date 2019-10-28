@@ -1,4 +1,4 @@
-package com.littlewhite.SendFile;
+package com.littlewhite.SendFile.FrontCamera;
 
 import android.Manifest;
 import android.app.Activity;
@@ -6,13 +6,10 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.graphics.Color;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
-import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
@@ -28,41 +25,32 @@ import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.media.ImageReader;
-import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
+
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+
 import android.util.Log;
 import android.util.Size;
 import android.util.SparseIntArray;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.FrameLayout;
-import android.widget.MediaController;
-import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.VideoView;
-import android.support.v7.app.AppCompatActivity;
-import com.littlewhite.R;
-import com.littlewhite.SendFile.FrontCamera.AutoFitTextureView;
 
+import com.littlewhite.R;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.reflect.Parameter;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -72,107 +60,18 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-public class VideoPlayer extends AppCompatActivity  implements View.OnClickListener{
-
-    VideoView videoView;
-    MediaController mController;
-    BrightUtil brightUtil;
-    Activity context  = this;
-    Button button ;
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        setContentView(R.layout.activity_video_play);
-        findViewById(R.id.burst_shoot).setOnClickListener(this);
-        //view.findViewById(R.id.expanded_menu).setOnClickListener(this);
-        mTextureView = (AutoFitTextureView) findViewById(R.id.texture);
-        // dir = Environment.getExternalStoragePublicDirectory(Environment.getExternalStoragePublicDirectory("")+ "/Camera2").getAbsoluteFile();
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-        super.onCreate(savedInstanceState);
-        getWindow().setFormat(PixelFormat.TRANSLUCENT);
-
-        BrightUtil brightUtil = new BrightUtil(this);
-        brightUtil.setScreenBrightness(255);
-        // 获取界面上VideoView组件
-        Window window = getWindow();
-        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        WindowManager manager = (WindowManager) this.getSystemService(Context.WINDOW_SERVICE);
-        Display display = manager.getDefaultDisplay();
-        Point theScreenResolution = new Point();
-        display.getSize(theScreenResolution);
-        videoView = (VideoView) findViewById(R.id.video);
-        ViewGroup.LayoutParams layoutParams = videoView.getLayoutParams();
-        layoutParams.height = theScreenResolution.y;
-        layoutParams.width = layoutParams.height ;
-        videoView.setLayoutParams(layoutParams);
-        TextView textView2 = findViewById(R.id.textView2);
-        ViewGroup.LayoutParams layoutParam = textView2.getLayoutParams();
-        layoutParams.height = theScreenResolution.y;
-        layoutParam.width = theScreenResolution.x;
-        textView2.setLayoutParams(layoutParam);
-        //videoView.setH
-        // 创建MediaController对象
-        mController = new MediaController(this);
-        //Enviornment.g
-        Intent intent = getIntent();
-        String a = intent.getStringExtra("videoPath");
-       // Log.i("路径",intent.getStringExtra("videoPath"));
-        File video = new File(a);
-        // Log.i("路径", Environment.getExternalStorageDirectory()+"/夏洛克/神探夏洛克 第四季 03英语_1080p.mp4");
-        if (video.exists()) {
-            videoView.setVideoPath(video.getAbsolutePath());
-            // 设置videoView和mController建立关联
-            videoView.setMediaController(mController);
-            // 设置mController和videoView建立关联
-            mController.setMediaPlayer(videoView);
-
-            // videoView.setL
-            // 让VideoView获取焦点
-            videoView.requestFocus();
-            videoView.start();
-            videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                @Override
-                public void onPrepared(MediaPlayer mp) {
-                    mp.setOnInfoListener(new MediaPlayer.OnInfoListener() {
-                        @Override
-                        public boolean onInfo(MediaPlayer mp, int what, int extra) {
-                            mp.start();
-                            mp.setLooping(true);
-                            if (what == MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START) {
-                                //videoView.setBackgroundColor(Color.TRANSPARENT);
-                            }
-                            return true;
-                        }
-                    });
-                }
-
-            });
-        }
-    }
-    @Override
-    protected void onResume() {
-        startBackgroundThread();
-        if (mTextureView.isAvailable()) {
-            openCamera(mTextureView.getWidth(), mTextureView.getHeight(), outputWidth, outputHeight);
-        } else {
-            mTextureView.setSurfaceTextureListener(mSurfaceTextureListener);
-        }
-        super.onResume();
-        //capture2.newInstance();
-
-        videoView.requestFocus();
-        videoView.start();
-    }
+public class capture2 extends Fragment implements View.OnClickListener{
+    /**
+     * Conversion from screen rotation to JPEG orientation.
+     */
     private static final SparseIntArray ORIENTATIONS = new SparseIntArray();
     private static final int REQUEST_CAMERA_PERMISSION = 1;
     private static final String FRAGMENT_DIALOG = "dialog";
     public  static File dir = Environment.getExternalStoragePublicDirectory( "/Camera2").getAbsoluteFile();;
 
     //默认输出分辨率
-    private int outputWidth = 1280;
-    private int outputHeight = 720;
+    private int outputWidth = 1280/2;
+    private int outputHeight = 720/2;
 
     static {
         ORIENTATIONS.append(Surface.ROTATION_0, 90);
@@ -244,7 +143,7 @@ public class VideoPlayer extends AppCompatActivity  implements View.OnClickListe
             mCameraOpenCloseLock.release();
             cameraDevice.close();
             mCameraDevice = null;
-            Activity activity = context;
+            Activity activity = getActivity();
             if (null != activity) {
                 activity.finish();
             }
@@ -287,9 +186,8 @@ public class VideoPlayer extends AppCompatActivity  implements View.OnClickListe
                 }
                 case STATE_WAITING_LOCK: {
                     Integer afState = result.get(CaptureResult.CONTROL_AF_STATE);
-                    if (afState == 0) {
+                    if (afState == null) {
                         Log.d("peng", "11111111111111111111");
-                        mState = STATE_PICTURE_TAKEN;
                         captureStillPicture();
                     } else if (CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED == afState ||
                             CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED == afState) {
@@ -351,7 +249,7 @@ public class VideoPlayer extends AppCompatActivity  implements View.OnClickListe
     };
 
     private void showToast(final String text) {
-        final Activity activity = context;
+        final Activity activity = getActivity();
         if (activity != null) {
             activity.runOnUiThread(new Runnable() {
                 @Override
@@ -395,6 +293,48 @@ public class VideoPlayer extends AppCompatActivity  implements View.OnClickListe
         }
     }
 
+    public static capture2 newInstance() {
+        return new capture2();
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.activity_video_play, container, false);
+    }
+
+    @Override
+    public void onViewCreated(final View view, Bundle savedInstanceState) {
+        view.findViewById(R.id.burst_shoot).setOnClickListener(this);
+        //view.findViewById(R.id.expanded_menu).setOnClickListener(this);
+        mTextureView = (AutoFitTextureView) view.findViewById(R.id.texture);
+       // dir = Environment.getExternalStoragePublicDirectory(Environment.getExternalStoragePublicDirectory("")+ "/Camera2").getAbsoluteFile();
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+       // dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + "/Camera2").getAbsoluteFile();
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        startBackgroundThread();
+        if (mTextureView.isAvailable()) {
+            openCamera(mTextureView.getWidth(), mTextureView.getHeight(), outputWidth, outputHeight);
+        } else {
+            mTextureView.setSurfaceTextureListener(mSurfaceTextureListener);
+        }
+    }
+
     @Override
     public void onPause() {
         closeCamera();
@@ -405,17 +345,16 @@ public class VideoPlayer extends AppCompatActivity  implements View.OnClickListe
 
 
     private void setUpCameraOutputs(int width, int height, int outputWid, int outputHei) {
-        Activity activity = context;
+        Activity activity = getActivity();
         CameraManager manager = (CameraManager) activity.getSystemService(Context.CAMERA_SERVICE);
         try {
-
-                for (String cameraId : manager.getCameraIdList()) {
+            for (String cameraId : manager.getCameraIdList()) {
                 CameraCharacteristics characteristics
                         = manager.getCameraCharacteristics(cameraId);
 
                 // We don‘t use a front facing camera in this sample.
                 Integer facing = characteristics.get(CameraCharacteristics.LENS_FACING);
-                //   characteristics.get(C);
+             //   characteristics.get(C);
                 if (facing != null && facing != CameraCharacteristics.LENS_FACING_FRONT) {
                     continue;
                 }
@@ -502,19 +441,19 @@ public class VideoPlayer extends AppCompatActivity  implements View.OnClickListe
         } catch (NullPointerException e) {
             // Currently an NPE is thrown when the Camera2API is used but not supported on the device this code runs.
             //ErrorDialog.newInstance(getString(R.string.camera_error))
-            // .show(getChildFragmentManager(), FRAGMENT_DIALOG);
+                   // .show(getChildFragmentManager(), FRAGMENT_DIALOG);
         }
     }
 
     private void openCamera(int width, int height, int outputW, int outputH) {
-        if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
+        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
             //requestCameraPermission();
             return;
         }
         setUpCameraOutputs(width, height, outputW, outputH);
         configureTransform(width, height);
-        Activity activity = context;
+        Activity activity = getActivity();
         CameraManager manager = (CameraManager) activity.getSystemService(Context.CAMERA_SERVICE);
         try {
             if (!mCameraOpenCloseLock.tryAcquire(2500, TimeUnit.MILLISECONDS)) {
@@ -624,7 +563,7 @@ public class VideoPlayer extends AppCompatActivity  implements View.OnClickListe
 
 
     private void configureTransform(int viewWidth, int viewHeight) {
-        Activity activity = context;
+        Activity activity = getActivity();
         if (null == mTextureView || null == mPreviewSize || null == activity) {
             return;
         }
@@ -658,7 +597,7 @@ public class VideoPlayer extends AppCompatActivity  implements View.OnClickListe
         Log.d("peng", "走了");
         try {
             // This is how to tell the camera to lock focus.
-            // mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START);
+           // mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START);
             mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_MODE_AUTO);
             mPreviewRequestBuilder.set(CaptureRequest.SENSOR_EXPOSURE_TIME,(long)1/100);
             // Tell #mCaptureCallback to wait for the lock.
@@ -690,13 +629,13 @@ public class VideoPlayer extends AppCompatActivity  implements View.OnClickListe
 
     private void captureStillPicture() {
         try {
-            final Activity activity = context;
+            final Activity activity = getActivity();
             if (null == activity || null == mCameraDevice) {
                 return;
             }
             Log.d("peng", "开始添加--------------------");
             ArrayList<CaptureRequest> captureList = new ArrayList<>();
-            for (int i = 0; i < 100; i++) {
+            for (int i = 0; i < 300; i++) {
                 CaptureRequest.Builder captureBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
                 captureBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
                 setAutoFlash(captureBuilder);
@@ -720,7 +659,7 @@ public class VideoPlayer extends AppCompatActivity  implements View.OnClickListe
                 public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
                     Log.d("peng", "正在存第-----" + mPictureCounter + "张");
                     mPictureCounter++;
-                    if (mPictureCounter >= 90) {
+                    if (mPictureCounter >= 299) {
                         showToast("ooooooookkkkkkkkkkk");
                         Log.d("peng", "存储完成--------------------");
                         unlockFocus();
@@ -771,10 +710,10 @@ public class VideoPlayer extends AppCompatActivity  implements View.OnClickListe
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.burst_shoot: {
-               // outputWidth = 600;
-               // outputHeight = 480;
+                outputWidth = 600;
+                outputHeight = 480;
                 //Toast.makeText(getActivity(), "640*480", Toast.LENGTH_SHORT).show();
-                // openCamera(mTextureView.getWidth(), mTextureView.getHeight(), outputWidth, outputHeight);
+               // openCamera(mTextureView.getWidth(), mTextureView.getHeight(), outputWidth, outputHeight);
                 takePicture();
                 break;
 
@@ -831,7 +770,7 @@ public class VideoPlayer extends AppCompatActivity  implements View.OnClickListe
         }
     }
 
-    private static class ImageSaverTOJPG implements Runnable {
+    public static class ImageSaverTOJPG implements Runnable {
         private final Image mImage;
 
         public ImageSaverTOJPG(Image image) {
@@ -840,9 +779,9 @@ public class VideoPlayer extends AppCompatActivity  implements View.OnClickListe
 
         @Override
         public void run() {
-            // ByteBuffer buffer = mImage.getPlanes()[0].getBuffer();
+           // ByteBuffer buffer = mImage.getPlanes()[0].getBuffer();
             //byte[] bytes = new byte[buffer.remaining()];
-            // ByteBuffer prebuffer = ByteBuffer.allocate(64);
+           // ByteBuffer prebuffer = ByteBuffer.allocate(64);
             FileOutputStream output = null;
 
             try {
@@ -850,13 +789,13 @@ public class VideoPlayer extends AppCompatActivity  implements View.OnClickListe
                 byte[] bytes = new byte[buffer.remaining()];
                 buffer.get(bytes);
                 output = new FileOutputStream(dir + File.separator + System.currentTimeMillis() + ".jpg");
-                //  output.write(prebuffer.array()); // write meta information to file
+              //  output.write(prebuffer.array()); // write meta information to file
                 // Now write the actual planes.
 
-                //buffer = mImage.getPlanes()[0].getBuffer();
-                // bytes = new byte[buffer.remaining()]; // makes byte array large enough to hold image
-                //  buffer.get(bytes); // copies image from buffer to byte array
-                output.write(bytes);    // write the byte array to file
+                    //buffer = mImage.getPlanes()[0].getBuffer();
+                   // bytes = new byte[buffer.remaining()]; // makes byte array large enough to hold image
+                  //  buffer.get(bytes); // copies image from buffer to byte array
+                    output.write(bytes);    // write the byte array to file
 
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
@@ -875,7 +814,7 @@ public class VideoPlayer extends AppCompatActivity  implements View.OnClickListe
         }
     }
 
-    static class CompareSizesByArea implements Comparator<Size> {
+    public static class CompareSizesByArea implements Comparator<Size> {
 
         @Override
         public int compare(Size lhs, Size rhs) {
@@ -912,16 +851,6 @@ public class VideoPlayer extends AppCompatActivity  implements View.OnClickListe
         }
 
     }
+
 }
-
-
-
-
-
-
-
-
-
-
-
 

@@ -30,6 +30,7 @@
     <string name="Clean">清理空间</string>
     <string name="DoClean">清理</string>
     <string name="FileExplorer">文件管理</string>
+    <string name="Burst_shoot">shoot</string>
 
 
 </resources>

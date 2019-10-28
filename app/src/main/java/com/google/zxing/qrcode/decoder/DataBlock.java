@@ -57,8 +57,8 @@ final class DataBlock {
     Version.ECBlocks ecBlocks = version.getECBlocksForLevel(ecLevel);
 
     // First count the total number of data blocks
-    int totalBlocks = 0;
-    Version.ECB[] ecBlockArray = ecBlocks.getECBlocks();
+    int totalBlocks = 0;//5
+    Version.ECB[] ecBlockArray = ecBlocks.getECBlocks();//长度=2
     for (Version.ECB ecBlock : ecBlockArray) {
       totalBlocks += ecBlock.getCount();
     }
@@ -68,43 +68,43 @@ final class DataBlock {
     int numResultBlocks = 0;
     for (Version.ECB ecBlock : ecBlockArray) {
       for (int i = 0; i < ecBlock.getCount(); i++) {
-        int numDataCodewords = ecBlock.getDataCodewords();
-        int numBlockCodewords = ecBlocks.getECCodewordsPerBlock() + numDataCodewords;
-        result[numResultBlocks++] = new DataBlock(numDataCodewords, new byte[numBlockCodewords]);
+        int numDataCodewords = ecBlock.getDataCodewords();//获取每一个block中数据的字符总数
+        int numBlockCodewords = ecBlocks.getECCodewordsPerBlock() + numDataCodewords;//获取每一块中EC和数据字符总数
+        result[numResultBlocks++] = new DataBlock(numDataCodewords, new byte[numBlockCodewords]);//存储以上两个数据，为下面纠错作准备
       }
     }
 
     // All blocks have the same amount of data, except that the last n
     // (where n may be 0) have 1 more byte. Figure out where these start.
-    int shorterBlocksTotalCodewords = result[0].codewords.length;
-    int longerBlocksStartAt = result.length - 1;
+    int shorterBlocksTotalCodewords = result[0].codewords.length;//短block数据和BC的总长度
+    int longerBlocksStartAt = result.length - 1;//最长的一定是最后一个
     while (longerBlocksStartAt >= 0) {
       int numCodewords = result[longerBlocksStartAt].codewords.length;
-      if (numCodewords == shorterBlocksTotalCodewords) {
+      if (numCodewords == shorterBlocksTotalCodewords) {//从最后一个开始查，判断倒数第几个的长度比其他的更长
         break;
       }
       longerBlocksStartAt--;
     }
     longerBlocksStartAt++;
 
-    int shorterBlocksNumDataCodewords = shorterBlocksTotalCodewords - ecBlocks.getECCodewordsPerBlock();
+    int shorterBlocksNumDataCodewords = shorterBlocksTotalCodewords - ecBlocks.getECCodewordsPerBlock();//短的block的数据长度
     // The last elements of result may be 1 element longer;
     // first fill out as many elements as all of them have
     int rawCodewordsOffset = 0;
     for (int i = 0; i < shorterBlocksNumDataCodewords; i++) {
-      for (int j = 0; j < numResultBlocks; j++) {
+      for (int j = 0; j < numResultBlocks; j++) {//假设小block中数据长度为i，一共中有j个block，它是一起取所有block的一部分数据，而不是先将一个完整的block数据取完，然后再取第二个
         result[j].codewords[i] = rawCodewords[rawCodewordsOffset++];
       }
     }
     // Fill out the last data block in the longer ones
-    for (int j = longerBlocksStartAt; j < numResultBlocks; j++) {
+    for (int j = longerBlocksStartAt; j < numResultBlocks; j++) {//取长的block，方法同上
       result[j].codewords[shorterBlocksNumDataCodewords] = rawCodewords[rawCodewordsOffset++];
     }
     // Now add in error correction blocks
     int max = result[0].codewords.length;
-    for (int i = shorterBlocksNumDataCodewords; i < max; i++) {
-      for (int j = 0; j < numResultBlocks; j++) {
-        int iOffset = j < longerBlocksStartAt ? i : i + 1;
+    for (int i = shorterBlocksNumDataCodewords; i < max; i++) {//在每一个block的数据后面放入纠错数据
+      for (int j = 0; j < numResultBlocks; j++) {//纠错数据的放入和上文相同
+        int iOffset = j < longerBlocksStartAt ? i : i + 1;//如果是大block，由于数据比其他长一个，则起始地址加一
         result[j].codewords[iOffset] = rawCodewords[rawCodewordsOffset++];
       }
     }
@@ -113,6 +113,85 @@ final class DataBlock {
 
   int getNumDataCodewords() {
     return numDataCodewords;
+  }
+
+  /**
+   * 使用自己设计的排列，将每一块中连在一起的数据和纠错码读取
+   * @param rawCodewords
+   * @param version
+   * @param ecLevel
+   * @return
+   */
+  static DataBlock[] getDataBlocksInNewWay(byte[] rawCodewords,
+                                   Version version,
+                                   ErrorCorrectionLevel ecLevel) {
+
+    if (rawCodewords.length != version.getTotalCodewords()) {
+      throw new IllegalArgumentException();
+    }
+
+    // Figure out the number and size of data blocks used by this version and
+    // error correction level
+    Version.ECBlocks ecBlocks = version.getECBlocksForLevel(ecLevel);
+
+    // First count the total number of data blocks
+    int totalBlocks = 0;//5
+    Version.ECB[] ecBlockArray = ecBlocks.getECBlocks();//长度=2
+    for (Version.ECB ecBlock : ecBlockArray) {
+      totalBlocks += ecBlock.getCount();
+    }
+
+    // Now establish DataBlocks of the appropriate size and number of data codewords
+    DataBlock[] result = new DataBlock[totalBlocks];
+    int numResultBlocks = 0;
+    for (Version.ECB ecBlock : ecBlockArray) {
+      for (int i = 0; i < ecBlock.getCount(); i++) {
+        int numDataCodewords = ecBlock.getDataCodewords();//获取每一个block中数据的字符总数
+        int numBlockCodewords = ecBlocks.getECCodewordsPerBlock() + numDataCodewords;//获取每一块中EC和数据字符总数
+        result[numResultBlocks++] = new DataBlock(numDataCodewords, new byte[numBlockCodewords]);//存储以上两个数据，为下面纠错作准备
+      }
+    }
+
+    // All blocks have the same amount of data, except that the last n
+    // (where n may be 0) have 1 more byte. Figure out where these start.
+    int shorterBlocksTotalCodewords = result[0].codewords.length;//短block数据和BC的总长度
+    int longerBlocksStartAt = result.length - 1;//最长的一定是最后一个
+    while (longerBlocksStartAt >= 0) {
+      int numCodewords = result[longerBlocksStartAt].codewords.length;
+      if (numCodewords == shorterBlocksTotalCodewords) {//从最后一个开始查，判断倒数第几个的长度比其他的更长
+        break;
+      }
+      longerBlocksStartAt--;
+    }
+    longerBlocksStartAt++;
+
+    int shorterBlocksNumDataCodewords = shorterBlocksTotalCodewords - ecBlocks.getECCodewordsPerBlock();//短的block的数据长度
+    // The last elements of result may be 1 element longer;
+    // first fill out as many elements as all of them have
+    int rawCodewordsOffset = 0;
+    int max = result[0].codewords.length;
+    for (int j = 0; j < numResultBlocks; j++) {
+      if(j < longerBlocksStartAt) {//长度小的
+        for (int i = 0; i < shorterBlocksNumDataCodewords; i++) {
+          result[j].codewords[i] = rawCodewords[rawCodewordsOffset++];
+        }
+        for (int i = shorterBlocksNumDataCodewords; i < max; i++) {//在每一个block的数据后面继续放入纠错
+          int iOffset= i;
+          result[j].codewords[iOffset] = rawCodewords[rawCodewordsOffset++];
+        }
+      }else{//后几个长度长的
+        for (int i = 0; i < shorterBlocksNumDataCodewords+1; i++) {
+          result[j].codewords[i] = rawCodewords[rawCodewordsOffset++];
+        }
+        for (int i = shorterBlocksNumDataCodewords+1; i < max+1; i++) {//在每一个block的数据后面继续放入纠错
+
+          result[j].codewords[i] = rawCodewords[rawCodewordsOffset++];
+        }
+
+      }
+    }
+
+    return result;
   }
 
   byte[] getCodewords() {

@@ -200,7 +200,7 @@ public class RaptorEncoderHandler extends Handler {
 
             data = mergedata(this.fecParameters.asArray(),data);
 
-                QrcodeUtil.encodebytearry(String.format(this.QRCodeDir,i),bitmap, data, sendConfigs.getWidth(), sendConfigs.getHeight());
+                QrcodeUtil.encodebytearry(String.format(this.QRCodeDir,i),bitmap, data, encodeHints,sendConfigs.getWidth(), sendConfigs.getHeight());
                 //zxingutil.preEncodeColorByte(String.format("src/kaiti/%d.jpg",i).toString(),"jpg", data, 900, 900);
 
 					/*try {
@@ -238,7 +238,7 @@ public class RaptorEncoderHandler extends Handler {
             // byte[] mlgb = null;
             try {
                 data = mergedata(this.fecParameters.asArray(),data);
-                QrcodeUtil.encodebytearry(String.format(this.QRCodeDir,i+j),bitmap, data, sendConfigs.getWidth(), sendConfigs.getHeight());
+                QrcodeUtil.encodebytearry(String.format(this.QRCodeDir,i+j),bitmap, data, encodeHints,sendConfigs.getWidth(), sendConfigs.getHeight());
                 //zxingutil.preEncodeColorByte(String.format("src/kaiti/%d.jpg",i+j).toString(),"jpg", data, 600, 600);
                     /*
 					try {

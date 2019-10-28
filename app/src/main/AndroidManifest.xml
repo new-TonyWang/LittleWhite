@@ -13,14 +13,13 @@
         android:name="android.hardware.camera"
         android:required="true" />
 
-
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".SendFileSelection"></activity>
+        <activity android:name=".SendFileSelection" />
         <activity android:name=".History.HistoryActivity" />
         <activity android:name=".TransmissionCompleteActivity" />
         <activity
@@ -31,53 +30,42 @@
             android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"
             android:windowSoftInputMode="stateAlwaysHidden" />
         <activity android:name=".ActionActivity" />
-        <activity android:name=".SendFile.SendFileActivity" >
+        <activity android:name=".SendFile.SendFileActivity">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
 
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="*/*"/>
-            </intent-filter>
 
+                <data android:mimeType="*/*" />
+            </intent-filter>
         </activity>
         <activity
             android:name=".SendFile.VideoPlayer"
             android:screenOrientation="sensorLandscape"
             android:stateNotNeeded="true"
             android:theme="@style/Theme.AppCompat.DayNight.NoActionBar" />
+        <activity android:name=".SettingsActivity" />
         <activity
-            android:name=".SettingsActivity"/>
-        <activity android:name=".FileManager.FileManager"
-            android:grantUriPermissions="true"
+            android:name=".FileManager.FileManager"
             android:exported="false"
-            />
+            android:grantUriPermissions="true" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
 
         <provider
-
             android:name="android.support.v4.content.FileProvider"
-
             android:authorities="com.littlewhite.FileManager.OpenFileUtil"
-
-            android:grantUriPermissions="true"
-
-            android:exported="false">
-
+            android:exported="false"
+            android:grantUriPermissions="true">
             <meta-data
-
                 android:name="android.support.FILE_PROVIDER_PATHS"
-
                 android:resource="@xml/file_path" />
-
         </provider>
-
     </application>
 
 </manifest>
