@@ -16,10 +16,14 @@
 
 package com.google.zxing;
 
+import android.util.Log;
+
 import com.google.zxing.common.BitArray;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.common.HsvData;
 import com.google.zxing.common.RGBData;
+
+import static com.littlewhite.SendFile.AlbumNotifier.TAG;
 
 /**
  * This class is the core bitmap class used by ZXing to represent 1 bit data. Reader objects
@@ -89,8 +93,10 @@ public  class BinaryBitmap {
     //    1D Reader finds a barcode before the 2D Readers run.
     // 2. This work will only be done once even if the caller installs multiple 2D Readers.
     if (matrix == null) {
-
+      long start = System.currentTimeMillis();
       matrix = binarizer.getBlackMatrix();
+      long end = System.currentTimeMillis();
+      Log.i(TAG,"二值化时间:"+(end-start));
       //System.out.println("matrix的高:"+matrix.getHeight()+"matrix的宽:"+matrix.getWidth());
     }
     return matrix;//从二值化得来的图像

@@ -76,9 +76,11 @@ public class Detector {
 
     resultPointCallback = hints == null ? null :
         (ResultPointCallback) hints.get(DecodeHintType.NEED_RESULT_POINT_CALLBACK);
-
+long start = System.currentTimeMillis();
     FinderPatternFinder finder = new FinderPatternFinder(image, resultPointCallback);//找到定位图标!!!!重点来了
     FinderPatternInfo info = finder.find(hints);
+    long end = System.currentTimeMillis();
+    System.out.println("定位时长" + (end - start) + "ms");
     /*
     System.out.println("BitMatrix宽:"+image.getWidth()+"BitMatrix高:"+image.getHeight());
     System.out.println("左下"+info.getBottomLeft().toString());
@@ -90,7 +92,7 @@ public class Detector {
 
   protected final DetectorResult processFinderPatternInfo(FinderPatternInfo info)
       throws NotFoundException, FormatException {
-
+long start = System.currentTimeMillis();
     FinderPattern topLeft = info.getTopLeft();
     FinderPattern topRight = info.getTopRight();
     FinderPattern bottomLeft = info.getBottomLeft();
@@ -145,6 +147,8 @@ public class Detector {
     } else {
       points = new ResultPoint[]{bottomLeft, topLeft, topRight, alignmentPattern};
     }
+long end = System.currentTimeMillis();
+    System.out.println("重新构建二维码的时长" + (end - start) + "ms");
     return new DetectorResult(bits, points);
   }
 

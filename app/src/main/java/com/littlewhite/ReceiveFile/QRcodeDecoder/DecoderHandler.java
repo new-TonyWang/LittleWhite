@@ -77,11 +77,11 @@ public class DecoderHandler extends Handler {
     public void handleMessage(Message message) {
         switch (message.what){
             case R.id.decode:
-                //long start = System.currentTimeMillis();
+                long start = System.currentTimeMillis();
                     decode((byte[])message.obj,message.arg1,message.arg2);
-                //long end = System.currentTimeMillis();
+                long end = System.currentTimeMillis();
 
-                //System.out.println("彩色二维码解析时长" + (end - start) + "ms");
+                System.out.println("二维码解析时长" + (end - start) + "ms");
                 break;
             case R.id.decodeColor:
                // long start = System.currentTimeMillis();

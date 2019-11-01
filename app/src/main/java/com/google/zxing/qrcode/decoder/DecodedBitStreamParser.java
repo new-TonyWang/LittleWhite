@@ -16,6 +16,8 @@
 
 package com.google.zxing.qrcode.decoder;
 
+import android.util.Log;
+
 import com.google.zxing.DecodeHintType;
 import com.google.zxing.FormatException;
 import com.google.zxing.NotDataException;
@@ -30,6 +32,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import static com.littlewhite.SendFile.AlbumNotifier.TAG;
 
 /**
  * <p>
@@ -153,7 +157,7 @@ final class DecodedBitStreamParser {
 	 */
 	static DecoderResult decodetobyte(byte[] bytes, Version version, ErrorCorrectionLevel ecLevel,
 			Map<DecodeHintType, ?> hints) throws FormatException {
-		
+		long start = System.currentTimeMillis();
 		BitSource bits = new BitSource(bytes);
 		Mode mode = Mode.forBits(bits.readBits(4));
 		if(mode!=Mode.DATA) {return null;}//不是文件传输码
@@ -167,6 +171,8 @@ final class DecodedBitStreamParser {
 		//byte[] result = new byte[count];
 		// case BYTE:
 		decodeByte(bits,count, byteSegments, hints);
+		long end = System.currentTimeMillis();
+		Log.i(TAG,"解析成byte数组的时间:"+(end-start)+"ms");
 		//decodeByteSegment(bits, result, count, currentCharacterSetECI, byteSegments, hints);// hints正常为空,currentCharacterSetECI
 		return new DecoderResult(bytes, byteSegments,
 				 ecLevel.toString(), -1, -1,mode);

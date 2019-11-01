@@ -101,7 +101,7 @@ public class FinderPatternFinder {
       // Get a row of black/white values
       clearCounts(stateCount);
       int currentState = 0;
-      for (int j = 0; j < maxJ; j++) {
+      for (int j = 0; j < maxJ; j++) {//扫描宽度
         if (image.get(j, i)) {
           // Black pixel
           if ((currentState & 1) == 1) { // Counting white pixels

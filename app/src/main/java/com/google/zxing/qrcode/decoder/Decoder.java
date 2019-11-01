@@ -16,6 +16,9 @@
 
 package com.google.zxing.qrcode.decoder;
 
+import android.nfc.Tag;
+import android.util.Log;
+
 import com.google.zxing.ChecksumException;
 import com.google.zxing.DecodeHintType;
 import com.google.zxing.FormatException;
@@ -30,6 +33,8 @@ import com.littlewhite.ColorCode.HSVColorTable;
 
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import static com.littlewhite.SendFile.AlbumNotifier.TAG;
 
 /**
  * <p>The main class which implements QR Code decoding -- as opposed to locating and extracting
@@ -167,6 +172,7 @@ public final class Decoder {
   }
   private DecoderResult decode(BitMatrixParser parser, Map<DecodeHintType,?> hints)
       throws FormatException, ChecksumException {
+    long start = System.currentTimeMillis();
     FormatInformation formatInfo = parser.readFormatInformation();
     Version version = parser.readVersion();
     ErrorCorrectionLevel ecLevel = formatInfo.getErrorCorrectionLevel();//纠错版本
@@ -186,6 +192,9 @@ public final class Decoder {
     }
     byte[] resultBytes = new byte[totalBytes];
     int resultOffset = 0;
+    long end = System.currentTimeMillis();
+    Log.i(TAG,"数据提取时间:"+(end-start)+"ms");
+    start= System.currentTimeMillis();
 
     // Error-correct and copy data blocks together into a stream of bytes
     for (DataBlock dataBlock : dataBlocks) {
@@ -196,10 +205,12 @@ public final class Decoder {
         resultBytes[resultOffset++] = codewordBytes[i];
       }
     }
-
+end =  System.currentTimeMillis();
+    Log.i(TAG,"纠错时间:"+(end-start)+"ms");
     // Decode the contents of that stream of bytes
+
     if(hints!=null&&hints.containsKey(DecodeHintType.FILEDATA)) {
-    	return	DecodedBitStreamParser.decodepayload(resultBytes, version, ecLevel, hints);
+    	return	DecodedBitStreamParser.decodetobyte(resultBytes, version, ecLevel, hints);
     }
     return DecodedBitStreamParser.decode(resultBytes, version, ecLevel, hints);
   }

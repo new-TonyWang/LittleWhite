@@ -157,8 +157,9 @@ final class MatrixUtil {
     embedDarkDotAtLeftBottomCorner(matrix);
 
     // Position adjustment patterns appear if version >= 2.
-    maybeEmbedPositionAdjustmentPatterns(version, matrix);
-    // Timing patterns should be embedded after position adj. patterns.
+//   maybeEmbedPositionAdjustmentPatterns(version, matrix);
+    EmbedPositionAdjustmentPatterns(version, matrix);
+    // Timing patterns should be emedded after position adj. patterns.
     embedTimingPatterns(matrix);
   }
 
@@ -518,6 +519,31 @@ final class MatrixUtil {
         }
       }
     }
+  }
+  private static void EmbedPositionAdjustmentPatterns(Version version, ByteMatrix matrix) {
+    if (version.getVersionNumber() < 2) {  // The patterns appear if version >= 2
+      return;
+    }
+    int index = version.getVersionNumber() - 1;
+    int[] coordinates = POSITION_ADJUSTMENT_PATTERN_COORDINATE_TABLE[index];
+    int length = coordinates.length;
+    for(int i = 0;i<length;i++){
+      if((coordinates[i]==-1&&i!=0)||i==length-1){
+        int lastone = coordinates[i-1];
+        int x = lastone;
+        int y = lastone;
+        if (x >= 0 && isEmpty(matrix.get(x, y))) {
+          // If the cell is unset, we embed the position adjustment pattern here.
+          // -2 is necessary since the x/y coordinates point to the center of the pattern, not the
+          // left top corner.
+          embedPositionAdjustmentPattern(x - 2, y - 2, matrix);
+        }
+      }else if(coordinates[0]==-1){
+        break;
+      }
+    }
+
+
   }
 
 }

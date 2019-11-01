@@ -16,6 +16,9 @@
 
 package com.google.zxing.qrcode.decoder;
 
+import android.nfc.Tag;
+import android.util.Log;
+
 import com.google.zxing.FormatException;
 import com.google.zxing.common.BitMatrix;
 
@@ -152,16 +155,18 @@ public final class Version {
 
     // Alignment patterns
     int max = alignmentPatternCenters.length;
-    for (int x = 0; x < max; x++) {
-      int i = alignmentPatternCenters[x] - 2;
-      for (int y = 0; y < max; y++) {
-        if ((x == 0 && (y == 0 || y == max - 1)) || (x == max - 1 && y == 0)) {
-          // No alignment patterns near the three finder patterns
-          continue;
-        }
-        bitMatrix.setRegion(alignmentPatternCenters[y] - 2, i, 5, 5);
-      }
-    }
+//    for (int x = 0; x < max; x++) {
+//      int i = alignmentPatternCenters[x] - 2;
+//      for (int y = 0; y < max; y++) {
+//        if ((x == 0 && (y == 0 || y == max - 1)) || (x == max - 1 && y == 0)) {
+//          // No alignment patterns near the three finder patterns
+//          continue;
+//        }
+//        bitMatrix.setRegion(alignmentPatternCenters[y] - 2, i, 5, 5);
+//      }
+//    }
+    Log.e("max是:",max+"");
+    bitMatrix.setRegion(alignmentPatternCenters[max-1] - 2, alignmentPatternCenters[max-1] - 2, 5, 5);
 
     // Vertical timing pattern
     bitMatrix.setRegion(6, 9, 1, dimension - 17);

@@ -189,7 +189,7 @@ final class BitMatrixParser {
               currentByte |= 1;
             }
             // If we've made a whole byte, save it off
-            if (bitsRead == 8) {
+            if (bitsRead == 8&&resultOffset<=result.length-1) {
               result[resultOffset++] = (byte) currentByte;
               bitsRead = 0;
               currentByte = 0;
