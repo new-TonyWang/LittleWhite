@@ -22,6 +22,7 @@ import com.google.zxing.NotFoundException;
 import com.google.zxing.ResultPoint;
 import com.google.zxing.ResultPointCallback;
 import com.google.zxing.common.BitMatrix;
+import com.google.zxing.common.DefaultGridSampler;
 import com.google.zxing.common.DetectorResult;
 import com.google.zxing.common.GridSampler;
 import com.google.zxing.common.HsvData;
@@ -137,7 +138,7 @@ long start = System.currentTimeMillis();
     }
 
     PerspectiveTransform transform =//透视变换
-        createTransform(topLeft, topRight, bottomLeft, alignmentPattern, dimension);
+            createTransformWithPattern(topLeft, topRight, bottomLeft, alignmentPattern, dimension);
 
     BitMatrix bits = sampleGrid(image, transform, dimension);//点阵化像素点
 
@@ -194,12 +195,59 @@ long end = System.currentTimeMillis();
         bottomLeft.getY());
   }
 
+  private static PerspectiveTransform createTransformWithPattern(ResultPoint topLeft,
+                                                      ResultPoint topRight,
+                                                      ResultPoint bottomLeft,
+                                                      ResultPoint alignmentPattern,
+                                                      int dimension) {
+    float dimMinusThree = dimension+6.0f-3.5f;
+    float bottomRightX;
+    float bottomRightY;
+    float sourceBottomRightX;
+    float sourceBottomRightY;
+    if (alignmentPattern != null) {
+      bottomRightX = alignmentPattern.getX();
+      bottomRightY = alignmentPattern.getY();
+      sourceBottomRightX = dimMinusThree - 3.0f;
+      sourceBottomRightY = dimension-6.5f;
+    } else {
+      // Don't have an alignment pattern, just make up the bottom-right point
+      bottomRightX = (topRight.getX() - topLeft.getX()) + bottomLeft.getX();
+      bottomRightY = (topRight.getY() - topLeft.getY()) + bottomLeft.getY();
+      sourceBottomRightX = dimMinusThree;
+      sourceBottomRightY = dimMinusThree;
+    }
+
+    return PerspectiveTransform.quadrilateralToQuadrilateral(
+            9.5f,//左上角
+            3.5f,//左上角
+            dimMinusThree,//右上角x
+            3.5f,//右上角y
+            sourceBottomRightX,
+            sourceBottomRightY,
+            9.5f,
+            dimension-3.5f,
+            topLeft.getX(),
+            topLeft.getY(),
+            topRight.getX(),
+            topRight.getY(),
+            bottomRightX,
+            bottomRightY,
+            bottomLeft.getX(),
+            bottomLeft.getY());
+  }
+
+
+
+
   private static BitMatrix sampleGrid(BitMatrix image,
                                       PerspectiveTransform transform,
                                       int dimension) throws NotFoundException {
 
     GridSampler sampler = GridSampler.getInstance();
-    return sampler.sampleGrid(image, dimension, dimension, transform);
+    //DefaultGridSampler sampler = new DefaultGridSampler();
+    return sampler.sampleGridwithPattern(image, dimension, dimension, transform);
+    //return sampler.sampleGrid(image, dimension, dimension, transform);
   }
 
   /**

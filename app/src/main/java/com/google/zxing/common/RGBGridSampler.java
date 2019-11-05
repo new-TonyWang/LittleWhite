@@ -38,6 +38,7 @@ public  class RGBGridSampler extends GridSampler {
         return null;
     }
 
+
     @Override
     public BitMatrix[] ColorGrid(HsvData image, int dimensionX, int dimensionY, PerspectiveTransform transform, HSVColorTable hsvColorTable) throws NotFoundException {
         return new BitMatrix[0];
@@ -116,7 +117,7 @@ public  class RGBGridSampler extends GridSampler {
        // return bits;
         BitMatrix[] Bits = {bitsR,bitsG,bitsB};
 
-       // outputimage(bits);
+       //outputimage(bits);
 
        // outputimage(bitsR,1);
        // outputimage(bitsG,2);
@@ -182,6 +183,11 @@ public  class RGBGridSampler extends GridSampler {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public BitMatrix sampleGridwithPattern(BitMatrix image, int dimension, int dimension1, PerspectiveTransform transform) {
+        return null;
     }
 
 

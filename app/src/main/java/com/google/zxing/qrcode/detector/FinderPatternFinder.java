@@ -73,7 +73,7 @@ public class FinderPatternFinder {
     return possibleCenters;
   }
 
-  final FinderPatternInfo find(Map<DecodeHintType,?> hints) throws NotFoundException {
+  public final FinderPatternInfo find(Map<DecodeHintType, ?> hints) throws NotFoundException {
     boolean tryHarder = hints != null && hints.containsKey(DecodeHintType.TRY_HARDER);
     int maxI = image.getHeight();
     int maxJ = image.getWidth();
@@ -94,7 +94,7 @@ public class FinderPatternFinder {
     if (iSkip < MIN_SKIP || tryHarder) {
       iSkip = MIN_SKIP;
     }
-
+    iSkip=1;
     boolean done = false;
     int[] stateCount = new int[5];
     for (int i = iSkip - 1; i < maxI && !done; i += iSkip) {
@@ -102,7 +102,7 @@ public class FinderPatternFinder {
       clearCounts(stateCount);
       int currentState = 0;
       for (int j = 0; j < maxJ; j++) {//扫描宽度
-        if (image.get(j, i)) {
+        if (image.get(j, i)) {//该点为黑色
           // Black pixel
           if ((currentState & 1) == 1) { // Counting white pixels
             currentState++;
@@ -116,7 +116,7 @@ public class FinderPatternFinder {
                 if (confirmed) {
                   // Start examining every other line. Checking each line turned out to be too
                   // expensive and didn't improve performance.
-                  iSkip = 2;
+                  iSkip = 1;
                   if (hasSkipped) {
                     done = haveMultiplyConfirmedCenters();
                   } else {
@@ -143,7 +143,7 @@ public class FinderPatternFinder {
                 currentState = 0;
                 clearCounts(stateCount);
               } else { // No, shift counts back by two
-                shiftCounts2(stateCount);
+                shiftCounts2(stateCount);//整体左移动一位，最后一位置0
                 currentState = 3;
               }
             } else {
@@ -184,12 +184,13 @@ public class FinderPatternFinder {
    * @param stateCount count of black/white/black/white/black pixels just read
    * @return true iff the proportions of the counts is close enough to the 1/1/3/1/1 ratios
    *         used by finder patterns to be considered a match
+   *         该函数将可能出现1/1/3/1/1的区域进行鉴别，首先先估算出每一个小块的大小，以误差为1/2*moduleSize的大小判断和1/1/3/1/1的拟合程度，如果每一部分都满足则就能确定
    */
   protected static boolean foundPatternCross(int[] stateCount) {
     int totalModuleSize = 0;
     for (int i = 0; i < 5; i++) {
       int count = stateCount[i];
-      if (count == 0) {
+      if (count == 0) {//count=0的时候就完全不满足1/1/3/1/1，直接丢弃
         return false;
       }
       totalModuleSize += count;
@@ -197,7 +198,7 @@ public class FinderPatternFinder {
     if (totalModuleSize < 7) {
       return false;
     }
-    float moduleSize = totalModuleSize / 7.0f;
+    float moduleSize = totalModuleSize / 7.0f;//估算每一个模块的大小
     float maxVariance = moduleSize / 2.0f;
     // Allow less than 50% variance from 1-1-3-1-1 proportions
     return
@@ -344,7 +345,7 @@ public class FinderPatternFinder {
 
     // Start counting up from center
     int i = startI;
-    while (i >= 0 && image.get(centerJ, i)) {
+    while (i >= 0 && image.get(centerJ, i)) {//从中心点下手，，向上查
       stateCount[2]++;
       i--;
     }
@@ -505,8 +506,8 @@ public class FinderPatternFinder {
   protected final boolean handlePossibleCenter(int[] stateCount, int i, int j) {
     int stateCountTotal = stateCount[0] + stateCount[1] + stateCount[2] + stateCount[3] +
         stateCount[4];
-    float centerJ = centerFromEnd(stateCount, j);
-    float centerI = crossCheckVertical(i, (int) centerJ, stateCount[2], stateCountTotal);
+    float centerJ = centerFromEnd(stateCount, j);//计算水平方向1/1/3/1/1区域的中心
+    float centerI = crossCheckVertical(i, (int) centerJ, stateCount[2], stateCountTotal);//计算垂直方向1/1/3/1/1区域的中心
     if (!Float.isNaN(centerI)) {
       // Re-cross check
       centerJ = crossCheckHorizontal((int) centerJ, (int) centerI, stateCount[2], stateCountTotal);

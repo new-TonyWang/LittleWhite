@@ -187,5 +187,10 @@ public  class ColorGridSampler extends GridSampler {
         }
     }
 
+    @Override
+    public BitMatrix sampleGridwithPattern(BitMatrix image, int dimension, int dimension1, PerspectiveTransform transform) {
+        return null;
+    }
+
 
 }
