@@ -65,7 +65,7 @@ public class ReceiveActivity extends SendReceive<ReceiveHandler> implements Surf
         if (hasSurface) {
             // The activity was paused but not stopped, so the surface still exists. Therefore
             // surfaceCreated() won't be called, so init the camera here.
-            initCamera(surfaceHolder);//重新打开app的时候用
+            initCamera(surfaceHolder);
         } else {
             // Install the callback and wait for surfaceCreated() to init the camera.
             surfaceHolder.addCallback(this);
@@ -243,7 +243,7 @@ public class ReceiveActivity extends SendReceive<ReceiveHandler> implements Surf
 
     /**
      *
-     * raptor解析所有数据包的时候调用，加上progressbar和文字提示。
+     * 已经接收足够量的数据包，raptor纠错的时候调用，加上progressbar和文字提示。
      */
     public void RaptorCalculationStart(){
             handler.quitSynchronously();

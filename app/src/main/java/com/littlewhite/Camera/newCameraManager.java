@@ -21,8 +21,8 @@ import java.io.IOException;
 public class newCameraManager {
 
   /**
-   * 让获取的解码框的宽高为偶数，方便截取UV
-   * @author dswitkin@google.com (Daniel Switkin)
+   * 让获取的解码框的宽高为偶数，方便截取UV通道
+   *
    */
   @SuppressWarnings("deprecation") // camera APIs
 
@@ -209,6 +209,12 @@ public class newCameraManager {
         theCamera.getCamera().setOneShotPreviewCallback(previewCallback);
       }
     }
+
+  /**
+   * 开启预览，即开启
+   * @param handler
+   * @param message
+   */
   public synchronized void requestPreviewFrameWithBuffer(Handler handler, int message) {
     OpenCamera theCamera = camera;
     if (theCamera != null && previewing) {

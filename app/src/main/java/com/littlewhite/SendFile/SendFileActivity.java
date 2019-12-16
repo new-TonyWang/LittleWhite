@@ -49,6 +49,10 @@ import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
+/**
+ * 文件发送界面，可以设置很多发送时的属性
+ */
+
 public class SendFileActivity extends ActivityOnlistener {
 
 

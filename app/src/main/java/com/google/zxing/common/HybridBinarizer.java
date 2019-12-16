@@ -103,16 +103,16 @@ public final class HybridBinarizer extends GlobalHistogramBinarizer {
       matrix = super.getBlackMatrix();
     }
     //System.out.println("二值化后的BitMatrix宽:"+matrix.getWidth()+"，高:"+matrix.getHeight());
-    /*
-    try {
-		outputimage(matrix,"src/matrix.png");
-	} catch (IOException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
-	*/
+
+//    try {
+//		outputimage(matrix,"src/matrix.png");
+//	} catch (IOException e) {
+//		e.printStackTrace();
+//	}
+
     return matrix;
   }
+
 
   @Override
   public Binarizer createBinarizer(LuminanceSource source) {

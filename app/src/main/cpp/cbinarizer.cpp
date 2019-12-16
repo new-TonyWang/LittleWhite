@@ -1,7 +1,8 @@
 #include <jni.h>
 #include <libyuv.h>
 #include "CBinarize.h"
-
+#include <stdlib.h>
+#include <string.h>
 extern "C"
 JNIEXPORT jobjectArray JNICALL
 Java_com_google_zxing_common_CBinarizer_calculateBlackPointsfromC(JNIEnv *env, jobject instance,
@@ -178,7 +179,7 @@ Java_com_google_zxing_common_CBinarizer_convertToRGB(JNIEnv *env, jobject instan
     //  getHSVchnnels(width,height,ARGB,H,S,V);
     // TODO
     cv::Mat img(height,width,CV_8UC4,ARGB);
-   // cv::imwrite("sdcard/test.jpg",img);
+    cv::imwrite("sdcard/rgbimage.jpg",img);
     // TODO
     std::vector<cv::Mat> channels;
     split(img,channels);
@@ -221,7 +222,10 @@ Java_com_littlewhite_ReceiveFile_QRcodeDecoder_DecoderHandler_convertToRGB(JNIEn
     //  getHSVchnnels(width,height,ARGB,H,S,V);
     // TODO
     cv::Mat img(height,width,CV_8UC4,ARGB);
-    // cv::imwrite("sdcard/test.jpg",img);
+    //long a = (random()%100);
+    String c = "sdcard/rgb.jpg";
+
+     //cv::imwrite(c,img);
     // TODO
     std::vector<cv::Mat> channels;
     split(img,channels);

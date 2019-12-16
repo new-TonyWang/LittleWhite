@@ -10,6 +10,9 @@ import com.littlewhite.ReceiveFile.ReceiveActivity;
 
 import java.util.concurrent.CountDownLatch;
 
+/**
+ * 该类是用于解析将RGB三通道分别二值化得到的三张二维码
+ */
 public class QRCodeDecodeThread extends Thread {
     private Handler handler;
     private ReceiveActivity activity;

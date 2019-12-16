@@ -38,12 +38,12 @@ public class ReceiveHandler extends Handler {
         SUCCESS,
         DONE
     }
-    public ReceiveHandler(ReceiveActivity receiveActivity, newCameraManager cameraManager,int iscolor)  {
+    public ReceiveHandler(ReceiveActivity receiveActivity, newCameraManager newcameraManager,int iscolor)  {
         Log.i(this.getClass().toString(),"启动");
         this.receiveActivity = receiveActivity;
-        this.cameraManager = cameraManager;
+        this.cameraManager = newcameraManager;//相机管理,负责设置相机属性并开启预览画面
         this.sqllitData = new SqllitData(this.receiveActivity);//启动数据库，记录接收到的文件信息
-        this.zipThread = new ZipThread(this.receiveActivity,sqllitData);//压缩文件线程
+        this.zipThread = new ZipThread(this.receiveActivity,sqllitData);//接收文件之后进行解压
         /*
         this.mergeFile =  new MergeFileThread(this.receiveActivity);
         this.multiDecoder = new MultiDecoder(this.receiveActivity,this.mergeFile);
@@ -53,12 +53,12 @@ public class ReceiveHandler extends Handler {
         //MultiDecoder.start();
         */
 
-        this.raptorQDecoder = new RaptorQDecoder(this.receiveActivity,this.zipThread,sqllitData);//RaptorQ线程
-        this.qrCodeDecodeThread = new QRCodeDecodeThread(this.receiveActivity,this.raptorQDecoder);
-        this.rbinary = new Rbinary(this.receiveActivity,this.qrCodeDecodeThread);
-        this.gbinary = new Gbinary(this.receiveActivity,this.qrCodeDecodeThread);
-        this.bbinary = new Bbinary(this.receiveActivity,this.qrCodeDecodeThread);
-        this.decoderThread = new DecoderThread(this.receiveActivity,this.raptorQDecoder,this.rbinary,this.gbinary,this.bbinary);//二维码解析线程
+        this.raptorQDecoder = new RaptorQDecoder(this.receiveActivity,this.zipThread,sqllitData);//RaptorQ纠错码线程
+        this.qrCodeDecodeThread = new QRCodeDecodeThread(this.receiveActivity,this.raptorQDecoder);//QRcode解析线程
+        this.rbinary = new Rbinary(this.receiveActivity,this.qrCodeDecodeThread);//二值化红色通道线程
+        this.gbinary = new Gbinary(this.receiveActivity,this.qrCodeDecodeThread);//二值化绿色通道线程
+        this.bbinary = new Bbinary(this.receiveActivity,this.qrCodeDecodeThread);//二值化蓝色通道线程
+        this.decoderThread = new DecoderThread(this.receiveActivity,this.raptorQDecoder,this.rbinary,this.gbinary,this.bbinary);//用于对解析功能进一步明细，主要是作用于接收RGB二维码的时候
         Thread raptorQDecoderThread = new Thread(this.raptorQDecoder);
         Thread DecoderThread = new Thread(this.decoderThread);
         Thread ZipThread = new Thread(this.zipThread);
@@ -77,13 +77,13 @@ public class ReceiveHandler extends Handler {
         this.cameraManager.startPreview();
         switch(iscolor) {
             case R.id.BW:
-                restartPreviewAndDecode();//解码黑白
+                restartPreviewAndDecode();//解码黑白二维码
                 break;
             case R.id.HSV:
-                restartPreviewAndDecodeColorcode();//解码HSV
+                restartPreviewAndDecodeColorcode();//解码HSV格式
                 break;
             case R.id.RGB:
-                restartPreviewAndDecodeRGB();//解码RGB
+                restartPreviewAndDecodeRGB();//解码RGB格式
                 break;
         }
 
@@ -105,10 +105,10 @@ public class ReceiveHandler extends Handler {
                     Bundle bundle = message.getData();
                     receiveActivity.TransmissionComplete(bundle);
                     break;
-                    case R.id.RaptorDecodeFile://Raptor码开始生成文件，可以将其他线程关闭
+                    case R.id.RaptorDecodeFile://Raptor码开始进行校验，可以将其他线程关闭
                         this.receiveActivity.RaptorCalculationStart();
                         Message finish = obtainMessage(R.id.finish);
-                        decoderThread.getHandler().sendMessageAtFrontOfQueue(finish);//发送消息到对第一个位置
+                        decoderThread.getHandler().sendMessageAtFrontOfQueue(finish);//发送消息到队第一个位置
                         break;
                  //case R.id.
                 case R.id.stop:

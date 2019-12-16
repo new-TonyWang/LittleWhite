@@ -154,7 +154,7 @@ public class QRCodeReader implements Reader {
 	      throws NotFoundException, ChecksumException, FormatException {
 	    DecoderResult decoderResult;
 	    ResultPoint[] points;
-	      DetectorResult detectorResult = new Detector(image.getBlackMatrix()).detect(hints);//寻找二维码定位码，透视变换，将二维码点阵化
+	      DetectorResult detectorResult = new Detector(image.getBlackMatrix()).detect(hints);//image.getBlackMatrix()方法将图片二值化，一个耗时操作。寻找二维码定位码，透视变换，将二维码点阵化
 	      decoderResult = decoder.decode(detectorResult.getBits(), hints);//解析二维码
 	      //System.out.println("bits宽:"+detectorResult.getBits().getWidth()+"bits高:"+detectorResult.getBits().getHeight());//获取到的是二维码的行列数
 	      points = detectorResult.getPoints();

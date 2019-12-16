@@ -76,20 +76,20 @@ public class DecoderHandler extends Handler {
     @Override
     public void handleMessage(Message message) {
         switch (message.what){
-            case R.id.decode:
+            case R.id.decode://解析黑白
                 long start = System.currentTimeMillis();
                     decode((byte[])message.obj,message.arg1,message.arg2);
                 long end = System.currentTimeMillis();
 
                 System.out.println("二维码解析时长" + (end - start) + "ms");
                 break;
-            case R.id.decodeColor:
+            case R.id.decodeColor://解析HSV
                // long start = System.currentTimeMillis();
                 decodeColor((byte[])message.obj,message.arg1,message.arg2);
                // long end = System.currentTimeMillis();
                // System.out.println("彩色二维码解析时长" + (end - start) + "ms");
                 break;
-            case R.id.decodeRGB:
+            case R.id.decodeRGB://完成YUV-RGB的格式转换，然后再将RGB三东通道数据分别发给三个二值化的线程
                  //long start = System.currentTimeMillis();
                 decodeRGB((byte[])message.obj,message.arg1,message.arg2);
                  //long end = System.currentTimeMillis();
@@ -155,6 +155,13 @@ public class DecoderHandler extends Handler {
             sendToRaptorDecoder(((List<byte[]>) result.getResultMetadata().get(ResultMetadataType.BYTE_SEGMENTS)).get(0));
         }
     }
+
+    /**
+     * 解析RGB二维码
+     * @param YUV
+     * @param width
+     * @param height
+     */
     private void decodeRGB(byte[] YUV,int width,int height)  {
         //Result result= null;
 
@@ -173,12 +180,12 @@ public class DecoderHandler extends Handler {
                 subHeight++;
             }
 
-                byte[] uv = source.getUVMatrix();
-                byte[] luminances = source.getMatrix();
+                byte[] uv = source.getUVMatrix();//获取UV通道
+                byte[] luminances = source.getMatrix();//获取Y通道
                 byte[] RC = new byte[luminances.length];
                 byte[] GC = new byte[luminances.length];
                 byte[] BC = new byte[luminances.length];
-                convertToRGB(luminances, uv, RC, GC, BC, source.getWidth(), source.getHeight());
+                convertToRGB(luminances, uv, RC, GC, BC, source.getWidth(), source.getHeight());//格式转换
                 long time = System.currentTimeMillis();
                 RGBChannel channelR = new RGBChannel(RC,R.id.Convert_R,source.getWidth(),source.getHeight(),time);
                 RGBChannel channelG = new RGBChannel(GC,R.id.Convert_G,source.getWidth(),source.getHeight(),time);

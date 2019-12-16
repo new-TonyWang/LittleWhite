@@ -39,17 +39,17 @@ public class QRCodeDecodeHandler extends Handler {
     public void handleMessage(Message message) {
         switch (message.what) {
             case R.id.decode:
-            RGBData rgbData = this.qrCodeHashMap.addNewNode((RGBmatrixChannel) message.obj);
+            RGBData rgbData = this.qrCodeHashMap.addNewNode((RGBmatrixChannel) message.obj);//由于R，G，B三个线程完成二值化的顺序不一定相同所以这里起到了线程同步的作用
             Result result = null;
             if (rgbData != null) {
                 QRCodeReader reader = new QRCodeReader();
                 try {
-                    result = reader.decodeRGBCode(rgbData, this.decodeHints);
+                    result = reader.decodeRGBCode(rgbData, this.decodeHints);//解析二维码
                 } catch (Exception e) {
                     Log.e(TAG, "解析失败");
                     return;
                 }
-                sendToRaptorDecoder(((List<byte[]>) result.getResultMetadata().get(ResultMetadataType.BYTE_SEGMENTS)).get(0));
+                sendToRaptorDecoder(((List<byte[]>) result.getResultMetadata().get(ResultMetadataType.BYTE_SEGMENTS)).get(0));//传给raptorQ进行纠错
             }
             break;
             case R.id.finish:
