@@ -9,6 +9,8 @@
     <string name="receiveBlack">接收黑白二维码</string>
     <string name="receiveColor">接收HSV二维码</string>
     <string name="receiveRGB">接收RGB二维码</string>
+    <string name="decodeFromPic">从图片序列解码</string>pureQRCOdeDecode
+    <string name="pureQRCOdeDecode">解析标准二维码并输出</string>
     <string name="videoSettings">视频设置</string>
     <string name="resolution">视频分辨率:</string>
     <string name="width">宽:</string>

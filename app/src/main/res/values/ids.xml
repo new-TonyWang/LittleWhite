@@ -15,12 +15,14 @@
  limitations under the License.
  -->
 <resources>
+  <item type="id" name="decodepureQRCode"/>
   <item type="id" name="decode"/>
   <item type="id" name="decodeColor"/>
   <item type="id" name="decodeRGB"/>
   <item type="id" name="BW"/>
   <item type="id" name="HSV"/>
   <item type="id" name="RGB"/>
+  <item type="id" name="decodePureQRSequence"/>
   <item type="id" name="failed"/>
   <item type="id" name="decode_succeeded"/>
   <item type="id" name="Merge"/>
@@ -29,6 +31,7 @@
   <item type="id" name="FECParameters"/>
   <item type="id" name="update_progress"/>
   <item type="id" name="finish"/>
+  <item type="id" name="outputgray"/>
   <item type="id" name="restart_decode"/>
   <item type="id" name="quit"/>
   <item type="id" name="restart_preview"/>

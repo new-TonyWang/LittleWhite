@@ -32,10 +32,10 @@ public class DecoderThread implements Runnable {
     private Rbinary rbinary;
     private Gbinary gbinary;
     private Bbinary bbinary;
-
+    private OutPutGray outPutGray;
     public DecoderThread(
                          com.littlewhite.ReceiveFile.ReceiveActivity receiveActivity,
-                         RaptorQDecoder raptorQDecoder, Rbinary rbinary, Gbinary gbinary, Bbinary bbinary) {
+                         RaptorQDecoder raptorQDecoder, Rbinary rbinary, Gbinary gbinary, Bbinary bbinary,OutPutGray outPutGray) {
 
 
         ReceiveActivity = receiveActivity;
@@ -43,6 +43,7 @@ public class DecoderThread implements Runnable {
         this.rbinary = rbinary;
         this.gbinary = gbinary;
         this.bbinary = bbinary;
+        this.outPutGray = outPutGray;
         setHints();
         this.handlerInitLatch = new CountDownLatch(1);
     }
@@ -70,7 +71,7 @@ public class DecoderThread implements Runnable {
     @Override
     public void run() {
         Looper.prepare();
-        this.handler = new DecoderHandler(decodeHints,raptorQDecoder.getHandler(),ReceiveActivity,new HSVColorTable(),this.rbinary,this.gbinary,this.bbinary);
+        this.handler = new DecoderHandler(decodeHints,raptorQDecoder.getHandler(),ReceiveActivity,new HSVColorTable(),this.rbinary,this.gbinary,this.bbinary,this.outPutGray);
         handlerInitLatch.countDown();
         //Log.i(this.getClass().toString(),"启动");
         Looper.loop();

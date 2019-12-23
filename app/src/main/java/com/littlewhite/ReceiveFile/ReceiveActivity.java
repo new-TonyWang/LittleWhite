@@ -201,6 +201,9 @@ public class ReceiveActivity extends SendReceive<ReceiveHandler> implements Surf
                     case R.id.RGB:
                         this.handler = new ReceiveHandler(this, this.cameraManager,R.id.RGB);//解码RGB
                         break;
+                    case R.id.pureQRCOdeDecode:
+                        this.handler = new ReceiveHandler(this, this.cameraManager,R.id.pureQRCOdeDecode);
+                        break;
                 }
 
             }

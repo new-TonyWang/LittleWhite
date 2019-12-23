@@ -35,7 +35,7 @@ import com.littlewhite.Camera.open.OpenCamera;
  * configure the camera hardware.
  */
 @SuppressWarnings("deprecation") // camera APIs
-final class CameraConfigurationManager {
+final class Camera2ConfigurationManager {
 
   private static final String TAG = "CameraConfiguration";
 
@@ -47,7 +47,7 @@ final class CameraConfigurationManager {
   private Point bestPreviewSize;
   private Point previewSizeOnScreen;
 
-  CameraConfigurationManager(Context context) {
+  Camera2ConfigurationManager(Context context) {
     this.context = context;
   }
 

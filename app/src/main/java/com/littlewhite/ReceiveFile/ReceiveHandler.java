@@ -15,6 +15,7 @@ import com.littlewhite.ReceiveFile.ColorCode.QRCodeDecodeThread;
 import com.littlewhite.ReceiveFile.ColorCode.Rbinary;
 import com.littlewhite.ReceiveFile.QRcodeDecoder.DecoderThread;
 
+import com.littlewhite.ReceiveFile.QRcodeDecoder.OutPutGray;
 import com.littlewhite.ReceiveFile.SqllitUtil.SqllitData;
 import com.littlewhite.ZipFile.ZipThread;
 
@@ -58,13 +59,15 @@ public class ReceiveHandler extends Handler {
         this.rbinary = new Rbinary(this.receiveActivity,this.qrCodeDecodeThread);//二值化红色通道线程
         this.gbinary = new Gbinary(this.receiveActivity,this.qrCodeDecodeThread);//二值化绿色通道线程
         this.bbinary = new Bbinary(this.receiveActivity,this.qrCodeDecodeThread);//二值化蓝色通道线程
-        this.decoderThread = new DecoderThread(this.receiveActivity,this.raptorQDecoder,this.rbinary,this.gbinary,this.bbinary);//用于对解析功能进一步明细，主要是作用于接收RGB二维码的时候
+        OutPutGray outPutGray = new OutPutGray();
+        this.decoderThread = new DecoderThread(this.receiveActivity,this.raptorQDecoder,this.rbinary,this.gbinary,this.bbinary,outPutGray);//用于对解析功能进一步明细，主要是作用于接收RGB二维码的时候
         Thread raptorQDecoderThread = new Thread(this.raptorQDecoder);
         Thread DecoderThread = new Thread(this.decoderThread);
         Thread ZipThread = new Thread(this.zipThread);
         Thread rbin = new Thread(this.rbinary);
         Thread gbin = new Thread(this.gbinary);
         Thread bbin = new Thread(this.bbinary);
+        Thread ooutPutGray = new Thread(outPutGray);
         Thread qrcodedecode = new Thread(this.qrCodeDecodeThread);
         ZipThread.start();
         raptorQDecoderThread.start();
@@ -72,6 +75,7 @@ public class ReceiveHandler extends Handler {
         rbin.start();
         gbin.start();
         bbin.start();
+        ooutPutGray.start();
         DecoderThread.start();
         state = State.SUCCESS;
         this.cameraManager.startPreview();
@@ -85,10 +89,14 @@ public class ReceiveHandler extends Handler {
             case R.id.RGB:
                 restartPreviewAndDecodeRGB();//解码RGB格式
                 break;
+            case R.id.pureQRCOdeDecode:
+                restartPreviewAndDecodePureQRcodes();//解码标准二维码
+                break;
         }
 
 
     }
+
     @Override
     public void handleMessage(Message message) {
             switch(message.what){
@@ -137,6 +145,14 @@ public class ReceiveHandler extends Handler {
             //cameraManager.requestPreviewFrameWithBuffer(multiDecoder.getHandler(), R.id.decode);
             cameraManager.requestPreviewFrameWithBuffer(decoderThread.getHandler(), R.id.decodeRGB);
             //cameraManager.requestPreviewFrame(decoderThread.getHandler(), R.id.decode);
+        }
+    }
+    private void restartPreviewAndDecodePureQRcodes() {
+        if (state == State.SUCCESS) {
+            state = State.PREVIEW;
+            //cameraManager.requestPreviewFrameWithBuffer(multiDecoder.getHandler(), R.id.decode);
+            cameraManager.requestPreviewFrameWithBuffer(decoderThread.getHandler(), R.id.decodepureQRCode);
+            // cameraManager.requestPreviewFrame(decoderThread.getHandler(), R.id.decode);
         }
     }
     public void quitSynchronously() {

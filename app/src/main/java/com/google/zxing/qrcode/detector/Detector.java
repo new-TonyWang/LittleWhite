@@ -138,7 +138,9 @@ long start = System.currentTimeMillis();
     }
 
     PerspectiveTransform transform =//透视变换
-            createTransformWithPattern(topLeft, topRight, bottomLeft, alignmentPattern, dimension);
+            createTransform(topLeft, topRight, bottomLeft, alignmentPattern, dimension);
+//    PerspectiveTransform transform =//透视变换
+//            createTransformWithPattern(topLeft, topRight, bottomLeft, alignmentPattern, dimension);
 
     BitMatrix bits = sampleGrid(image, transform, dimension);//点阵化像素点
 
@@ -246,8 +248,8 @@ long end = System.currentTimeMillis();
 
     GridSampler sampler = GridSampler.getInstance();
     //DefaultGridSampler sampler = new DefaultGridSampler();
-    return sampler.sampleGridwithPattern(image, dimension, dimension, transform);
-    //return sampler.sampleGrid(image, dimension, dimension, transform);
+    //return sampler.sampleGridwithPattern(image, dimension, dimension, transform);
+    return sampler.sampleGrid(image, dimension, dimension, transform);
   }
 
   /**

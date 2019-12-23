@@ -46,7 +46,7 @@ public class QRCodeDecodeHandler extends Handler {
                 try {
                     result = reader.decodeRGBCode(rgbData, this.decodeHints);//解析二维码
                 } catch (Exception e) {
-                    Log.e(TAG, "解析失败");
+                   // Log.e(TAG, "解析失败");
                     return;
                 }
                 sendToRaptorDecoder(((List<byte[]>) result.getResultMetadata().get(ResultMetadataType.BYTE_SEGMENTS)).get(0));//传给raptorQ进行纠错

@@ -122,8 +122,8 @@ public final class DefaultGridSampler extends GridSampler {
           }
         }
 
-        outputimage(bits,2);
-        outputimage(pattern,1);
+        //outputimage(bits,2);
+        //outputimage(pattern,1);
       } catch (ArrayIndexOutOfBoundsException aioobe) {
         // This feels wrong, but, sometimes if the finder patterns are misidentified, the resulting
         // transform gets "twisted" such that it maps a straight line of points to a set of points

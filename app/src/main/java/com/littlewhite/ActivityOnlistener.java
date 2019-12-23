@@ -67,6 +67,18 @@ public class ActivityOnlistener extends AppCompatActivity implements View.OnClic
                 //Intent receive = new Intent(this, ReceiveActivity.class);
                 //startActivity(receive);
                 break;
+            case R.id.decodeQRfromPic:
+                Intent intent = new Intent(this, FileManager.class);
+                intent.putExtra("dir",Environment.getExternalStoragePublicDirectory("").getAbsolutePath());
+                startActivity(intent);
+                //Intent receive = new Intent(this, ReceiveActivity.class);
+                //startActivity(receive);
+                break;
+            case R.id.pureQRCOdeDecode:
+                Intent pureQRCOdeDecode = new Intent(this, ReceiveActivity.class);
+                pureQRCOdeDecode.putExtra("iscolor",R.id.pureQRCOdeDecode);
+                startActivity(pureQRCOdeDecode);
+                break;
             case R.id.FileSelection:
                 getFilePath(REQUEST_CODE_GET_FILE_PATH,"*/*");
                // Intent receive = new Intent(this, ReceiveActivity.class);

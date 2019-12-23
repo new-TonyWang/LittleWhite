@@ -16,7 +16,6 @@
 
 package com.google.zxing.qrcode.decoder;
 
-import android.nfc.Tag;
 import android.util.Log;
 
 import com.google.zxing.ChecksumException;
@@ -29,7 +28,6 @@ import com.google.zxing.common.DetectorResult;
 import com.google.zxing.common.reedsolomon.GenericGF;
 import com.google.zxing.common.reedsolomon.ReedSolomonDecoder;
 import com.google.zxing.common.reedsolomon.ReedSolomonException;
-import com.littlewhite.ColorCode.HSVColorTable;
 
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -37,16 +35,15 @@ import java.util.concurrent.LinkedBlockingQueue;
 import static com.littlewhite.SendFile.AlbumNotifier.TAG;
 
 /**
- * <p>The main class which implements QR Code decoding -- as opposed to locating and extracting
- * the QR Code from an image.</p>
+ * <p>用于解析传输文件的二维码</p>
  *
  * @author Sean Owen
  */
-public class Decoder {
+public class QRDataDecoder extends Decoder{
 
   private final ReedSolomonDecoder rsDecoder;
 
-  public Decoder() {
+  public QRDataDecoder() {
     rsDecoder = new ReedSolomonDecoder(GenericGF.QR_CODE_FIELD_256);
   }
 
@@ -172,14 +169,17 @@ public class Decoder {
   }
   protected DecoderResult decode(BitMatrixParser parser, Map<DecodeHintType, ?> hints)
           throws FormatException, ChecksumException {
+    if(hints==null||!hints.containsKey(DecodeHintType.FILEDATA)) {//若不是文件传输则交给父类
+     return super.decode(parser,hints);
+    }
     Version version = parser.readVersion();//获得版本号
     FormatInformation formatInfo = parser.readFormatInformation();//格式信息
     ErrorCorrectionLevel ecLevel = formatInfo.getErrorCorrectionLevel();//获得纠错信息
     DataMask dataMask = DataMask.values()[formatInfo.getDataMask()];
     // Read codewords
-    byte[] codewords = parser.readCodewords(version,dataMask);//读取位矩阵中表示查找器模式的bit，按顺序排列，以重建二维码中包含的码字字节。
+    byte[] codewords = parser.readCodewordsnew(version,dataMask);//读取位矩阵中表示查找器模式的bit，按顺序排列，以重建二维码中包含的码字字节。
     // Separate into data blocks
-    DataBlock[] dataBlocks = DataBlock.getDataBlocks(codewords, version, ecLevel);
+    DataBlock[] dataBlocks = DataBlock.getDataBlocksInNewWay(codewords, version, ecLevel);
 
     // Count total number of data bytes
     int totalBytes = 0;
@@ -200,10 +200,8 @@ public class Decoder {
     }
 
     // Decode the contents of that stream of bytes
-    if(hints!=null&&hints.containsKey(DecodeHintType.FILEDATA)) {
-      return	DecodedBitStreamParser.decodepayload(resultBytes, version, ecLevel, hints);
-    }
-    return DecodedBitStreamParser.decode(resultBytes, version, ecLevel, hints);
+
+    return DecodedBitStreamParser.decodepayload(resultBytes, version, ecLevel, hints);
   }
   private DecoderResult decode1(BitMatrixParser parser, Map<DecodeHintType,?> hints)
       throws FormatException, ChecksumException {
@@ -244,6 +242,9 @@ end =  System.currentTimeMillis();
     Log.i(TAG,"纠错时间:"+(end-start)+"ms");
     // Decode the contents of that stream of bytes
 
+    if(hints!=null&&hints.containsKey(DecodeHintType.FILEDATA)) {
+    	return	DecodedBitStreamParser.decodetobyte(resultBytes, version, ecLevel, hints);
+    }
     return DecodedBitStreamParser.decode(resultBytes, version, ecLevel, hints);
   }
 

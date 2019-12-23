@@ -33,6 +33,7 @@ import com.google.zxing.common.DetectorResult;
 import com.google.zxing.common.RGBData;
 import com.google.zxing.qrcode.decoder.Decoder;
 import com.google.zxing.qrcode.decoder.QRCodeDecoderMetaData;
+import com.google.zxing.qrcode.decoder.QRDataDecoder;
 import com.google.zxing.qrcode.detector.ColorDetector;
 import com.google.zxing.qrcode.detector.Detector;
 import com.google.zxing.qrcode.detector.RGBDetector;
@@ -50,7 +51,7 @@ public class QRCodeReader implements Reader {
 
   private static final ResultPoint[] NO_POINTS = new ResultPoint[0];
 
-  private final Decoder decoder = new Decoder();
+  private final QRDataDecoder decoder = new QRDataDecoder();
 
   protected final Decoder getDecoder() {
     return decoder;
