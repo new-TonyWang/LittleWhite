@@ -174,15 +174,15 @@ public class DecoderHandler extends Handler {
                 //sendToOutputGrayerror(source,"成功",++this.iamgecount);
             } catch (ChecksumException e) {
                 Log.i(TAG,"校验失败");
-               // sendToOutputGrayerror(source,"校验失败",++this.iamgecount);
+                //sendToOutputGrayerror(source,"校验失败",++this.iamgecount);
                 return;//解析不到的时候跳出该方法
             } catch (FormatException e) {
                 Log.i(TAG,"格式错误");
-               // sendToOutputGrayerror(source,"格式错误",++this.iamgecount);
+                //sendToOutputGrayerror(source,"格式错误",++this.iamgecount);
                 return;//解析不到的时候跳出该方法
             } catch (NotFoundException e) {
                 if (startcapture) {
-                   // sendToOutputGrayerror(source, "未找到二维码", ++this.iamgecount);
+                    //sendToOutputGrayerror(source, "未找到二维码", ++this.iamgecount);
                     Log.i(TAG, "未找到二维码");
                     return;//解析不到的时候跳出该方法
                 }
