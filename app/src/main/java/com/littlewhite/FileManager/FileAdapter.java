@@ -114,7 +114,10 @@ public class FileAdapter extends BaseAdapter {
         }
 
 
-
+        if(i==0){
+            tv_name.setText("../");
+            return view;
+        }
         tv_name.setText(file.getName());
 
 

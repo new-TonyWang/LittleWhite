@@ -85,6 +85,78 @@ public final class DefaultGridSampler extends GridSampler {
     }
     return bits;
   }
+  @Override
+  public BitMatrix sampleGridwithPattern(BitMatrix image,
+                              int dimensionX,
+                              int dimensionY,
+                              PerspectiveTransform transform) throws NotFoundException {
+    if (dimensionX <= 0 || dimensionY <= 0) {
+      throw NotFoundException.getNotFoundInstance();
+    }
+    int dimx = dimensionX+6;
+    BitMatrix bits = new BitMatrix(dimensionX, dimensionY);
+    BitMatrix pattern = new BitMatrix(6, dimensionY);
+    float[] points = new float[2 * dimx];
+    for (int y = 0; y < dimensionY; y++) {
+      int max = points.length;
+      float iValue = y + 0.5f;
+      for (int x = 0; x < max; x += 2) {//
+        points[x] = (float) (x / 2) + 0.5f;
+        points[x + 1] = iValue;
+      }
+      transform.transformPoints(points);
+      // Quick check to see if points transformed to something inside the image;
+      // sufficient to check the endpoints
+      checkAndNudgePoints(image, points);
+      try {
+        for (int x = 0; x < 12; x += 2) {
+          if (image.get((int) points[x], (int) points[x + 1])) {
+            // Black(-ish) pixel
+            pattern.set(x / 2, y);
+          }
+        }
+        for (int x = 12; x < max; x += 2) {
+          if (image.get((int) points[x], (int) points[x + 1])) {
+            // Black(-ish) pixel
+            bits.set((x-12) / 2, y);
+          }
+        }
+
+        //outputimage(bits,2);
+        //outputimage(pattern,1);
+      } catch (ArrayIndexOutOfBoundsException aioobe) {
+        // This feels wrong, but, sometimes if the finder patterns are misidentified, the resulting
+        // transform gets "twisted" such that it maps a straight line of points to a set of points
+        // whose endpoints are in bounds, but others are not. There is probably some mathematical
+        // way to detect this about the transformation that I don't know yet.
+        // This results in an ugly runtime exception despite our clever checks above -- can't have
+        // that. We could check each point's coordinates but that feels duplicative. We settle for
+        // catching and wrapping ArrayIndexOutOfBoundsException.
+        throw NotFoundException.getNotFoundInstance();
+      }
+    }
+    points = null;
+//
+//    int max = 6;
+//    float[] patternPoints = new float[2*max];
+//    BitMatrix pattern = new BitMatrix(max, dimensionY);
+//    for (int y = 0; y < dimensionY; y++) {
+//      float iValue = y + 0.5f;
+//      for (int x = 0; x < max; x += 2) {//横向取两个采样点
+//        patternPoints[x] = (float) ((x-5) / 2) + 0.5f;
+//        patternPoints[x + 1] = iValue;
+//      }
+//      transform.transformPoints(patternPoints);
+//      for (int x = 0; x < max; x += 2) {
+//        if (image.get((int) patternPoints[x], (int) patternPoints[x + 1])) {
+//          // Black(-ish) pixel
+//          pattern.set(x / 2, y);
+//        }
+//      }
+//    }
+//    outputimage(pattern,1);
+    return bits;
+  }
 
   @Override
   public BitMatrix[] ColorGrid(HsvData image, int dimensionX, int dimensionY, PerspectiveTransform transform, HSVColorTable hsvColorTable) throws NotFoundException {

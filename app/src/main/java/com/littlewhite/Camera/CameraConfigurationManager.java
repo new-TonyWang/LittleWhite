@@ -128,7 +128,7 @@ final class CameraConfigurationManager {
     //cameraResolution=1920*1080
     bestPreviewSize = CameraConfigurationUtils.findBestPreviewSizeValue(parameters, screenResolution);
     Log.i(TAG, "Best available preview size: " + bestPreviewSize);
-
+    parameters.set("shutter-speed",9);
     boolean isScreenPortrait = screenResolution.x < screenResolution.y;
     boolean isPreviewSizePortrait = bestPreviewSize.x < bestPreviewSize.y;
 

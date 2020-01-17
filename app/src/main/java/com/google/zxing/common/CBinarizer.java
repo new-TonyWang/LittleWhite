@@ -85,9 +85,9 @@ public class CBinarizer extends GlobalHistogramBinarizer {
 
         return hsvData;
     }
-    public RGBData getRGBData() throws NotFoundException {
+    public RGBData getRGBData()  {
 
-         long start = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
 
         if (rgbData != null) {
             return rgbData;
@@ -121,14 +121,14 @@ public class CBinarizer extends GlobalHistogramBinarizer {
         int[][] blackPoints = calculateBlackPoints(R, subWidth, subHeight, width, height);
         BitMatrix newMatrixR = new BitMatrix(width, height);
         calculateThresholdForBlock(R, subWidth, subHeight, width, height, blackPoints, newMatrixR);
-         blackPoints = calculateBlackPoints(G, subWidth, subHeight, width, height);
+        blackPoints = calculateBlackPoints(G, subWidth, subHeight, width, height);
         BitMatrix newMatrixG = new BitMatrix(width, height);
         calculateThresholdForBlock(G, subWidth, subHeight, width, height, blackPoints, newMatrixG);
         blackPoints = calculateBlackPoints(B, subWidth, subHeight, width, height);
         BitMatrix newMatrixB = new BitMatrix(width, height);
         calculateThresholdForBlock(B, subWidth, subHeight, width, height, blackPoints, newMatrixB);
          long end = System.currentTimeMillis();
-         System.out.println("时长" + (end - start) + "ms");
+         System.out.println("二值化时长" + (end - start) + "ms");
 
 
         rgbData = new RGBData(newMatrixR,newMatrixG,newMatrixB);

@@ -65,7 +65,7 @@ public class ReceiveActivity extends SendReceive<ReceiveHandler> implements Surf
         if (hasSurface) {
             // The activity was paused but not stopped, so the surface still exists. Therefore
             // surfaceCreated() won't be called, so init the camera here.
-            initCamera(surfaceHolder);//重新打开app的时候用
+            initCamera(surfaceHolder);
         } else {
             // Install the callback and wait for surfaceCreated() to init the camera.
             surfaceHolder.addCallback(this);
@@ -201,6 +201,9 @@ public class ReceiveActivity extends SendReceive<ReceiveHandler> implements Surf
                     case R.id.RGB:
                         this.handler = new ReceiveHandler(this, this.cameraManager,R.id.RGB);//解码RGB
                         break;
+                    case R.id.pureQRCOdeDecode:
+                        this.handler = new ReceiveHandler(this, this.cameraManager,R.id.pureQRCOdeDecode);
+                        break;
                 }
 
             }
@@ -228,7 +231,6 @@ public class ReceiveActivity extends SendReceive<ReceiveHandler> implements Surf
         if (handler != null) {
             handler.quitSynchronously();
             handler = null;
-            //receiveHandler = null;//程序未退出的时候就不删除handler
         }
 
         cameraManager.closeDriver();
@@ -244,9 +246,11 @@ public class ReceiveActivity extends SendReceive<ReceiveHandler> implements Surf
 
     /**
      *
-     * raptor解析所有数据包的时候调用，加上progressbar和文字提示。
+     * 已经接收足够量的数据包，raptor纠错的时候调用，加上progressbar和文字提示。
      */
     public void RaptorCalculationStart(){
+            handler.quitSynchronously();
+            //handler = null;
         this.progress.setVisibility(View.GONE);
         View view = findViewById(R.id.result_view);
         view.setVisibility(View.VISIBLE);

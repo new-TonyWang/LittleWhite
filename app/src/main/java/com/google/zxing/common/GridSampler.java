@@ -16,8 +16,17 @@
 
 package com.google.zxing.common;
 
+import android.graphics.Bitmap;
+import android.os.Environment;
+
 import com.google.zxing.NotFoundException;
 import com.littlewhite.ColorCode.HSVColorTable;
+
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 /**
  * Implementations of this class can, given locations of finder patterns for a QR code in an
@@ -108,10 +117,13 @@ public abstract class GridSampler {
                                        int dimensionX,
                                        int dimensionY,
                                        PerspectiveTransform transform) throws NotFoundException;
+
+
+
   public abstract BitMatrix[] ColorGrid(HsvData image,
-                                       int dimensionX,
-                                       int dimensionY,
-                                       PerspectiveTransform transform,
+                                        int dimensionX,
+                                        int dimensionY,
+                                        PerspectiveTransform transform,
                                         HSVColorTable hsvColorTable) throws NotFoundException;
   public abstract BitMatrix[] RGBGrid(RGBData image,
                                int dimensionX,
@@ -187,4 +199,53 @@ public abstract class GridSampler {
     }
   }
 
+  protected void outputimage(BitMatrix bitMatrix,int index)  {
+    int length = bitMatrix.getBits().length;
+    int height = bitMatrix.getHeight();
+    int width = bitMatrix.getWidth();
+    //Bitmap.Config Config =
+    Bitmap image = Bitmap.createBitmap(bitMatrix.getWidth(), bitMatrix.getHeight(), Bitmap.Config.ARGB_8888);
+    for(int y = 0;y<height;y++) {
+      for(int x = 0;x<width;x++) {
+        image.setPixel(x, y, (bitMatrix.get(x, y) ? 0x00000000 : 0xFFFFFFFF));
+      }
+    }
+    File file = null;
+    switch (index) {
+      case 1:
+        file = new File(String.valueOf(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "red.jpg"));
+
+        break;//File myCaptureFile = new File( + fileName);
+      case 2:
+        file = new File(String.valueOf(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "green.jpg"));
+
+        break;//File myCaptureFile = new File( + fileName);
+      case 3:
+        file = new File(String.valueOf(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "blue.jpg"));
+
+        break;//File myCaptureFile = new File( + fileName);
+    }
+    BufferedOutputStream bos = null;
+    try {
+      bos = new BufferedOutputStream(new FileOutputStream(file));
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+    }
+
+    image.compress(Bitmap.CompressFormat.JPEG, 100, bos);
+
+    try {
+      bos.flush();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+    try {
+      bos.close();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public abstract BitMatrix sampleGridwithPattern(BitMatrix image, int dimension, int dimension1, PerspectiveTransform transform) throws NotFoundException;
 }

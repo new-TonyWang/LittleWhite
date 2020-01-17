@@ -448,7 +448,7 @@ public final class BitMatrix implements Cloneable {
    */
   @Override
   public String toString() {
-    return toString("X ", "  ");
+    return toString("X ", "0 ");
   }
 
   /**

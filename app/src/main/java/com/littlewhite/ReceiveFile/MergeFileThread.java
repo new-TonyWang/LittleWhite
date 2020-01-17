@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 
 
-public class MergeFileThread implements Runnable {
+public class MergeFileThread implements Runnable {//未使用
     private Handler handler;
     private File outputfile;
     private ReceiveActivity receiveActivity;

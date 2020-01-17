@@ -30,8 +30,10 @@ import com.google.zxing.ResultPoint;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.common.DecoderResult;
 import com.google.zxing.common.DetectorResult;
+import com.google.zxing.common.RGBData;
 import com.google.zxing.qrcode.decoder.Decoder;
 import com.google.zxing.qrcode.decoder.QRCodeDecoderMetaData;
+import com.google.zxing.qrcode.decoder.QRDataDecoder;
 import com.google.zxing.qrcode.detector.ColorDetector;
 import com.google.zxing.qrcode.detector.Detector;
 import com.google.zxing.qrcode.detector.RGBDetector;
@@ -49,7 +51,7 @@ public class QRCodeReader implements Reader {
 
   private static final ResultPoint[] NO_POINTS = new ResultPoint[0];
 
-  private final Decoder decoder = new Decoder();
+  private final QRDataDecoder decoder = new QRDataDecoder();
 
   protected final Decoder getDecoder() {
     return decoder;
@@ -153,7 +155,7 @@ public class QRCodeReader implements Reader {
 	      throws NotFoundException, ChecksumException, FormatException {
 	    DecoderResult decoderResult;
 	    ResultPoint[] points;
-	      DetectorResult detectorResult = new Detector(image.getBlackMatrix()).detect(hints);//寻找二维码定位码，透视变换，将二维码点阵化
+	      DetectorResult detectorResult = new Detector(image.getBlackMatrix()).detect(hints);//image.getBlackMatrix()方法将图片二值化，一个耗时操作。寻找二维码定位码，透视变换，将二维码点阵化
 	      decoderResult = decoder.decode(detectorResult.getBits(), hints);//解析二维码
 	      //System.out.println("bits宽:"+detectorResult.getBits().getWidth()+"bits高:"+detectorResult.getBits().getHeight());//获取到的是二维码的行列数
 	      points = detectorResult.getPoints();
@@ -214,11 +216,11 @@ public class QRCodeReader implements Reader {
 
         return result;
     }
-    public final Result decodeRGBCode(BinaryBitmap image, Map<DecodeHintType,?> hints)
+    public final Result decodeRGBCode(RGBData image, Map<DecodeHintType,?> hints)
             throws NotFoundException, ChecksumException, FormatException {
         DecoderResult decoderResult;
         ResultPoint[] points;
-        DetectorResult[] detectorResults = new RGBDetector(image.getRGBData()).detect(hints);//寻找二维码定位码，透视变换，将二维码点阵化
+        DetectorResult[] detectorResults = new RGBDetector(image).detect(hints);//寻找二维码定位码，透视变换，将二维码点阵化
         decoderResult = decoder.decodeColorCode(detectorResults, hints);//解析二维码
         //System.out.println("bits宽:"+detectorResult.getBits().getWidth()+"bits高:"+detectorResult.getBits().getHeight());//获取到的是二维码的行列数
         points = detectorResults[0].getPoints();

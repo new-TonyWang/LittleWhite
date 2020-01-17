@@ -10,6 +10,7 @@ import android.os.Environment;
 
 import android.support.annotation.Nullable;
 
+import android.util.Log;
 import android.view.ContextMenu;
 
 import android.view.MenuItem;
@@ -26,6 +27,8 @@ import android.widget.Toast;
 
 
 import com.littlewhite.R;
+import com.littlewhite.ReceiveFile.QRCodeSeuenceReader;
+import com.littlewhite.ReceiveFile.SignleQRCodeReader;
 
 import java.io.File;
 
@@ -115,8 +118,8 @@ public class FileManager extends Activity {
             title.setText(intent.getStringExtra("title"));
 
         else {
-            String path = Objects.requireNonNull(getExternalFilesDir("receive")).getAbsolutePath();
-            title.setText("历史记录:" +path.substring(path.lastIndexOf("Android"),path.length()));
+           // String path = Objects.requireNonNull(getExternalFilesDir("receive")).getAbsolutePath();
+           // title.setText("路径:" +path.substring(path.lastIndexOf("Android"),path.length()));
         }
 
 
@@ -154,6 +157,15 @@ public class FileManager extends Activity {
                 if(dateList.get(i).isDirectory())
 
                 {
+                    if(i==0){
+                        Intent intent=new Intent(FileManager.this,FileManager.class);
+
+                        intent.putExtra("dir",new String(dir).substring(0,dir.lastIndexOf("/")));
+
+                        intent.putExtra("title",new String(dir).substring(0,dir.lastIndexOf("/")));
+
+                        startActivity(intent);
+                    }
 
                     Intent intent=new Intent(FileManager.this,FileManager.class);
 
@@ -193,13 +205,15 @@ public class FileManager extends Activity {
 
         //menu.setHeaderIcon(R.drawable.ic_brightness_high_black_24dp);
 
-        menu.add(1,1,1,"复制");
+        menu.add(1,1,1,"解析二维码图片");
+       // Intent intent = new Intent();
+       // intent.putExtra("menuindex",menuInfo.position);
+       // menu.addIntentOptions(1,1,1,null,null,)
+        //menu.add(1,2,1,"粘贴");
 
-        menu.add(1,2,1,"粘贴");
+        //menu.add(1,3,1,"剪切");
 
-        menu.add(1,3,1,"剪切");
-
-        menu.add(1,4,1,"重命名");
+       // menu.add(1,4,1,"重命名");
 
 
 
@@ -212,13 +226,24 @@ public class FileManager extends Activity {
     @Override
 
     public boolean onContextItemSelected(MenuItem item) {
-
+        AdapterView.AdapterContextMenuInfo menuInfo = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        Log.i("", "context item seleted ID="+ menuInfo.id);
         switch (item.getItemId()){
 
             case 1:
+                File  file=new File(dir + "/" + dateList.get((int) menuInfo.id).getName());
+                if(!file.isDirectory()){
+                    SignleQRCodeReader SignleQRCodeReader = new SignleQRCodeReader(dir + "/" + dateList.get((int) menuInfo.id).getName());
+                    Thread decode = new Thread(SignleQRCodeReader);
+                    decode.start();
+                }
 
-                Toast.makeText(FileManager.this,"已复制",Toast.LENGTH_SHORT).show();
-
+                //Toast.makeText(FileManager.this,"已复制",Toast.LENGTH_SHORT).show();
+                else {
+                    QRCodeSeuenceReader qrCodeSeuenceReader = new QRCodeSeuenceReader(dir + "/" + dateList.get((int) menuInfo.id).getName());
+                    Thread decode = new Thread(qrCodeSeuenceReader);
+                    decode.start();
+                }
                 break;
 
             case 2:
@@ -254,7 +279,7 @@ public class FileManager extends Activity {
 
 
         File file=new File(dir);
-
+        dateList.add(new File(file.getParent()));
         if(file.exists())
 
         {

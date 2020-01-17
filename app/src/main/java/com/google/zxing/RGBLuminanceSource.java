@@ -55,6 +55,7 @@ public final class RGBLuminanceSource extends LuminanceSource {
     }
   }
 
+
   private RGBLuminanceSource(byte[] pixels,
                              int dataWidth,
                              int dataHeight,

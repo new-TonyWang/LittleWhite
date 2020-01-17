@@ -22,6 +22,7 @@ import com.google.zxing.NotFoundException;
 import com.google.zxing.ResultPoint;
 import com.google.zxing.ResultPointCallback;
 import com.google.zxing.common.BitMatrix;
+import com.google.zxing.common.DefaultGridSampler;
 import com.google.zxing.common.DetectorResult;
 import com.google.zxing.common.GridSampler;
 import com.google.zxing.common.HsvData;
@@ -76,9 +77,11 @@ public class Detector {
 
     resultPointCallback = hints == null ? null :
         (ResultPointCallback) hints.get(DecodeHintType.NEED_RESULT_POINT_CALLBACK);
-
+long start = System.currentTimeMillis();
     FinderPatternFinder finder = new FinderPatternFinder(image, resultPointCallback);//找到定位图标!!!!重点来了
     FinderPatternInfo info = finder.find(hints);
+    long end = System.currentTimeMillis();
+    System.out.println("定位时长" + (end - start) + "ms");
     /*
     System.out.println("BitMatrix宽:"+image.getWidth()+"BitMatrix高:"+image.getHeight());
     System.out.println("左下"+info.getBottomLeft().toString());
@@ -90,7 +93,7 @@ public class Detector {
 
   protected final DetectorResult processFinderPatternInfo(FinderPatternInfo info)
       throws NotFoundException, FormatException {
-
+long start = System.currentTimeMillis();
     FinderPattern topLeft = info.getTopLeft();
     FinderPattern topRight = info.getTopRight();
     FinderPattern bottomLeft = info.getBottomLeft();
@@ -135,7 +138,9 @@ public class Detector {
     }
 
     PerspectiveTransform transform =//透视变换
-        createTransform(topLeft, topRight, bottomLeft, alignmentPattern, dimension);
+            createTransform(topLeft, topRight, bottomLeft, alignmentPattern, dimension);
+//    PerspectiveTransform transform =//透视变换
+//            createTransformWithPattern(topLeft, topRight, bottomLeft, alignmentPattern, dimension);
 
     BitMatrix bits = sampleGrid(image, transform, dimension);//点阵化像素点
 
@@ -145,6 +150,8 @@ public class Detector {
     } else {
       points = new ResultPoint[]{bottomLeft, topLeft, topRight, alignmentPattern};
     }
+long end = System.currentTimeMillis();
+    System.out.println("重新构建二维码的时长" + (end - start) + "ms");
     return new DetectorResult(bits, points);
   }
 
@@ -190,11 +197,58 @@ public class Detector {
         bottomLeft.getY());
   }
 
+  private static PerspectiveTransform createTransformWithPattern(ResultPoint topLeft,
+                                                      ResultPoint topRight,
+                                                      ResultPoint bottomLeft,
+                                                      ResultPoint alignmentPattern,
+                                                      int dimension) {
+    float dimMinusThree = dimension+6.0f-3.5f;
+    float bottomRightX;
+    float bottomRightY;
+    float sourceBottomRightX;
+    float sourceBottomRightY;
+    if (alignmentPattern != null) {
+      bottomRightX = alignmentPattern.getX();
+      bottomRightY = alignmentPattern.getY();
+      sourceBottomRightX = dimMinusThree - 3.0f;
+      sourceBottomRightY = dimension-6.5f;
+    } else {
+      // Don't have an alignment pattern, just make up the bottom-right point
+      bottomRightX = (topRight.getX() - topLeft.getX()) + bottomLeft.getX();
+      bottomRightY = (topRight.getY() - topLeft.getY()) + bottomLeft.getY();
+      sourceBottomRightX = dimMinusThree;
+      sourceBottomRightY = dimMinusThree;
+    }
+
+    return PerspectiveTransform.quadrilateralToQuadrilateral(
+            9.5f,//左上角
+            3.5f,//左上角
+            dimMinusThree,//右上角x
+            3.5f,//右上角y
+            sourceBottomRightX,
+            sourceBottomRightY,
+            9.5f,
+            dimension-3.5f,
+            topLeft.getX(),
+            topLeft.getY(),
+            topRight.getX(),
+            topRight.getY(),
+            bottomRightX,
+            bottomRightY,
+            bottomLeft.getX(),
+            bottomLeft.getY());
+  }
+
+
+
+
   private static BitMatrix sampleGrid(BitMatrix image,
                                       PerspectiveTransform transform,
                                       int dimension) throws NotFoundException {
 
     GridSampler sampler = GridSampler.getInstance();
+    //DefaultGridSampler sampler = new DefaultGridSampler();
+    //return sampler.sampleGridwithPattern(image, dimension, dimension, transform);
     return sampler.sampleGrid(image, dimension, dimension, transform);
   }
 

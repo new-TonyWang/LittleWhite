@@ -1,7 +1,8 @@
 #include <jni.h>
 #include <libyuv.h>
 #include "CBinarize.h"
-
+#include <stdlib.h>
+#include <string.h>
 extern "C"
 JNIEXPORT jobjectArray JNICALL
 Java_com_google_zxing_common_CBinarizer_calculateBlackPointsfromC(JNIEnv *env, jobject instance,
@@ -178,7 +179,53 @@ Java_com_google_zxing_common_CBinarizer_convertToRGB(JNIEnv *env, jobject instan
     //  getHSVchnnels(width,height,ARGB,H,S,V);
     // TODO
     cv::Mat img(height,width,CV_8UC4,ARGB);
-   // cv::imwrite("sdcard/test.jpg",img);
+    cv::imwrite("sdcard/rgbimage.jpg",img);
+    // TODO
+    std::vector<cv::Mat> channels;
+    split(img,channels);
+    jsize cwidth = (jsize)channels[1].cols;
+    //cv::imwrite("sdcard/testB.jpg",channels[0]);
+    //cv::imwrite("sdcard/testg.jpg",channels[1]);
+    //cv::imwrite("sdcard/testr.jpg",channels[2]);
+    jsize cheght = (jsize)channels[1].rows;
+    jsize length = cwidth*cheght;
+    free(ARGB);
+
+    env->ReleaseByteArrayElements(luminances_, (jbyte *)luminances, 0);
+    env->ReleaseByteArrayElements(uv_,(jbyte *) uv, 0);
+    env->SetByteArrayRegion(B_, 0, length, (jbyte *)channels[0].data);
+    env->SetByteArrayRegion(G_,0, length,(jbyte *)channels[1].data);
+    env->SetByteArrayRegion(R_,0, length,(jbyte *)channels[2].data);
+    //env->ReleaseByteArrayElements(R_, R, 0);
+    //env->ReleaseByteArrayElements(G_, G, 0);
+    //env->ReleaseByteArrayElements(B_, B, 0);
+    return 1;
+}
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_littlewhite_ReceiveFile_QRcodeDecoder_DecoderHandler_convertToRGB(JNIEnv *env,
+                                                                           jobject instance,
+                                                                           jbyteArray luminances_,
+                                                                           jbyteArray uv_,
+                                                                           jbyteArray R_,
+                                                                           jbyteArray G_,
+                                                                           jbyteArray B_,
+                                                                           jint width,
+                                                                           jint height) {
+    uint8_t *luminances =(uint8_t *) env->GetByteArrayElements(luminances_, NULL);
+    uint8_t *uv = (uint8_t *)env->GetByteArrayElements(uv_, NULL);
+    //jbyte *R = env->GetByteArrayElements(R_, NULL);
+    //jbyte *G = env->GetByteArrayElements(G_, NULL);
+    //jbyte *B = env->GetByteArrayElements(B_, NULL);
+    uint8_t *ARGB = new uint8_t[width*height*4];
+    libyuv::NV12ToABGR(luminances,width,uv,width,ARGB,width*4,width,height);
+    //  getHSVchnnels(width,height,ARGB,H,S,V);
+    // TODO
+    cv::Mat img(height,width,CV_8UC4,ARGB);
+    //long a = (random()%100);
+    String c = "sdcard/rgb.jpg";
+
+     //cv::imwrite(c,img);
     // TODO
     std::vector<cv::Mat> channels;
     split(img,channels);

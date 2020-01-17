@@ -35,6 +35,18 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="30dp"
-            android:text="@string/receiveRGB" />
+            android:text="@string/receiveRGB" />pureQRCOdeDecode
+        <Button
+            android:id="@+id/decodeQRfromPic"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="30dp"
+            android:text="@string/decodeFromPic" />
+        <Button
+            android:id="@+id/pureQRCOdeDecode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="30dp"
+            android:text="@string/pureQRCOdeDecode" />
     </LinearLayout>
 </android.support.constraint.ConstraintLayout>

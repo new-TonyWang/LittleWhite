@@ -16,6 +16,9 @@
 
 package com.google.zxing.qrcode.decoder;
 
+import android.nfc.Tag;
+import android.util.Log;
+
 import com.google.zxing.ChecksumException;
 import com.google.zxing.DecodeHintType;
 import com.google.zxing.FormatException;
@@ -31,13 +34,15 @@ import com.littlewhite.ColorCode.HSVColorTable;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import static com.littlewhite.SendFile.AlbumNotifier.TAG;
+
 /**
  * <p>The main class which implements QR Code decoding -- as opposed to locating and extracting
  * the QR Code from an image.</p>
  *
  * @author Sean Owen
  */
-public final class Decoder {
+public class Decoder {
 
   private final ReedSolomonDecoder rsDecoder;
 
@@ -165,15 +170,12 @@ public final class Decoder {
     }
 
   }
-  private DecoderResult decode(BitMatrixParser parser, Map<DecodeHintType,?> hints)
-      throws FormatException, ChecksumException {
-    FormatInformation formatInfo = parser.readFormatInformation();
-    Version version = parser.readVersion();
-    ErrorCorrectionLevel ecLevel = formatInfo.getErrorCorrectionLevel();//纠错版本
+  protected DecoderResult decode(BitMatrixParser parser, Map<DecodeHintType, ?> hints)
+          throws FormatException, ChecksumException {
+    Version version = parser.readVersion();//获得版本号
+    FormatInformation formatInfo = parser.readFormatInformation();//格式信息
+    ErrorCorrectionLevel ecLevel = formatInfo.getErrorCorrectionLevel();//获得纠错信息
     DataMask dataMask = DataMask.values()[formatInfo.getDataMask()];
-    //Version version = parser.readVersion();
-   // ErrorCorrectionLevel ecLevel = parser.readFormatInformation().getErrorCorrectionLevel();//纠错版本
-
     // Read codewords
     byte[] codewords = parser.readCodewords(version,dataMask);//读取位矩阵中表示查找器模式的bit，按顺序排列，以重建二维码中包含的码字字节。
     // Separate into data blocks
@@ -199,8 +201,49 @@ public final class Decoder {
 
     // Decode the contents of that stream of bytes
     if(hints!=null&&hints.containsKey(DecodeHintType.FILEDATA)) {
-    	return	DecodedBitStreamParser.decodepayload(resultBytes, version, ecLevel, hints);
+      return	DecodedBitStreamParser.decodepayload(resultBytes, version, ecLevel, hints);
     }
+    return DecodedBitStreamParser.decode(resultBytes, version, ecLevel, hints);
+  }
+  private DecoderResult decode1(BitMatrixParser parser, Map<DecodeHintType,?> hints)
+      throws FormatException, ChecksumException {
+    long start = System.currentTimeMillis();
+    FormatInformation formatInfo = parser.readFormatInformation();
+    Version version = parser.readVersion();
+    ErrorCorrectionLevel ecLevel = formatInfo.getErrorCorrectionLevel();//纠错版本
+    DataMask dataMask = DataMask.values()[formatInfo.getDataMask()];
+    //Version version = parser.readVersion();
+   // ErrorCorrectionLevel ecLevel = parser.readFormatInformation().getErrorCorrectionLevel();//纠错版本
+
+    // Read codewords
+    byte[] codewords = parser.readCodewords(version,dataMask);//读取位矩阵中表示查找器模式的bit，按顺序排列，以重建二维码中包含的码字字节。
+    // Separate into data blocks
+   DataBlock[] dataBlocks = DataBlock.getDataBlocks(codewords, version, ecLevel);
+    //DataBlock[] dataBlocks = DataBlock.getDataBlocksInNewWay(codewords, version, ecLevel);
+    // Count total number of data bytes
+    int totalBytes = 0;
+    for (DataBlock dataBlock : dataBlocks) {
+      totalBytes += dataBlock.getNumDataCodewords();
+    }
+    byte[] resultBytes = new byte[totalBytes];
+    int resultOffset = 0;
+    long end = System.currentTimeMillis();
+    Log.i(TAG,"数据提取时间:"+(end-start)+"ms");
+    start= System.currentTimeMillis();
+
+    // Error-correct and copy data blocks together into a stream of bytes
+    for (DataBlock dataBlock : dataBlocks) {
+      byte[] codewordBytes = dataBlock.getCodewords();
+      int numDataCodewords = dataBlock.getNumDataCodewords();
+      correctErrors(codewordBytes, numDataCodewords);
+      for (int i = 0; i < numDataCodewords; i++) {
+        resultBytes[resultOffset++] = codewordBytes[i];
+      }
+    }
+end =  System.currentTimeMillis();
+    Log.i(TAG,"纠错时间:"+(end-start)+"ms");
+    // Decode the contents of that stream of bytes
+
     return DecodedBitStreamParser.decode(resultBytes, version, ecLevel, hints);
   }
 
