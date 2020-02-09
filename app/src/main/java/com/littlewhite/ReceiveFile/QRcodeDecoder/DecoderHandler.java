@@ -109,9 +109,9 @@ public class DecoderHandler extends Handler {
             case R.id.finish:
               Message finish =  obtainMessage(R.id.finish);
                 this.RaptorQDecodeHandler.sendMessageAtFrontOfQueue(finish);
-                this.rbinary.getHandler().sendMessageAtFrontOfQueue(finish);
-                this.gbinary.getHandler().sendMessageAtFrontOfQueue(finish);
-                this.bbinary.getHandler().sendMessageAtFrontOfQueue(finish);
+                //this.rbinary.getHandler().sendMessageAtFrontOfQueue(finish);
+                //this.gbinary.getHandler().sendMessageAtFrontOfQueue(finish);
+                //this.bbinary.getHandler().sendMessageAtFrontOfQueue(finish);
                // message;
                 Looper.myLooper().quit();
                 reader.reset();
